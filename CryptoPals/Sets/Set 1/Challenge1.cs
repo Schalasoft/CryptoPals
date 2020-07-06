@@ -18,9 +18,7 @@ namespace CryptoPals.Sets.Challenges
         public string Solution(string hex)
         {
             // Encode hex to Base64
-            string encoded = Encode(hex);
-
-            return encoded;
+            return Encode(hex);
         }
 
         private string Encode(string hex)
@@ -29,9 +27,7 @@ namespace CryptoPals.Sets.Challenges
             string binary = HexStringToBinaryString(hex);
 
             // Get Base64 represenation of binary string
-            string encoded = BinaryStringToBase64(binary);
-
-            return encoded;
+            return BinaryStringToBase64(binary);
         }
 
         // Convert hex string to binary string
@@ -59,9 +55,6 @@ namespace CryptoPals.Sets.Challenges
         // Convert binary string to Base64 string
         private string BinaryStringToBase64(string text)
         {
-            // Array to hold bytes (sextets) of binary string for conversion to Base64
-            byte[] bytes = new byte[text.Length / 6];
-
             // Grab sextets from binary sequence
             StringBuilder stringBuilder = new StringBuilder();
             int index = 0;
@@ -81,9 +74,7 @@ namespace CryptoPals.Sets.Challenges
                 stringBuilder.Append(base64Table[(int)b]);
             }
 
-            string byteString = stringBuilder.ToString();
-
-            return byteString;
+            return stringBuilder.ToString();
         }
     }
 }
