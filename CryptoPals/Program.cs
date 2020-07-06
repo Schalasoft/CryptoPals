@@ -1,6 +1,7 @@
 ﻿using CryptoPals.Interfaces;
 using CryptoPals.Factories;
 using CryptoPals.Enumerations;
+using System;
 
 namespace CryptoPals
 {
@@ -34,7 +35,12 @@ namespace CryptoPals
                 }
 
                 // Solve the challenge
-                SolveChallenge(i, input);
+                string output = SolveChallenge(i, input);
+
+                Console.WriteLine("Challenge {0}", i);
+                Console.WriteLine("input  : {0}", input);
+                Console.WriteLine("output : {0}", output);
+                Console.WriteLine("<------------------------------------------------------->\n");
             }
         }
 
