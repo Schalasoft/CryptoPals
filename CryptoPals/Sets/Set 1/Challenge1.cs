@@ -15,7 +15,7 @@ namespace CryptoPals.Sets.Challenges
         // Convert hex to base 64 (2 char hex value is 1 byte, base64 is 4 characters per 3 bytes/hex values)
         // Input  : 49276d206b696c6c696e6720796f757220627261696e206c696b65206120706f69736f6e6f7573206d757368726f6f6d
         // Output : SSdtIGtpbGxpbmcgeW91ciBicmFpbiBsaWtlIGEgcG9pc29ub3VzIG11c2hyb29t
-        public string Solution(string hex)
+        public string Solve(string hex)
         {
             // Encode hex to Base64
             return Encode(hex);
@@ -33,6 +33,9 @@ namespace CryptoPals.Sets.Challenges
         // Convert hex string to binary string
         private string HexStringToBinaryString(string text)
         {
+            if (text.Length % 2 != 0)
+                throw new ArgumentException("Hex input text must be divisible by 2 (even)");
+
             // Convert hex string to a string of binary
             StringBuilder binarySb = new StringBuilder();
             for (int i = 0; i < text.Length; i += hexLength)
@@ -64,8 +67,8 @@ namespace CryptoPals.Sets.Challenges
                 string sextet;
                 if (i + 6 < text.Length)
                     sextet = text.Substring(i, 6);
-                else
-                    sextet = text.Substring(i, text.Length - i).PadLeft(6 - (text.Length - i), '0');
+                else // Missing data, pad sextet with zeros set how much padding should be added to the final output
+                    sextet = text.Substring(i, text.Length - i).PadRight(6, '0');
 
                 // Convert to byte
                 byte b = Convert.ToByte(sextet, binaryBase);
@@ -74,7 +77,14 @@ namespace CryptoPals.Sets.Challenges
                 stringBuilder.Append(base64Table[(int)b]);
             }
 
-            return stringBuilder.ToString();
+            // Get constructed string
+            string output = stringBuilder.ToString();
+
+            // Pad right to the expected data length (incase of any missing characters in the final 3 character set)
+            if(output.Length % 4 != 0)
+                output = output.PadRight(output.Length + (4 - output.Length % 4), '=');
+
+            return output;
         }
     }
 }

@@ -26,7 +26,9 @@ namespace CryptoPals
                     break;
 
                     case 2:
-                        input = "1c0111001f010100061a024b53535009181c";
+                        string a = "1c0111001f010100061a024b53535009181c";
+                        string b = "686974207468652062756c6c277320657965";
+                        input = $"{a}/{b}";
                         break;
 
                     default:
@@ -37,6 +39,7 @@ namespace CryptoPals
                 // Solve the challenge
                 string output = SolveChallenge(i, input);
 
+                // Output challenge information
                 Console.WriteLine("Challenge {0}", i);
                 Console.WriteLine("input  : {0}", input);
                 Console.WriteLine("output : {0}", output);
@@ -50,7 +53,7 @@ namespace CryptoPals
 
             IChallenge challenge = ChallengeFactory.InitializeChallenge(challengeEnum);
 
-            return challenge.Solution(input);
+            return challenge.Solve(input);
         }
     }
 }

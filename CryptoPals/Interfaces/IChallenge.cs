@@ -2,6 +2,6 @@
 {
     interface IChallenge
     {
-        public string Solution(string input);
+        public string Solve(string input);
     }
 }
