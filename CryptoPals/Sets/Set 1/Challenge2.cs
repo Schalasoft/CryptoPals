@@ -1,7 +1,7 @@
 ﻿using CryptoPals.Interfaces;
 using System;
 
-namespace CryptoPals.Sets.Challenges
+namespace CryptoPals.Sets
 {
     // Fixed XOR
     // A function that takes two equal-length buffers and produces their XOR combination

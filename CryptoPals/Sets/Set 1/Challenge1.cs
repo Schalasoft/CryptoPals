@@ -2,7 +2,7 @@
 using System.Text;
 using CryptoPals.Interfaces;
 
-namespace CryptoPals.Sets.Challenges
+namespace CryptoPals.Sets
 {
     // Encode Hex string as Base64
     class Challenge1 : IChallenge

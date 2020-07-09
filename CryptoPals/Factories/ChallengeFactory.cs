@@ -1,6 +1,6 @@
 ﻿using CryptoPals.Enumerations;
 using CryptoPals.Interfaces;
-using CryptoPals.Sets.Challenges;
+using CryptoPals.Sets;
 using System;
 
 namespace CryptoPals.Factories
@@ -21,8 +21,8 @@ namespace CryptoPals.Factories
                 case ChallengeEnum.Challenge2:
                     return new Challenge2();
 
-                //case ChallengeEnum.Challenge3:
-                //    return new Challenge3();
+                case ChallengeEnum.Challenge3:
+                    return new Challenge3();
 
                 //case ChallengeEnum.Challenge4:
                 //    return new Challenge4();
