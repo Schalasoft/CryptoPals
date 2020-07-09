@@ -14,7 +14,7 @@ namespace CryptoPals
 
         private static void SolveChallenges()
         {
-            int challengeCount = 2;
+            int challengeCount = 3;
             string input;
             for(int i = 1; i <= challengeCount; i++)
             {
@@ -30,7 +30,11 @@ namespace CryptoPals
                         string b = "686974207468652062756c6c277320657965";
                         char separator = '/';
                         input = $"{a}{separator}{b}";
-                        break;
+                    break;
+
+                    case 3:
+                        input = "";
+                    break;
 
                     default:
                         input = "";
