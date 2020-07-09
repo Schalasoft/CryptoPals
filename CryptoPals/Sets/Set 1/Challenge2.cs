@@ -12,7 +12,7 @@ namespace CryptoPals.Sets
     // output:
     // 746865206b696420646f6e277420706c6179
 
-    class Challenge2 : IChallenge
+    class Challenge2 : IChallenge, IChallenge2
     {
         public string Solve(string input)
         {
@@ -31,13 +31,19 @@ namespace CryptoPals.Sets
             byte[] bytes = FixedXOR(a, b);
 
             // Convert to string
-            string xord = BitConverter.ToString(bytes).Replace("-", string.Empty).ToLower();
+            string xord = HexBytesToString(bytes);
 
             return xord;
         }
 
+        // Hex bytes to string with no dashes
+        public string HexBytesToString(byte[] bytes)
+        {
+            return BitConverter.ToString(bytes).Replace("-", string.Empty).ToLower();
+        }
+
         // Converts a hex string to its byte representation
-        private byte[] HexStringToBytes(string hex)
+        public byte[] HexStringToBytes(string hex)
         {
             byte[] bytes = new byte[hex.Length / 2];
 
@@ -49,6 +55,12 @@ namespace CryptoPals.Sets
             return bytes;
         }
 
+        // XOR two bytes
+        public byte XOR(byte a, byte b)
+        {
+            return (byte)(a ^ b);
+        }
+
         // XOR two equal length byte arrays
         private byte[] FixedXOR(byte[] a, byte[] b)
         {
@@ -56,7 +68,7 @@ namespace CryptoPals.Sets
 
             // XOR a and b to get c
             for (int i = 0; i < a.Length; i++)
-                c[i] = (byte)(a[i] ^ b[i]);
+                c[i] = XOR(a[i], b[i]);
 
             return c;
         }

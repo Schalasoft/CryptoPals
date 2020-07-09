@@ -5,6 +5,23 @@ using System;
 
 namespace CryptoPals
 {
+    /*
+                                                     ,  ,
+                                                   / \/ \
+                                                  (/ //_ \_
+         .-._                                      \||  .  \
+          \  '-._                            _,:__.-"/---\_ \
+     ______/___  '.    .--------------------'~-'--.)__( , )\ \
+    `'--.___  _\  /    |             Here        ,'    \)|\ `\|
+         /_.-' _\ \ _:,_          Be Dragons           " ||   (
+       .'__ _.' \'-/,`-~`                                |/
+           '. ___.> /=,|  Abandon hope all ye who enter  |
+            / .-'/_ )  '---------------------------------'
+            )'  ( /(/
+                 \\ "
+                  '=='
+    */
+
     class Program
     {
         static void Main(string[] args)
@@ -46,9 +63,9 @@ namespace CryptoPals
 
                 // Output challenge information
                 Console.WriteLine("Challenge {0}", i);
-                Console.WriteLine("input  : {0}", input);
-                Console.WriteLine("output : {0}", output);
-                Console.WriteLine("<------------------------------------------------------->\n");
+                Console.WriteLine("Input  : {0}", input);
+                Console.WriteLine("Output : {0}", output);
+                Console.WriteLine("-------------------------------------------------------------------------------------------------------------\n");
             }
         }
 
