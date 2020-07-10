@@ -72,7 +72,7 @@ namespace CryptoPals.Sets
         }
 
         // Given an input string, XOR decrypt it against each ASCII character and return a KVP containing the key, score, and decoded text
-        private KeyValuePair<int, Tuple<double, string>> GetMaxScoringItem(string input)
+        public KeyValuePair<int, Tuple<double, string>> GetMaxScoringItem(string input)
         {
             // Decode string with each key (using 0-255 int values as key)
             // Key          : Int/char to use as cypher
