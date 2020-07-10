@@ -4,11 +4,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Xml;
 
 namespace CryptoPals.Sets
 {
-    class Challenge3 : IChallenge
+    class Challenge3 : IChallenge3, IChallenge
     {
         /*
         The hex encoded string:
@@ -60,6 +59,21 @@ namespace CryptoPals.Sets
 
         public string Solve(string input)
         {
+            // Get the max scored cypher attempt
+            KeyValuePair<int, Tuple<double, string>> maxScoringItem = GetMaxScoringItem(input);
+
+            // Format output
+            string deducedKey = maxScoringItem.Key.ToString();
+            string maxScore = maxScoringItem.Value.Item1.ToString();
+            string output = maxScoringItem.Value.Item2;
+
+            // Return combined output so we can see output, and key, and score
+            return $"{output}{Environment.NewLine}Key    : {deducedKey}{Environment.NewLine}Score  : {maxScore}";
+        }
+
+        // Given an input string, XOR decrypt it against each ASCII character and return a KVP containing the key, score, and decoded text
+        private KeyValuePair<int, Tuple<double, string>> GetMaxScoringItem(string input)
+        {
             // Decode string with each key (using 0-255 int values as key)
             // Key          : Int/char to use as cypher
             // Tuple Item 1 : Score
@@ -73,12 +87,8 @@ namespace CryptoPals.Sets
 
             // Get the KVP with the max score
             KeyValuePair<int, Tuple<double, string>> maxScoringItem = data.FirstOrDefault(x => x.Value.Item1 == data.Values.Max(x => x.Item1));
-            string deducedKey = maxScoringItem.Key.ToString();
-            string maxScore = maxScoringItem.Value.Item1.ToString();
-            string output = maxScoringItem.Value.Item2;
 
-            // Return combined output so we can see output, and key, and score
-            return $"{output}{Environment.NewLine}Key    : {deducedKey}{Environment.NewLine}Score  : {maxScore}";
+            return maxScoringItem;
         }
 
         // Decode text against a single key and score it

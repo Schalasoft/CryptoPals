@@ -4,9 +4,21 @@ using CryptoPals.Interfaces;
 
 namespace CryptoPals.Sets
 {
-    // Encode Hex string as Base64
+    // Convert Hex string as Base64
     class Challenge1 : IChallenge
     {
+        /*
+        Convert hex to base64
+
+        The string:
+        49276d206b696c6c696e6720796f757220627261696e206c696b65206120706f69736f6e6f7573206d757368726f6f6d
+        
+        Should produce:
+        SSdtIGtpbGxpbmcgeW91ciBicmFpbiBsaWtlIGEgcG9pc29ub3VzIG11c2hyb29t
+
+        So go ahead and make that happen. You'll need to use this code for the rest of the exercises.
+        */
+
         private const int binaryBase = 2;    // Binary is 0 or 1 == 2 bit
         private const int hexBase    = 16;   // Hex value is 2 bytes == 16 bit
         private const int hexLength  = 2;    // Length of a hex value in characters

@@ -2,6 +2,7 @@
 using CryptoPals.Factories;
 using CryptoPals.Enumerations;
 using System;
+using System.IO;
 
 namespace CryptoPals
 {
@@ -24,6 +25,9 @@ namespace CryptoPals
 
     class Program
     {
+        // File variables
+        static string Directory = "..\\..\\..\\Data\\";
+
         static void Main(string[] args)
         {
             SolveChallenges();
@@ -31,7 +35,7 @@ namespace CryptoPals
 
         private static void SolveChallenges()
         {
-            int challengeCount = 3;
+            int challengeCount = 4;
             string input;
             for(int i = 1; i <= challengeCount; i++)
             {
@@ -53,6 +57,10 @@ namespace CryptoPals
                         input = "1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736";
                     break;
 
+                    case 4:
+                        input = ReadFile(Directory, "Challenge4.txt");
+                    break;
+
                     default:
                         input = "";
                     break;
@@ -69,6 +77,7 @@ namespace CryptoPals
             }
         }
 
+        // Solve an individual challenge
         private static string SolveChallenge(int challengeId, string input)
         {
             ChallengeEnum challengeEnum = (ChallengeEnum)challengeId;
@@ -76,6 +85,13 @@ namespace CryptoPals
             IChallenge challenge = ChallengeFactory.InitializeChallenge(challengeEnum);
 
             return challenge.Solve(input);
+        }
+
+        // Get the payload from the layer file
+        private static string ReadFile(string dir, string fileName)
+        {
+            // Read entire file
+            return File.ReadAllText($"{dir}{fileName}");
         }
     }
 }
