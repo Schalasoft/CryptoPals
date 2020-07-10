@@ -25,9 +25,12 @@ namespace CryptoPals.Sets
         IChallenge challenge1 = ChallengeFactory.InitializeChallenge(Enumerations.ChallengeEnum.Challenge1);
         IChallenge2 challenge2 = (IChallenge2)ChallengeFactory.InitializeChallenge(Enumerations.ChallengeEnum.Challenge2);
 
-        // Letter Frequency values taken from http://pi.math.cornell.edu/~mec/2003-2004/cryptography/subs/frequencies.html
+        // Letter Frequency values taken from 
+        // Alphabet:        http://pi.math.cornell.edu/~mec/2003-2004/cryptography/subs/frequencies.html
+        // Space frequency: http://www.macfreek.nl/memory/Letter_Distribution
         Dictionary<char, float> letterFrequencyTable = new Dictionary<char, float>
         {
+            {' ',18.00f},
             {'E',12.02f},
             {'T',9.10f},
             {'A',8.12f},
@@ -95,12 +98,8 @@ namespace CryptoPals.Sets
                 decodedBytes[j] = challenge2.XOR(bytes[j], key);
             }
 
-            // Convert decoded bytes to string
-            //string hex = challenge2.HexBytesToString(decodedBytes);
-
-            // Decode the hex string
-            string decoded = Encoding.ASCII.GetString(decodedBytes);
-            //string decoded = challenge1.Solve(hex);
+            // Decode the hex string as ASCII
+            string decoded = Encoding.ASCII.GetString(decodedBytes).ToUpper();
 
             // Calculate score using the letter frequency table
             double score = GetScore(decoded);
