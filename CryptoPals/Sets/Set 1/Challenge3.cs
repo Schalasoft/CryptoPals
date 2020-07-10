@@ -96,10 +96,11 @@ namespace CryptoPals.Sets
             }
 
             // Convert decoded bytes to string
-            string hex = challenge2.HexBytesToString(decodedBytes);
+            //string hex = challenge2.HexBytesToString(decodedBytes);
 
             // Decode the hex string
-            string decoded = challenge1.Solve(hex);
+            string decoded = Encoding.ASCII.GetString(decodedBytes);
+            //string decoded = challenge1.Solve(hex);
 
             // Calculate score using the letter frequency table
             double score = GetScore(decoded);
