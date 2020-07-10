@@ -58,7 +58,7 @@ namespace CryptoPals.Sets
 
         public string Solve(string input)
         {
-            // Decode each string with each key
+            // Decode string with each key (using 0-255 int values as key)
             // Key          : Int/char to use as cypher
             // Tuple Item 1 : Score
             // Tuple Item 2 : Decoded text
@@ -75,31 +75,33 @@ namespace CryptoPals.Sets
             string maxScore = maxScoringItem.Value.Item1.ToString();
             string output = maxScoringItem.Value.Item2;
 
+            // Return combined output so we can see output, and key, and score
             return $"{output}{Environment.NewLine}Key    : {deducedKey}{Environment.NewLine}Score  : {maxScore}";
         }
 
         // Decode text against a single key and score it
         private KeyValuePair<int, Tuple<double, string>> DecodeAndScore(int index, string text)
         {
+            // Get byte representation of key (0-255)
+            byte key = (byte)index;
+
+            // Get byte representation of input text
             byte[] bytes = challenge2.HexStringToBytes(text);
 
-            // Create key using 0-255 int values as key
-            byte key = (byte)index;
+            // XOR each byte of input text against the key byte
             byte[] decodedBytes = new byte[bytes.Length];
-
-            // XOR each byte against the key
             for (int j = 0; j < bytes.Length; j++)
             {
                 decodedBytes[j] = challenge2.XOR(bytes[j], key);
             }
 
-            // Convert bytes to string
+            // Convert decoded bytes to string
             string hex = challenge2.HexBytesToString(decodedBytes);
 
             // Decode the hex string
             string decoded = challenge1.Solve(hex);
 
-            // Calculate score
+            // Calculate score using the letter frequency table
             double score = GetScore(decoded);
 
             // Return KVP containing the key (index), score, and decoded text
