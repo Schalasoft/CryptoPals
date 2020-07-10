@@ -22,7 +22,6 @@ namespace CryptoPals.Sets
         */
 
         // Reuse previous challenge functionality
-        IChallenge challenge1 = ChallengeFactory.InitializeChallenge(Enumerations.ChallengeEnum.Challenge1);
         IChallenge2 challenge2 = (IChallenge2)ChallengeFactory.InitializeChallenge(Enumerations.ChallengeEnum.Challenge2);
 
         // Letter Frequency values taken from 
