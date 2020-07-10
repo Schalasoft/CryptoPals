@@ -2,7 +2,6 @@
 using CryptoPals.Factories;
 using CryptoPals.Enumerations;
 using System;
-using System.IO;
 
 namespace CryptoPals
 {
@@ -25,9 +24,6 @@ namespace CryptoPals
 
     class Program
     {
-        // File variables
-        static string Directory = "..\\..\\..\\Data\\";
-
         static void Main(string[] args)
         {
             SolveChallenges();
@@ -35,11 +31,11 @@ namespace CryptoPals
 
         private static void SolveChallenges()
         {
-            int challengeCount = 4;
+            int challengeCount = 5;
             string input;
             for(int i = 1; i <= challengeCount; i++)
             {
-                // Alias for input when it is too long
+                // Alias for input when it is too long for outputting to the console
                 string inputAlias = "";
 
                 // Setup input
@@ -52,8 +48,7 @@ namespace CryptoPals
                     case 2:
                         string a = "1c0111001f010100061a024b53535009181c";
                         string b = "686974207468652062756c6c277320657965";
-                        char separator = '/';
-                        input = $"{a}{separator}{b}";
+                        input = $"{a}{Constants.Separator}{b}";
                     break;
 
                     case 3:
@@ -62,8 +57,14 @@ namespace CryptoPals
 
                     case 4:
                         string fileName = "Challenge4.txt";
-                        input = ReadFile(Directory, fileName);
+                        input = FileHandling.ReadFile(Constants.Directory, fileName);
                         inputAlias = fileName;
+                    break;
+
+                    case 5:
+                        string text = "Burning 'em, if you ain't quick and nimble\r\nI go crazy when I hear a cymbal";
+                        string key = "ICE"; //ice baby
+                        input = $"{text}{Constants.Separator}{key}";
                     break;
 
                     default:
@@ -94,13 +95,6 @@ namespace CryptoPals
             IChallenge challenge = ChallengeFactory.InitializeChallenge(challengeEnum);
 
             return challenge.Solve(input);
-        }
-
-        // Get the payload from the layer file
-        private static string ReadFile(string dir, string fileName)
-        {
-            // Read entire file
-            return File.ReadAllText($"{dir}{fileName}");
         }
     }
 }

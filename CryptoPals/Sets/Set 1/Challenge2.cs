@@ -19,7 +19,7 @@ namespace CryptoPals.Sets
         public string Solve(string input)
         {
             // Separate a and b from the combined input
-            string[] split = input.Split('/');
+            string[] split = input.Split(Constants.Separator);
             string hexA = split[0];
             string hexB = split[1];
             if(hexA.Length != hexB.Length)

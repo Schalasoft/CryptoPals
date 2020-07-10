@@ -21,8 +21,8 @@ namespace CryptoPals.Sets
         // Solve the challenge
         public string Solve(string input)
         {
-            return SolveFast(input);
-            //return SolveSlow(input);
+            //return SolveFast(input); // todo GetMissingByteCountForString is not giving the expected result, look at this later
+            return SolveSlow(input);
         }
 
         // Go through each line and find the line with the most missing bytes, which is likely to be the XOR encoded line as XOR removes bits
@@ -32,7 +32,6 @@ namespace CryptoPals.Sets
             string[] lines = input.Split("\r\n");
 
             // Iterate lines and find the one with the most missing bytes
-
             int mostMissingBytes = 0;
             string mostMissingBytesLine = "";
             int mostMissingBytesLineNumber = 0;
