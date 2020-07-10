@@ -39,8 +39,11 @@ namespace CryptoPals
             string input;
             for(int i = 1; i <= challengeCount; i++)
             {
+                // Alias for input when it is too long
+                string inputAlias = "";
+
                 // Setup input
-                switch(i)
+                switch (i)
                 {
                     case 1:
                         input = "49276d206b696c6c696e6720796f757220627261696e206c696b65206120706f69736f6e6f7573206d757368726f6f6d";
@@ -58,7 +61,9 @@ namespace CryptoPals
                     break;
 
                     case 4:
-                        input = ReadFile(Directory, "Challenge4.txt");
+                        string fileName = "Challenge4.txt";
+                        input = ReadFile(Directory, fileName);
+                        inputAlias = fileName;
                     break;
 
                     default:
@@ -68,6 +73,10 @@ namespace CryptoPals
 
                 // Solve the challenge
                 string output = SolveChallenge(i, input);
+
+                // Replace input text with alias for logging if an alias has been set
+                if (!inputAlias.Equals(""))
+                    input = inputAlias;
 
                 // Output challenge information
                 Console.WriteLine("Challenge {0}", i);

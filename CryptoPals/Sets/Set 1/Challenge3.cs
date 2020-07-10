@@ -63,12 +63,20 @@ namespace CryptoPals.Sets
             KeyValuePair<int, Tuple<double, string>> maxScoringItem = GetMaxScoringItem(input);
 
             // Format output
-            string deducedKey = maxScoringItem.Key.ToString();
-            string maxScore = maxScoringItem.Value.Item1.ToString();
-            string output = maxScoringItem.Value.Item2;
+            string output = FormatOutput(maxScoringItem);
 
             // Return combined output so we can see output, and key, and score
-            return $"{output}{Environment.NewLine}Key    : {deducedKey}{Environment.NewLine}Score  : {maxScore}";
+            return output;
+        }
+
+        // Format a Key Value Pair for output so we can see the output, key, and score
+        public string FormatOutput(KeyValuePair<int, Tuple<double, string>> kvp, string additionalInformation = "")
+        {
+            string deducedKey = kvp.Key.ToString();
+            string maxScore = kvp.Value.Item1.ToString();
+            string output = kvp.Value.Item2.Replace("\r", "").Replace("\n", "");
+
+            return $"{output}{Environment.NewLine}Key    : {deducedKey}{Environment.NewLine}Score  : {maxScore}{additionalInformation}";
         }
 
         // Given an input string, XOR decrypt it against each ASCII character and return a KVP containing the key, score, and decoded text
