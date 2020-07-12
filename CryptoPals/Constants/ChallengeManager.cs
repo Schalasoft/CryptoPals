@@ -13,16 +13,16 @@ namespace CryptoPals
         static public void Initialize(int challengeCount)
         {
             Challenges = new IChallenge[challengeCount];
-            for(int i = 0; i < challengeCount; i++)
+            for(int i = 1; i <= challengeCount; i++)
             {
-                Challenges[i] = ChallengeFactory.InitializeChallenge((ChallengeEnum)i);
+                Challenges[i-1] = ChallengeFactory.InitializeChallenge((ChallengeEnum)i);
             }
         }
 
         // Get a challenge based on its ID
         static public IChallenge GetChallenge(int challengeId)
         {
-            return Challenges[challengeId];
+            return Challenges[challengeId-1];
         }
     }
 }

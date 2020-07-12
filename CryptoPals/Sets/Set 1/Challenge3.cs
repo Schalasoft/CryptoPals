@@ -26,7 +26,7 @@ namespace CryptoPals.Sets
         // Letter Frequency values taken from 
         // Alphabet:        http://pi.math.cornell.edu/~mec/2003-2004/cryptography/subs/frequencies.html
         // Space frequency: http://www.macfreek.nl/memory/Letter_Distribution
-        Dictionary<char, float> letterFrequencyTable = new Dictionary<char, float>
+        private Dictionary<char, float> letterFrequencyTable = new Dictionary<char, float>
         {
             {' ',18.00f},
             {'E',12.02f},

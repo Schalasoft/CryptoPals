@@ -37,11 +37,11 @@ namespace CryptoPals
         private static void SolveChallenges()
         {
             // Initialize the Challenge Manager used to hold the instance of each challenge
-            int challengeCount = 5 + 1; // (ChallengeCount + 1) as challenge array is 0 based
+            int challengeCount = 5;
             InitializeChallengeManager(challengeCount);
 
             string input, fileName;
-            for (int i = 1; i < challengeCount; i++)
+            for (int i = 1; i <= challengeCount; i++)
             {
                 // Alias for input when it is too long for outputting to the console
                 string inputAlias = "";

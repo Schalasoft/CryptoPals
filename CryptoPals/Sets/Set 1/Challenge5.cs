@@ -40,26 +40,34 @@ namespace CryptoPals.Sets
         // Sequentially apply each byte of the key against each byte of the input text and return the resulting encoded text
         private string RepeatingKeyXOR(string text, string key)
         {
+            // Get text bytes
+            byte[] textBytes = Encoding.ASCII.GetBytes(text);
+            byte[] keyBytes  = Encoding.ASCII.GetBytes(key);
+
             // Go through each letter in the input text
-            StringBuilder sb = new StringBuilder();
+            byte[] bytes = new byte[textBytes.Length];
             int keyIndex = 0;
-            for (int i = 0; i < text.Length; i++)
+            for (int i = 0; i < textBytes.Length; i++)
             {
-                // Encrypt the letter by XORing it against the appropriate part of the repeating key
-                char encryptedLetter = (char)challenge2.XOR((byte)text[i], (byte)key[keyIndex++]);
-                
-                // Add it to the string builder that contains the complete encoded string
-                sb.Append(encryptedLetter);
+                // Encrypt the bytes by XORing it against the appropriate part of the repeating key
+                bytes[i] = challenge2.XOR(textBytes[i], keyBytes[keyIndex++]);
 
                 // Reset repeating key index
                 if (keyIndex > 2)
                     keyIndex = 0;
             }
 
-            // Get built encoded string from string builder
-            string encoded = sb.ToString();
+            // todo Need to get \n to convert to a single byte of value 10 in decimal, it currently converts to two separate bytes ruining the encoding
 
-            return encoded;
+            // Return encoded string from the encoded bytes
+            string actual = challenge2.HexBytesToString(bytes);
+            string expected = "0b3637272a2b2e63622c2e69692a23693a2a3c6324202d623d63343c2a26226324272765272a282b2f20430a652e2c652a3124333a653e2b2027630c692b20283165286326302e27282f";
+
+            if(actual.Equals(expected))
+            {
+                int a = 0;
+            }
+            return actual;
         }
     }
 }
