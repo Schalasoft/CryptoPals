@@ -5,7 +5,7 @@ using CryptoPals.Interfaces;
 namespace CryptoPals.Sets
 {
     // Convert Hex string as Base64
-    class Challenge1 : IChallenge
+    class Challenge1 : IChallenge1, IChallenge
     {
         /*
         Convert hex to base64
@@ -45,29 +45,52 @@ namespace CryptoPals.Sets
         // Convert hex string to binary string
         private string HexStringToBinaryString(string text)
         {
-            if (text.Length % 2 != 0)
-                throw new ArgumentException("Hex input text must be divisible by 2 (even)");
+            // Convert to bytes
+            byte[] bytes = HexStringToBytes(text);
 
-            // Convert hex string to a string of binary
+            // Convert hex bytes to a string of binary
             StringBuilder binarySb = new StringBuilder();
-            for (int i = 0; i < text.Length; i += hexLength)
+            foreach (byte hextet in bytes)
             {
-                // Grab hex value
-                string hex = text.Substring(i, hexLength);
-
-                // Convert hex value to hextet
-                byte hextet = Convert.ToByte(hex, hexBase);
-
                 // Convert byte to a string of binary
                 string byteString = Convert.ToString(hextet, binaryBase).PadLeft(8, '0');
 
                 // Append to the full binary sequence
                 binarySb.Append(byteString);
             }
+
             return binarySb.ToString();
         }
 
-        // Convert binary string to Base64 string
+        // Convert a 2 digit hex value to a byte
+        public byte[] HexStringToBytes(string text)
+        {
+            if (text.Length % 2 != 0)
+                throw new ArgumentException("Hex input text must be divisible by 2 (even)");
+
+            byte[] bytes = new byte[text.Length / 2];
+            for (int i = 0; i < text.Length; i += hexLength)
+            {
+                // Grab hex value
+                string hex = text.Substring(i, hexLength);
+
+                // Convert hex value to hextet
+                byte hextet = HexToByte(hex);
+
+                // Store the hextet in its correct position in the output array
+                bytes[i / 2] = hextet;
+            }
+
+            return bytes;
+        }
+
+        // Convert a hex value to a byte
+        private byte HexToByte(string hex)
+        {
+            return Convert.ToByte(hex, hexBase);
+        }
+
+        // Convert hex binary string to Base64 string
         private string BinaryStringToBase64(string text)
         {
             // Grab sextets from binary sequence

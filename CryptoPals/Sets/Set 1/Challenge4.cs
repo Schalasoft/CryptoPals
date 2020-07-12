@@ -2,7 +2,6 @@
 using CryptoPals.Interfaces;
 using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace CryptoPals.Sets
 {
@@ -16,6 +15,7 @@ namespace CryptoPals.Sets
         */
 
         // Reuse previous challenge functionality
+        IChallenge1 challenge1 = (IChallenge1)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge1);
         IChallenge3 challenge3 = (IChallenge3)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge3);
 
         // Solve the challenge
@@ -24,7 +24,7 @@ namespace CryptoPals.Sets
             // Get individual lines
             string[] lines = SplitTextIntoLines(input);
 
-            return SolveFast(lines); // todo GetMissingByteCountForString is not giving the expected result, look at this later
+            return SolveFast(lines);
             //return SolveSlow(lines);
         }
 
@@ -38,7 +38,7 @@ namespace CryptoPals.Sets
             for (int i = 0; i < lines.Length; i++)
             {
                 // Find the count of missing bytes
-                int missingBytes = GetMissingByteCountForString(lines[i]);
+                int missingBytes = GetMissingByteCountForHexString(lines[i]);
 
                 // If this line has more missing bytes than the previous max, update the max and save a reference to the line
                 if(missingBytes > mostMissingBytes)
@@ -91,15 +91,17 @@ namespace CryptoPals.Sets
         }
 
         // Determine the amount of byte values not expressed in a given string input
-        private int GetMissingByteCountForString(string input)
+        private int GetMissingByteCountForHexString(string text)
         {
+            // Convert the input hex text to bytes
+            byte[] bytes = challenge1.HexStringToBytes(text);
+
             // Count the number of unique bytes expressed by the text
             List<byte> expressedBytes = new List<byte>();
-            byte[] bytes = Encoding.ASCII.GetBytes(input);
-            foreach (byte b in bytes)
+            foreach(byte hextet in bytes)
             {
-                if (!expressedBytes.Contains(b))
-                    expressedBytes.Add(b);
+                if (!expressedBytes.Contains(hextet))
+                    expressedBytes.Add(hextet);
             }
 
             // Calculate the amount of missing bytes from the ASCII value range (0 - 256)
