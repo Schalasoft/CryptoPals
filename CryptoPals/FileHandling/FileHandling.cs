@@ -13,6 +13,7 @@ namespace CryptoPals
             
             // Remove escape characters from string (we want '\n' instead of '\\n' or it will mess up the bytes) 
             text = Regex.Unescape(text);
+
             return text;
         }
     }
