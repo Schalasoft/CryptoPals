@@ -30,11 +30,9 @@ namespace CryptoPals.Sets
         {
             // Split the input to get the plaintext to encrypt and the cycling key
             string[] split = input.Split(Constants.Separator);
-            string text    = split[0];
-            string key     = split[1];
 
             // Encrypt
-            string output = RepeatingKeyXOR(text, key);
+            string output = RepeatingKeyXOR(split[0], split[1]);
 
             return output;
         }
