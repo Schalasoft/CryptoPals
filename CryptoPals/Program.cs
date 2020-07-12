@@ -40,43 +40,22 @@ namespace CryptoPals
             int challengeCount = 5 + 1; // (ChallengeCount + 1) as challenge array is 0 based
             InitializeChallengeManager(challengeCount);
 
-            string input;
-            for(int i = 1; i < challengeCount; i++)
+            string input, fileName;
+            for (int i = 1; i < challengeCount; i++)
             {
                 // Alias for input when it is too long for outputting to the console
                 string inputAlias = "";
 
-                // Setup input
+                // Read input, and perform any additional preparation operations on the input data for specific challenges
+                fileName = $"Challenge{i}.txt";
+                input = FileHandling.ReadFile(Constants.Directory, fileName);
                 switch (i)
                 {
-                    case 1:
-                        input = "49276d206b696c6c696e6720796f757220627261696e206c696b65206120706f69736f6e6f7573206d757368726f6f6d";
-                    break;
-
-                    case 2:
-                        string a = "1c0111001f010100061a024b53535009181c";
-                        string b = "686974207468652062756c6c277320657965";
-                        input = $"{a}{Constants.Separator}{b}";
-                    break;
-
-                    case 3:
-                        input = "1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736";
-                    break;
-
                     case 4:
-                        string fileName = "Challenge4.txt";
-                        input = FileHandling.ReadFile(Constants.Directory, fileName);
                         inputAlias = fileName;
                     break;
 
-                    case 5:
-                        string text = "Burning 'em, if you ain't quick and nimble I go crazy when I hear a cymbal";
-                        string key = "ICE"; //ice baby
-                        input = $"{text}{Constants.Separator}{key}";
-                    break;
-
                     default:
-                        input = "";
                     break;
                 }
 
