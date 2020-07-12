@@ -46,9 +46,11 @@ namespace CryptoPals
                 // Alias for input when it is too long for outputting to the console
                 string inputAlias = "";
 
-                // Read input, and perform any additional preparation operations on the input data for specific challenges
+                // Read input
                 fileName = $"Challenge{i}.txt";
                 input = FileHandling.ReadFile(Constants.Directory, fileName);
+
+                // Perform any additional preparation operations for specific challenges
                 switch (i)
                 {
                     case 4:
