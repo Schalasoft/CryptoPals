@@ -1,4 +1,5 @@
-﻿using CryptoPals.Factories;
+﻿using CryptoPals.Enumerations;
+using CryptoPals.Factories;
 using CryptoPals.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -21,7 +22,7 @@ namespace CryptoPals.Sets
         */
 
         // Reuse previous challenge functionality
-        IChallenge2 challenge2 = (IChallenge2)ChallengeFactory.InitializeChallenge(Enumerations.ChallengeEnum.Challenge2);
+        IChallenge2 challenge2 = (IChallenge2)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge2);
 
         // Letter Frequency values taken from 
         // Alphabet:        http://pi.math.cornell.edu/~mec/2003-2004/cryptography/subs/frequencies.html

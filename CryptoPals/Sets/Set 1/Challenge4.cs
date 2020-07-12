@@ -1,4 +1,5 @@
-﻿using CryptoPals.Factories;
+﻿using CryptoPals.Enumerations;
+using CryptoPals.Factories;
 using CryptoPals.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -16,13 +17,13 @@ namespace CryptoPals.Sets
         */
 
         // Reuse previous challenge functionality
-        IChallenge3 challenge3 = (IChallenge3)ChallengeFactory.InitializeChallenge(Enumerations.ChallengeEnum.Challenge3);
+        IChallenge3 challenge3 = (IChallenge3)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge3);
 
         // Solve the challenge
         public string Solve(string input)
         {
-            //return SolveFast(input); // todo GetMissingByteCountForString is not giving the expected result, look at this later
-            return SolveSlow(input);
+            return SolveFast(input); // todo GetMissingByteCountForString is not giving the expected result, look at this later
+            //return SolveSlow(input);
         }
 
         // Go through each line and find the line with the most missing bytes, which is likely to be the XOR encoded line as XOR removes bits

@@ -1,7 +1,4 @@
-﻿using CryptoPals.Interfaces;
-using CryptoPals.Factories;
-using CryptoPals.Enumerations;
-using System;
+﻿using System;
 
 namespace CryptoPals
 {
@@ -24,16 +21,27 @@ namespace CryptoPals
 
     class Program
     {
-        static void Main(string[] args)
+        // Main entry point
+        public static void Main(string[] args)
         {
             SolveChallenges();
         }
 
+        // Challenge Manager holds instances of challenges for reuse
+        private static void InitializeChallengeManager(int challengeCount)
+        {
+            ChallengeManager.Initialize(challengeCount);
+        }
+
+        // Solve all challenges
         private static void SolveChallenges()
         {
-            int challengeCount = 5;
+            // Initialize the Challenge Manager used to hold the instance of each challenge
+            int challengeCount = 5 + 1; // (ChallengeCount + 1) as challenge array is 0 based
+            InitializeChallengeManager(challengeCount);
+
             string input;
-            for(int i = 1; i <= challengeCount; i++)
+            for(int i = 1; i < challengeCount; i++)
             {
                 // Alias for input when it is too long for outputting to the console
                 string inputAlias = "";
@@ -62,7 +70,7 @@ namespace CryptoPals
                     break;
 
                     case 5:
-                        string text = "Burning 'em, if you ain't quick and nimble\r\nI go crazy when I hear a cymbal";
+                        string text = "Burning 'em, if you ain't quick and nimble I go crazy when I hear a cymbal";
                         string key = "ICE"; //ice baby
                         input = $"{text}{Constants.Separator}{key}";
                     break;
@@ -90,11 +98,7 @@ namespace CryptoPals
         // Solve an individual challenge
         private static string SolveChallenge(int challengeId, string input)
         {
-            ChallengeEnum challengeEnum = (ChallengeEnum)challengeId;
-
-            IChallenge challenge = ChallengeFactory.InitializeChallenge(challengeEnum);
-
-            return challenge.Solve(input);
+            return ChallengeManager.GetChallenge(challengeId).Solve(input);
         }
     }
 }

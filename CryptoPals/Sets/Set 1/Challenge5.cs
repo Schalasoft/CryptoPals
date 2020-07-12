@@ -1,4 +1,6 @@
-﻿using CryptoPals.Interfaces;
+﻿using CryptoPals.Factories;
+using CryptoPals.Interfaces;
+using System.Text;
 
 namespace CryptoPals.Sets
 {
@@ -21,6 +23,9 @@ namespace CryptoPals.Sets
         Encrypt a bunch of stuff using your repeating-key XOR function. Encrypt your mail. Encrypt your password file. Your .sig file. Get a feel for it. I promise, we aren't wasting your time with this.
         */
 
+        // Reuse previous challenge functionality
+        IChallenge2 challenge2 = (IChallenge2)ChallengeManager.GetChallenge((int)Enumerations.ChallengeEnum.Challenge2);
+
         // Solve the challenge
         public string Solve(string input)
         {
@@ -30,8 +35,7 @@ namespace CryptoPals.Sets
             string key     = split[1];
 
             // Encrypt
-
-            string output = "";
+            string output = RepeatingKeyXOR(text, key);
 
             return output;
         }
@@ -39,9 +43,24 @@ namespace CryptoPals.Sets
         // Sequentially apply each byte of the key against each byte of the input text and return the resulting encoded text
         private string RepeatingKeyXOR(string text, string key)
         {
+            // Go through each letter in the input text
+            StringBuilder sb = new StringBuilder();
+            int keyIndex = 0;
+            for (int i = 0; i < text.Length; i++)
+            {
+                // Encrypt the letter by XORing it against the appropriate part of the repeating key
+                char encryptedLetter = (char)challenge2.XOR((byte)text[i], (byte)key[keyIndex++]);
+                
+                // Add it to the string builder that contains the complete encoded string
+                sb.Append(encryptedLetter);
 
+                // Reset repeating key index
+                if (keyIndex > 2)
+                    keyIndex = 0;
+            }
 
-            string encoded = "";
+            // Get built encoded string from string builder
+            string encoded = sb.ToString();
 
             return encoded;
         }
