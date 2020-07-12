@@ -1,5 +1,4 @@
 ﻿using CryptoPals.Enumerations;
-using CryptoPals.Factories;
 using CryptoPals.Interfaces;
 using System;
 using System.Collections.Generic;

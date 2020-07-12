@@ -1,5 +1,4 @@
-﻿using CryptoPals.Factories;
-using CryptoPals.Interfaces;
+﻿using CryptoPals.Interfaces;
 using System.Text;
 
 namespace CryptoPals.Sets
