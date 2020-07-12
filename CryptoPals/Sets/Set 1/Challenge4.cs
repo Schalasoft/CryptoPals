@@ -21,16 +21,16 @@ namespace CryptoPals.Sets
         // Solve the challenge
         public string Solve(string input)
         {
-            return SolveFast(input); // todo GetMissingByteCountForString is not giving the expected result, look at this later
-            //return SolveSlow(input);
+            // Get individual lines
+            string[] lines = SplitTextIntoLines(input);
+
+            return SolveFast(lines); // todo GetMissingByteCountForString is not giving the expected result, look at this later
+            //return SolveSlow(lines);
         }
 
         // Go through each line and find the line with the most missing bytes, which is likely to be the XOR encoded line as XOR removes bits
-        private string SolveFast(string input)
+        private string SolveFast(string[] lines)
         {
-            // Get individual lines
-            string[] lines = input.Split("\r\n");
-
             // Iterate lines and find the one with the most missing bytes
             int mostMissingBytes = 0;
             string mostMissingBytesLine = "";
@@ -59,11 +59,8 @@ namespace CryptoPals.Sets
         }
 
         // Go through each line, XOR decode and choose the line with the highest score
-        private string SolveSlow(string input)
+        private string SolveSlow(string[] lines)
         {
-            // Get individual lines
-            string[] lines = input.Split("\r\n");
-
             // Decode lines
             double maxLineScore = 0;
             int maxScoringLineNumber = 0;
@@ -110,6 +107,12 @@ namespace CryptoPals.Sets
             int missingByteCount = maxByteCount - expressedBytes.Count;
 
             return missingByteCount;
+        }
+
+        // Split text into lines based on newline characters
+        private string[] SplitTextIntoLines(string text)
+        {
+            return text.Split(Environment.NewLine);
         }
     }
 }
