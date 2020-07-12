@@ -1,4 +1,7 @@
-﻿using CryptoPals.Interfaces;
+﻿using CryptoPals.Enumerations;
+using CryptoPals.Interfaces;
+using System.Collections;
+using System.Text;
 
 namespace CryptoPals.Sets
 {
@@ -42,12 +45,64 @@ namespace CryptoPals.Sets
         In particular: the "wokka wokka!!!" edit distance really is 37.
         */
 
+        // Reuse previous challenge functionality
+        IChallenge2 challenge2 = (IChallenge2)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge2);
+
         // Solve the challenge
         public string Solve(string input)
         {
             string output = "";
 
+            // test data
+            string a = "this is a test";
+            string b = "wokka wokka!!!";
+            int hammingDistance = GetHammingDistance(a, b);
+
+            // try 2 to 40
+            int keySize = 0;
+            for(int i = 0; i <= 40; i++)
+            {
+
+            }
+
             return output;
+        }
+
+        // Get the Hamming Distance of two equal length strings (the total number of set bits after XORing the bytes of the strings together)
+        private int GetHammingDistance(string a, string b)
+        {
+            // Convert to bytes
+            byte[] bytesX = Encoding.ASCII.GetBytes(a);
+            byte[] bytesY = Encoding.ASCII.GetBytes(b);
+
+            // Calculate hamming distance by XORing each byte, counting the number of 1s and summing them
+            int hammingDistance = 0;
+            for (int i = 0; i < bytesX.Length; i++)
+            {
+                // Perform XOR
+                byte c = challenge2.XOR(bytesX[i], bytesY[i]);
+
+                // Count set bits
+                int count = CountSetBits(c);
+
+                // Add to the running total (hamming distance)
+                hammingDistance += count;
+            }
+
+            return hammingDistance;
+        }
+
+        // Count the number of set bits in a byte by adding on any 1s using logical AND to the count, then right shifting to get the next bit
+        // This is done until the byte is zero (has no 1s left)
+        private int CountSetBits(byte b)
+        {
+            int count = 0;
+            while (b > 0)
+            {
+                count += b & 1;
+                b >>= 1;
+            }
+            return count;
         }
     }
 }
