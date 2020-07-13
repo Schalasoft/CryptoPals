@@ -79,24 +79,25 @@ namespace CryptoPals.Sets
             // Try key sizes 2 to 40
             int minKeySize = 2;
             int maxKeySize = 40;
-            Dictionary<int, int> distances = new Dictionary<int, int>();
+            List<int> distances = new List<int>();
             for (int i = minKeySize; i <= maxKeySize; i++)
             {
                 // Use MemoryStream to simplify taking chunks of bytes
                 MemoryStream stream = new MemoryStream(bytes);
 
-                // Get the hamming distance between 1st and 2nd sets of bytes of the keysize, divide by keysize to normalize the result
-                int distance = CalculateHammingDistance(ByteConverter.GetBytes(stream, i), ByteConverter.GetBytes(stream, i)) / i;
+                // Get distances for the current keysize until there are not enough bytes left
+                while (stream.Position <= i * 2)
+                {
+                    // Get the hamming distance between 1st and 2nd sets of bytes of the keysize, divide by keysize to normalize the result
+                    int distance = CalculateHammingDistance(ByteConverter.GetBytes(stream, i), ByteConverter.GetBytes(stream, i)) / i;
 
-                // Store index and normalized distance in dictionary so we can get the keysize (i) with the lowest distance
-                distances.Add(i, distance);
+                    // Append the normalized distance to the list
+                    distances.Add(distance);
+                }
             }
 
-            // Get key of the item with the minimum distance from all the distances (this is likely the actual key size)
-            int keySize = distances.FirstOrDefault(x => x.Value == distances.Values.Min()).Key;
-
-            // CDG TEST
-            //int debug = CalculateHammingDistance(Encoding.ASCII.GetBytes("this is a test"), Encoding.ASCII.GetBytes("wokka wokka!!!"));
+            // Get the index of the minimum distance from all the distances, then add the minimum key size (e.g. if the index of the smallest is 0, that means it is keysize 2)
+            int keySize = distances.IndexOf(distances.Min()) + minKeySize;
 
             return keySize;
         }
