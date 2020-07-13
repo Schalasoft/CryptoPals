@@ -113,19 +113,19 @@ namespace CryptoPals.Sets
             for (int i = 0; i < text.Length; i += keySize)
             {
                 if (i + keySize > text.Length)
-                    break; // CDG TODO Hack for uneven input data
+                    break; // Cannot grab another block, bailing out is the best we can do
                 blocks[i / keySize] = text.Substring(i, keySize);
             }
 
             // Transpose each block (using the blocks, make transposed blocks of the the 1st byte of each block, the 2nd, 3rd etc.)
-            string[] transposedBlocks = new string[text.Length / keySize];
-            for (int i = 0; i < transposedBlocks.Length; i++)
+            string[] transposedBlocks = new string[keySize];
+            for (int i = 0; i < keySize; i++)
             {
                 // Create a transposed block
                 StringBuilder transposition = new StringBuilder();
-                for (int j = 0; j < keySize; j++)
+                for (int j = 0; j < blocks.Length; j++)
                 {
-                    transposition.Append(blocks[i][j]);
+                    transposition.Append(blocks[j][i]);
                 }
 
                 // Store the transposed block in an array
