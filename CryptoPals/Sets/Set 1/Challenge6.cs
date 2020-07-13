@@ -48,6 +48,7 @@ namespace CryptoPals.Sets
 
         // Reuse previous challenge functionality
         IChallenge2 challenge2 = (IChallenge2)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge2);
+        IChallenge3 challenge3 = (IChallenge3)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge3);
 
         // Solve the challenge
         public string Solve(string input)
@@ -64,7 +65,7 @@ namespace CryptoPals.Sets
         private string CalculateRepeatingKey(string text)
         {
             // Try key sizes 2 to 40
-            int maxKeySize = 2;
+            int maxKeySize = 40;
             int[] distances = new int[maxKeySize - 2];
             for (int i = 2; i <= maxKeySize; i++)
             {
@@ -73,18 +74,43 @@ namespace CryptoPals.Sets
             }
 
             // Get the minimum distance from all the distances (this is likely the actual key size)
-            int actualKeySize = distances.Min();
+            int keySize = distances.Min();
 
             // Break the ciphertext into blocks the size of the key
-            string[] blocks = new string[actualKeySize];
-
-            // Transpose each block (using the blocks, make blocks of the the 1st byte of each block, the 2nd, 3rd etc.)
-            for(int i = 0; i < actualKeySize; i++)
+            string[] blocks = new string[text.Length / keySize];
+            for(int i = 0; i < text.Length; i += keySize)
             {
-
+                blocks[i % keySize] = text.Substring(i, keySize);
             }
 
-            string key = "";
+            // Transpose each block (using the blocks, make transposed blocks of the the 1st byte of each block, the 2nd, 3rd etc.)
+            string[] transposedBlocks = new string[text.Length / keySize];
+            for (int i = 0; i < transposedBlocks.Length; i++)
+            {
+                // Create a transposed block
+                StringBuilder transposition = new StringBuilder();
+                for (int j = 0; j < keySize; j++)
+                {
+                    transposition.Append(blocks[j][i]);
+                }
+
+                // Store the transposed block in an array
+                transposedBlocks[i] = transposition.ToString();
+            }
+
+            // Solve each transposed block as a single character XOR
+            int keyInt = 0;
+            for(int i = 0; i < transposedBlocks.Length; i++)
+            {
+                // Get the 'best' repeating key XOR for this block
+                string output = challenge3.Solve(transposedBlocks[i]);
+                byte blockKey = (byte)'a';
+
+                // Add the block key to the actual key (the actual key is the sum of the block keys)
+                keyInt += (int)blockKey;
+            }
+
+            string key = (string)Encoding.ASCII.GetString(new byte[] { (byte)keyInt }); ;
 
             return key;
         }
