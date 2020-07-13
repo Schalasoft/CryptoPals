@@ -1,6 +1,6 @@
 ﻿using CryptoPals.Enumerations;
 using CryptoPals.Interfaces;
-using System.Collections;
+using System.Linq;
 using System.Text;
 
 namespace CryptoPals.Sets
@@ -52,21 +52,41 @@ namespace CryptoPals.Sets
         // Solve the challenge
         public string Solve(string input)
         {
+            // Calculate the repeating key given only the input string
+            string key = CalculateRepeatingKey(input);
+
             string output = "";
 
-            // test data
-            string a = "this is a test";
-            string b = "wokka wokka!!!";
-            int hammingDistance = GetHammingDistance(a, b);
+            return output;
+        }
 
-            // try 2 to 40
-            int keySize = 0;
-            for(int i = 0; i <= 40; i++)
+        // Calculate the repeating key given only the input string (the text must be at least 81 characters long)
+        private string CalculateRepeatingKey(string text)
+        {
+            // Try key sizes 2 to 40
+            int maxKeySize = 2;
+            int[] distances = new int[maxKeySize - 2];
+            for (int i = 2; i <= maxKeySize; i++)
+            {
+                // Get the hamming distance between 1st and 2nd sets of bytes of the keysize, divide by keysize to normalize the result
+                distances[i - 2] = GetHammingDistance(text.Substring(0, i), text.Substring(i + 1, i)) / i;
+            }
+
+            // Get the minimum distance from all the distances (this is likely the actual key size)
+            int actualKeySize = distances.Min();
+
+            // Break the ciphertext into blocks the size of the key
+            string[] blocks = new string[actualKeySize];
+
+            // Transpose each block (using the blocks, make blocks of the the 1st byte of each block, the 2nd, 3rd etc.)
+            for(int i = 0; i < actualKeySize; i++)
             {
 
             }
 
-            return output;
+            string key = "";
+
+            return key;
         }
 
         // Get the Hamming Distance of two equal length strings (the total number of set bits after XORing the bytes of the strings together)
