@@ -51,7 +51,6 @@ namespace CryptoPals.Sets
         // Reuse previous challenge functionality
         IChallenge2 challenge2 = (IChallenge2)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge2);
         IChallenge3 challenge3 = (IChallenge3)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge3);
-        IChallenge  challenge5 = (IChallenge)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge5);
 
         // Solve the challenge
         public string Solve(string input)
@@ -60,19 +59,20 @@ namespace CryptoPals.Sets
             input = input.Replace("\r\n", "");
 
             // Calculate the repeating key given only the input string
-            string key = CalculateRepeatingKey(input);
+            int key = CalculateRepeatingKey(input);
 
             // Decrypt using the determined repeating key
-            string decrypted = challenge5.Solve($"{input}{Constants.Separator}{key}");
+            KeyValuePair<int, Tuple<double, string>> decryptedAndScore = challenge3.DecodeAndScore(key, input);
+            string decrypted = decryptedAndScore.Value.Item2;
 
             // Base64 text
-            string output = Encoding.ASCII.GetString(Encoding.ASCII.GetBytes(decrypted));
+            string output = decrypted;
 
             return output;
         }
 
         // Calculate the repeating key given only the input string (the text must be at least 81 characters long)
-        private string CalculateRepeatingKey(string text)
+        private int CalculateRepeatingKey(string text)
         {
             // Try key sizes 2 to 40
             int maxKeySize = 40;
@@ -109,7 +109,7 @@ namespace CryptoPals.Sets
             }
 
             // Solve each transposed block as a single character XOR
-            int keyInt = 0;
+            int key = 0;
             for(int i = 0; i < transposedBlocks.Length; i++)
             {
                 // Get the 'best' repeating key XOR for this block
@@ -117,10 +117,8 @@ namespace CryptoPals.Sets
                 byte blockKey = (byte)output.Key;
 
                 // Add the block key to the actual key (the actual key is the sum of the block keys)
-                keyInt += (int)blockKey;
+                key += (int)blockKey;
             }
-
-            string key = (string)Encoding.ASCII.GetString(new byte[] { (byte)keyInt }); ;
 
             return key;
         }
