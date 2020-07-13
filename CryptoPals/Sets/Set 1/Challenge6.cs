@@ -49,14 +49,22 @@ namespace CryptoPals.Sets
         // Reuse previous challenge functionality
         IChallenge2 challenge2 = (IChallenge2)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge2);
         IChallenge3 challenge3 = (IChallenge3)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge3);
+        IChallenge challenge5 = (IChallenge)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge5);
 
         // Solve the challenge
         public string Solve(string input)
         {
+            // First, remove newlines characters from the input text
+            input = input.Replace("\r\n", "");
+
             // Calculate the repeating key given only the input string
             string key = CalculateRepeatingKey(input);
 
-            string output = "";
+            // Decrypt using the determined repeating key
+            string decrypted = challenge5.Solve($"{input}{Constants.Separator}{key}");
+
+            // Base64 text
+            string output = Encoding.ASCII.GetString(Encoding.ASCII.GetBytes(decrypted));
 
             return output;
         }
@@ -66,7 +74,7 @@ namespace CryptoPals.Sets
         {
             // Try key sizes 2 to 40
             int maxKeySize = 40;
-            int[] distances = new int[maxKeySize - 2];
+            int[] distances = new int[maxKeySize - 1];
             for (int i = 2; i <= maxKeySize; i++)
             {
                 // Get the hamming distance between 1st and 2nd sets of bytes of the keysize, divide by keysize to normalize the result
@@ -80,7 +88,7 @@ namespace CryptoPals.Sets
             string[] blocks = new string[text.Length / keySize];
             for(int i = 0; i < text.Length; i += keySize)
             {
-                blocks[i % keySize] = text.Substring(i, keySize);
+                blocks[i / keySize] = text.Substring(i, keySize);
             }
 
             // Transpose each block (using the blocks, make transposed blocks of the the 1st byte of each block, the 2nd, 3rd etc.)
@@ -91,7 +99,7 @@ namespace CryptoPals.Sets
                 StringBuilder transposition = new StringBuilder();
                 for (int j = 0; j < keySize; j++)
                 {
-                    transposition.Append(blocks[j][i]);
+                    transposition.Append(blocks[i][j]);
                 }
 
                 // Store the transposed block in an array
