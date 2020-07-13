@@ -2,6 +2,7 @@
 using CryptoPals.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.Text;
 
 namespace CryptoPals.Sets
 {
@@ -50,7 +51,7 @@ namespace CryptoPals.Sets
             }
 
             // Get the max scoring cypher for the line with the most missing bytes
-            KeyValuePair<int, Tuple<double, string>> maxScoringItem = challenge3.GetMaxScoringItem(mostMissingBytesLine);
+            KeyValuePair<int, Tuple<double, string>> maxScoringItem = challenge3.GetMaxScoringItemFromText(mostMissingBytesLine, true);
 
             // Format the output
             string output = challenge3.FormatOutput(maxScoringItem, $"{Environment.NewLine}Line   : {mostMissingBytesLineNumber}{Environment.NewLine}Bytes  : {mostMissingBytes} missing");
@@ -68,7 +69,7 @@ namespace CryptoPals.Sets
             for (int i = 0; i < lines.Length; i++)
             {
                 // Get the max scoring cypher for this line
-                KeyValuePair<int, Tuple<double, string>> maxScoringItem = challenge3.GetMaxScoringItem(lines[i]);
+                KeyValuePair<int, Tuple<double, string>> maxScoringItem = challenge3.GetMaxScoringItemFromText(lines[i], true);
 
                 // If this line has a higher score than the previous highest, update the max and store a reference
                 if (maxScoringItem.Value.Item1 > maxLineScore)

@@ -56,11 +56,12 @@ namespace CryptoPals.Sets
             {'Z',0.07f}
         };
 
-
+        // Solve taking in 2 digit hex values before deciphering
         public string Solve(string input)
         {
-            // Get the max scored cypher attempt
-            KeyValuePair<int, Tuple<double, string>> maxScoringItem = GetMaxScoringItem(input);
+            // Hex as true means decipher input as values (2 char are 1 value)
+            bool hex = true;
+            KeyValuePair<int, Tuple<double, string>> maxScoringItem = GetMaxScoringItemFromText(input, hex);
 
             // Format output
             string output = FormatOutput(maxScoringItem);
@@ -69,44 +70,18 @@ namespace CryptoPals.Sets
             return output;
         }
 
-        // Format a Key Value Pair for output so we can see the output, key, and score
-        public string FormatOutput(KeyValuePair<int, Tuple<double, string>> kvp, string additionalInformation = "")
-        {
-            string deducedKey = kvp.Key.ToString();
-            string maxScore = kvp.Value.Item1.ToString();
-            string output = kvp.Value.Item2.Replace("\r", "").Replace("\n", "");
-
-            return $"{output}{Environment.NewLine}Key    : {deducedKey}{Environment.NewLine}Score  : {maxScore}{additionalInformation}";
-        }
-
-        // Given an input string, XOR decrypt it against each ASCII character and return a KVP containing the key, score, and decoded text
-        public KeyValuePair<int, Tuple<double, string>> GetMaxScoringItem(string input)
-        {
-            // Decode string with each key (using 0-255 int values as key)
-            // Key          : Int/char to use as cypher
-            // Tuple Item 1 : Score
-            // Tuple Item 2 : Decoded text
-            Dictionary<int, Tuple<double, string>> data = new Dictionary<int, Tuple<double, string>>();
-            for (int i = 0; i <= 255; i++)
-            {
-                KeyValuePair<int, Tuple<double, string>> chunk = DecodeAndScore(i, input);
-                data.Add(chunk.Key, chunk.Value);
-            }
-
-            // Get the KVP with the max score
-            KeyValuePair<int, Tuple<double, string>> maxScoringItem = data.FirstOrDefault(x => x.Value.Item1 == data.Values.Max(x => x.Item1));
-
-            return maxScoringItem;
-        }
-
         // Decode text against a single key and score it
-        private KeyValuePair<int, Tuple<double, string>> DecodeAndScore(int index, string text)
+        public KeyValuePair<int, Tuple<double, string>> DecodeAndScore(int index, string text, bool hex)
         {
             // Get byte representation of key (0-255)
             byte key = (byte)index;
 
-            // Get byte representation of input text
-            byte[] bytes = challenge2.HexStringToBytes(text);
+            // Byte conversion
+            byte[] bytes;
+            if (hex)
+                bytes = challenge2.HexStringToBytes(text);
+            else
+                bytes = Encoding.ASCII.GetBytes(text);
 
             // XOR each byte of input text against the key byte
             byte[] decodedBytes = new byte[bytes.Length];
@@ -123,6 +98,45 @@ namespace CryptoPals.Sets
 
             // Return KVP containing the key (index), score, and decoded text
             return new KeyValuePair<int, Tuple<double, string>>(index, new Tuple<double, string>(score, decoded));
+        }
+
+        // Format a Key Value Pair for output so we can see the output, key, and score
+        public string FormatOutput(KeyValuePair<int, Tuple<double, string>> kvp, string additionalInformation = "")
+        {
+            string deducedKey = kvp.Key.ToString();
+            string maxScore = kvp.Value.Item1.ToString();
+            string output = kvp.Value.Item2.Replace("\r", "").Replace("\n", "");
+
+            return $"{output}{Environment.NewLine}Key    : {deducedKey}{Environment.NewLine}Score  : {maxScore}{additionalInformation}";
+        }
+
+        public KeyValuePair<int, Tuple<double, string>> GetMaxScoringItemFromText(string text, bool hex = false)
+        {
+            // Get the max scored cypher attempt
+            KeyValuePair<int, Tuple<double, string>> maxScoringItem = GetMaxScoringItem(text, hex);
+
+            // Return combined output so we can see output, and key, and score
+            return maxScoringItem;
+        }
+
+        // Given an input string, XOR decrypt it against each ASCII character and return a KVP containing the key, score, and decoded text
+        public KeyValuePair<int, Tuple<double, string>> GetMaxScoringItem(string text, bool hex)
+        {
+            // Decode string with each key (using 0-255 int values as key)
+            // Key          : Int/char to use as cypher
+            // Tuple Item 1 : Score
+            // Tuple Item 2 : Decoded text
+            Dictionary<int, Tuple<double, string>> data = new Dictionary<int, Tuple<double, string>>();
+            for (int i = 0; i <= 255; i++)
+            {
+                KeyValuePair<int, Tuple<double, string>> chunk = DecodeAndScore(i, text, hex);
+                data.Add(chunk.Key, chunk.Value);
+            }
+
+            // Get the KVP with the max score
+            KeyValuePair<int, Tuple<double, string>> maxScoringItem = data.FirstOrDefault(x => x.Value.Item1 == data.Values.Max(x => x.Item1));
+
+            return maxScoringItem;
         }
 
         // Get the max score of a given string using the letter frequency table

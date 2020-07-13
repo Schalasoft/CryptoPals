@@ -1,5 +1,7 @@
 ﻿using CryptoPals.Enumerations;
 using CryptoPals.Interfaces;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
@@ -49,7 +51,7 @@ namespace CryptoPals.Sets
         // Reuse previous challenge functionality
         IChallenge2 challenge2 = (IChallenge2)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge2);
         IChallenge3 challenge3 = (IChallenge3)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge3);
-        IChallenge challenge5 = (IChallenge)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge5);
+        IChallenge  challenge5 = (IChallenge)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge5);
 
         // Solve the challenge
         public string Solve(string input)
@@ -111,8 +113,8 @@ namespace CryptoPals.Sets
             for(int i = 0; i < transposedBlocks.Length; i++)
             {
                 // Get the 'best' repeating key XOR for this block
-                string output = challenge3.Solve(transposedBlocks[i]);
-                byte blockKey = (byte)'a';
+                KeyValuePair<int, Tuple<double, string>> output = challenge3.GetMaxScoringItemFromText(transposedBlocks[i]);
+                byte blockKey = (byte)output.Key;
 
                 // Add the block key to the actual key (the actual key is the sum of the block keys)
                 keyInt += (int)blockKey;
@@ -127,15 +129,15 @@ namespace CryptoPals.Sets
         private int GetHammingDistance(string a, string b)
         {
             // Convert to bytes
-            byte[] bytesX = Encoding.ASCII.GetBytes(a);
-            byte[] bytesY = Encoding.ASCII.GetBytes(b);
+            byte[] bytesA = Encoding.ASCII.GetBytes(a);
+            byte[] bytesB = Encoding.ASCII.GetBytes(b);
 
             // Calculate hamming distance by XORing each byte, counting the number of 1s and summing them
             int hammingDistance = 0;
-            for (int i = 0; i < bytesX.Length; i++)
+            for (int i = 0; i < bytesA.Length; i++)
             {
                 // Perform XOR
-                byte c = challenge2.XOR(bytesX[i], bytesY[i]);
+                byte c = challenge2.XOR(bytesA[i], bytesB[i]);
 
                 // Count set bits
                 int count = CountSetBits(c);
