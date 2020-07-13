@@ -133,21 +133,24 @@ namespace CryptoPals.Sets
             }
 
             // Solve each transposed block as a single character XOR, combining these to get the actual key
-            StringBuilder stringBuilder = new StringBuilder();
-            for(int i = 0; i < keySize; i++)
+            char[] key = new char[keySize];
+            double[] scores = new double[keySize]; 
+            for (int i = 0; i < transposedBlocks.Length; i++)
             {
                 // Get the 'best' repeating key XOR for this block
-                KeyValuePair<int, Tuple<double, string>> output = challenge3.GetMaxScoringItemFromText(transposedBlocks[i]);
-                char blockKey = (char)output.Key;
+                KeyValuePair<int, Tuple<double, string>> kvp = challenge3.GetMaxScoringItem(transposedBlocks[i]);
+                double score = kvp.Value.Item1;
 
-                // Add the block key to the actual key (the actual key is the sum of the block keys)
-                stringBuilder.Append(blockKey);
+                // If the score for this key is higher than the previous key it is more likely to be the actual key
+                if (score > scores[i % keySize])
+                {
+                    // Update with the new best scoring key
+                    key[i % keySize]    = (char)kvp.Key;
+                    scores[i % keySize] = score;
+                }
             }
-
-            // The actual key
-            string key = stringBuilder.ToString();
-
-            return key;
+            
+            return key.ToString();
         }
 
         // Get the Hamming Distance of two equal length byte arrays (the total number of set bits after XORing the bytes together)

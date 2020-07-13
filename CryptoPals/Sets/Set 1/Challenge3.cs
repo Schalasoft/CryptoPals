@@ -61,7 +61,7 @@ namespace CryptoPals.Sets
         {
             // Hex as true means decipher input as values (2 char are 1 value)
             bool hex = true;
-            KeyValuePair<int, Tuple<double, string>> maxScoringItem = GetMaxScoringItemFromText(input, hex);
+            KeyValuePair<int, Tuple<double, string>> maxScoringItem = GetMaxScoringItem(input, hex);
 
             // Format output
             string output = FormatOutput(maxScoringItem);
@@ -109,15 +109,6 @@ namespace CryptoPals.Sets
             string output = kvp.Value.Item2.Replace("\r", "").Replace("\n", "");
 
             return $"{output}{Environment.NewLine}Key    : {deducedKey}{Environment.NewLine}Score  : {maxScore}{additionalInformation}";
-        }
-
-        public KeyValuePair<int, Tuple<double, string>> GetMaxScoringItemFromText(string text, bool hex = false)
-        {
-            // Get the max scored cypher attempt
-            KeyValuePair<int, Tuple<double, string>> maxScoringItem = GetMaxScoringItem(text, hex);
-
-            // Return combined output so we can see output, and key, and score
-            return maxScoringItem;
         }
 
         // Given an input string, XOR decrypt it against each ASCII character and return a KVP containing the key, score, and decoded text

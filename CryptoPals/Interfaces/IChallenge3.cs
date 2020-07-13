@@ -5,7 +5,7 @@ namespace CryptoPals.Interfaces
 {
     interface IChallenge3 : IChallenge
     {
-        public KeyValuePair<int, Tuple<double, string>> GetMaxScoringItemFromText(string text, bool hex = false);
+        public KeyValuePair<int, Tuple<double, string>> GetMaxScoringItem(string text, bool hex = false);
         public string FormatOutput(KeyValuePair<int, Tuple<double, string>> kvp, string additionalInformation = "");
     }
 }
