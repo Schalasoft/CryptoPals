@@ -2,7 +2,7 @@
 
 namespace CryptoPals.Sets
 {
-    class Challenge5 : IChallenge
+    class Challenge5 : IChallenge5, IChallenge
     {
         /*
         Implement repeating-key XOR
@@ -35,7 +35,7 @@ namespace CryptoPals.Sets
         }
 
         // Sequentially apply each byte of the key against each byte of the input text and return the resulting encoded text
-        private string RepeatingKeyXOR(string text, string key)
+        public string RepeatingKeyXOR(string text, string key)
         {
             // Go through each letter in the input text
             byte[] bytes = new byte[text.Length];

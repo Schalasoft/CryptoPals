@@ -2,6 +2,7 @@
 using CryptoPals.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 
@@ -51,6 +52,7 @@ namespace CryptoPals.Sets
         // Reuse previous challenge functionality
         IChallenge2 challenge2 = (IChallenge2)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge2);
         IChallenge3 challenge3 = (IChallenge3)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge3);
+        IChallenge5 challenge5 = (IChallenge5)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge5);
 
         // Solve the challenge
         public string Solve(string input)
@@ -58,37 +60,53 @@ namespace CryptoPals.Sets
             // First, remove newlines characters from the input text
             input = input.Replace("\r\n", "");
 
+            // Decode Base64
+            byte[] decodedBytes = Convert.FromBase64String(input);
+            string decodedString = Encoding.ASCII.GetString(decodedBytes);
+
             // Calculate the repeating key given only the input string
-            int key = CalculateRepeatingKey(input);
+            string key = CalculateRepeatingKey(decodedBytes, decodedString);
 
             // Decrypt using the determined repeating key
-            KeyValuePair<int, Tuple<double, string>> decryptedAndScore = challenge3.DecodeAndScore(key, input);
-            string decrypted = decryptedAndScore.Value.Item2;
-
-            // Base64 text
-            string output = decrypted;
+            string output = challenge5.RepeatingKeyXOR(decodedString, key);
 
             return output;
         }
 
-        // Calculate the repeating key given only the input string (the text must be at least 81 characters long)
-        private int CalculateRepeatingKey(string text)
+        // Calculate the key size by taking the lowest normalized hamming distance between equal sized sets of bytes in the text
+        private int CalculateKeySize(byte[] bytes)
         {
             // Try key sizes 2 to 40
+            int minKeySize = 2;
             int maxKeySize = 40;
             int[] distances = new int[maxKeySize - 1];
-            for (int i = 2; i <= maxKeySize; i++)
+            for (int i = minKeySize; i <= maxKeySize; i++)
             {
+                // Use MemoryStream to simplify taking chunks of bytes
+                MemoryStream stream = new MemoryStream(bytes);
+
                 // Get the hamming distance between 1st and 2nd sets of bytes of the keysize, divide by keysize to normalize the result
-                distances[i - 2] = GetHammingDistance(text.Substring(0, i), text.Substring(i + 1, i)) / i;
+                distances[i - minKeySize] = CalculateHammingDistance(ByteConverter.GetBytes(stream, i), ByteConverter.GetBytes(stream, i)) / i;
             }
 
             // Get the minimum distance from all the distances (this is likely the actual key size)
             int keySize = distances.Min();
 
+            // CDG TEST
+            //int debug = CalculateHammingDistance(Encoding.ASCII.GetBytes("this is a test"), Encoding.ASCII.GetBytes("wokka wokka!!!"));
+
+            return keySize;
+        }
+
+        // Calculate the repeating key given only the input string (the text must be at least 81 characters long)
+        private string CalculateRepeatingKey(byte[] bytes, string text)
+        {
+            // Calculate the key size
+            int keySize = CalculateKeySize(bytes);
+
             // Break the ciphertext into blocks the size of the key
             string[] blocks = new string[text.Length / keySize];
-            for(int i = 0; i < text.Length; i += keySize)
+            for (int i = 0; i < text.Length; i += keySize)
             {
                 blocks[i / keySize] = text.Substring(i, keySize);
             }
@@ -108,34 +126,33 @@ namespace CryptoPals.Sets
                 transposedBlocks[i] = transposition.ToString();
             }
 
-            // Solve each transposed block as a single character XOR
-            int key = 0;
+            // Solve each transposed block as a single character XOR, combining these to get the actual key
+            StringBuilder stringBuilder = new StringBuilder();
             for(int i = 0; i < transposedBlocks.Length; i++)
             {
                 // Get the 'best' repeating key XOR for this block
                 KeyValuePair<int, Tuple<double, string>> output = challenge3.GetMaxScoringItemFromText(transposedBlocks[i]);
-                byte blockKey = (byte)output.Key;
+                char blockKey = (char)output.Key;
 
                 // Add the block key to the actual key (the actual key is the sum of the block keys)
-                key += (int)blockKey;
+                stringBuilder.Append(blockKey);
             }
+
+            // The actual key
+            string key = stringBuilder.ToString();
 
             return key;
         }
 
-        // Get the Hamming Distance of two equal length strings (the total number of set bits after XORing the bytes of the strings together)
-        private int GetHammingDistance(string a, string b)
+        // Get the Hamming Distance of two equal length byte arrays (the total number of set bits after XORing the bytes together)
+        private int CalculateHammingDistance(byte[] a, byte[] b)
         {
-            // Convert to bytes
-            byte[] bytesA = Encoding.ASCII.GetBytes(a);
-            byte[] bytesB = Encoding.ASCII.GetBytes(b);
-
             // Calculate hamming distance by XORing each byte, counting the number of 1s and summing them
             int hammingDistance = 0;
-            for (int i = 0; i < bytesA.Length; i++)
+            for (int i = 0; i < a.Length; i++)
             {
                 // Perform XOR
-                byte c = challenge2.XOR(bytesA[i], bytesB[i]);
+                byte c = challenge2.XOR(a[i], b[i]);
 
                 // Count set bits
                 int count = CountSetBits(c);
