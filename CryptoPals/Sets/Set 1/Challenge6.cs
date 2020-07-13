@@ -60,6 +60,12 @@ namespace CryptoPals.Sets
             // First, remove newlines characters from the input text
             input = input.Replace("\r\n", "");
 
+            // CDG DEBUG
+            string debugKey = "1234";
+            string x = challenge5.RepeatingKeyXOR("test 123 test 123 test 123 test 123 test 123 test 123 test 123 test 123", debugKey);
+            byte[] t = Encoding.ASCII.GetBytes(x);
+            input = Convert.ToBase64String(t);
+
             // Decode Base64
             byte[] decodedBytes = Convert.FromBase64String(input);
             string decodedString = Encoding.ASCII.GetString(decodedBytes);
@@ -69,6 +75,7 @@ namespace CryptoPals.Sets
 
             // Decrypt using the determined repeating key
             string output = challenge5.RepeatingKeyXOR(decodedString, key);
+            string output1 = challenge5.RepeatingKeyXOR(decodedString, debugKey); // CDG DEBUG
 
             return output;
         }
@@ -78,22 +85,19 @@ namespace CryptoPals.Sets
         {
             // Try key sizes 2 to 40
             int minKeySize = 2;
-            int maxKeySize = 40;
+            int maxKeySize = 4;
+
             List<int> distances = new List<int>();
             for (int i = minKeySize; i <= maxKeySize; i++)
             {
                 // Use MemoryStream to simplify taking chunks of bytes
-                MemoryStream stream = new MemoryStream(bytes);
+                MemoryStream stream = new MemoryStream(bytes); 
 
-                // Get distances for the current keysize until there are not enough bytes left
-                while (stream.Position <= i * 2)
-                {
-                    // Get the hamming distance between 1st and 2nd sets of bytes of the keysize, divide by keysize to normalize the result
-                    int distance = CalculateHammingDistance(ByteConverter.GetBytes(stream, i), ByteConverter.GetBytes(stream, i)) / i;
+                // Get the hamming distance between 1st and 2nd keysize worth of bytes, divide by keysize to normalize the result
+                int distance = CalculateHammingDistance(ByteConverter.GetBytes(stream, i), ByteConverter.GetBytes(stream, i)) / i;
 
-                    // Append the normalized distance to the list
-                    distances.Add(distance);
-                }
+                // Append the normalized distance to the list
+                distances.Add(distance);
             }
 
             // Get the index of the minimum distance from all the distances, then add the minimum key size (e.g. if the index of the smallest is 0, that means it is keysize 2)
@@ -149,8 +153,8 @@ namespace CryptoPals.Sets
                     scores[i % keySize] = score;
                 }
             }
-            
-            return key.ToString();
+
+            return new string(key);
         }
 
         // Get the Hamming Distance of two equal length byte arrays (the total number of set bits after XORing the bytes together)

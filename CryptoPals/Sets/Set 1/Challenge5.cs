@@ -1,4 +1,5 @@
 ﻿using CryptoPals.Interfaces;
+using System.Text;
 
 namespace CryptoPals.Sets
 {
@@ -30,12 +31,13 @@ namespace CryptoPals.Sets
             // Split the input to get the plaintext to encrypt and the cycling key
             string[] split = input.Split(Constants.Separator);
 
-            // Encrypt
-            return RepeatingKeyXOR(split[0], split[1]);
+            // Encrypt/Decrypt
+            bool hex = true;
+            return RepeatingKeyXOR(split[0], split[1], hex);
         }
 
         // Sequentially apply each byte of the key against each byte of the input text and return the resulting encoded text
-        public string RepeatingKeyXOR(string text, string key)
+        public string RepeatingKeyXOR(string text, string key, bool hex = false)
         {
             // Go through each letter in the input text
             byte[] bytes = new byte[text.Length];
@@ -51,7 +53,13 @@ namespace CryptoPals.Sets
             }
 
             // Return encoded string from the encoded bytes
-            return challenge2.HexBytesToString(bytes);
+            string output = "";
+            if (hex)
+                output = challenge2.HexBytesToString(bytes);
+            else
+                output = Encoding.ASCII.GetString(bytes);
+
+            return output;
         }
     }
 }
