@@ -91,10 +91,11 @@ namespace CryptoPals.Sets
             }
 
             // Decode the hex string as ASCII
-            string decoded = Encoding.ASCII.GetString(decodedBytes).ToUpper();
+            string decoded = Encoding.ASCII.GetString(decodedBytes);
+            string decodedUpper = decoded.ToUpper();
 
             // Calculate score using the letter frequency table
-            double score = GetScore(decoded);
+            double score = GetScore(decodedUpper);
 
             // Return KVP containing the key (index), score, and decoded text
             return new KeyValuePair<int, Tuple<double, string>>(index, new Tuple<double, string>(score, decoded));
