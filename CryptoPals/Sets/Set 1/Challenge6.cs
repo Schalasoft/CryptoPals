@@ -79,18 +79,21 @@ namespace CryptoPals.Sets
             // Try key sizes 2 to 40
             int minKeySize = 2;
             int maxKeySize = 40;
-            int[] distances = new int[maxKeySize - 1];
+            Dictionary<int, int> distances = new Dictionary<int, int>();
             for (int i = minKeySize; i <= maxKeySize; i++)
             {
                 // Use MemoryStream to simplify taking chunks of bytes
                 MemoryStream stream = new MemoryStream(bytes);
 
                 // Get the hamming distance between 1st and 2nd sets of bytes of the keysize, divide by keysize to normalize the result
-                distances[i - minKeySize] = CalculateHammingDistance(ByteConverter.GetBytes(stream, i), ByteConverter.GetBytes(stream, i)) / i;
+                int distance = CalculateHammingDistance(ByteConverter.GetBytes(stream, i), ByteConverter.GetBytes(stream, i)) / i;
+
+                // Store index and normalized distance in dictionary so we can get the keysize (i) with the lowest distance
+                distances.Add(i, distance);
             }
 
-            // Get the minimum distance from all the distances (this is likely the actual key size)
-            int keySize = distances.Min();
+            // Get key of the item with the minimum distance from all the distances (this is likely the actual key size)
+            int keySize = distances.FirstOrDefault(x => x.Value == distances.Values.Min()).Key;
 
             // CDG TEST
             //int debug = CalculateHammingDistance(Encoding.ASCII.GetBytes("this is a test"), Encoding.ASCII.GetBytes("wokka wokka!!!"));
@@ -108,6 +111,8 @@ namespace CryptoPals.Sets
             string[] blocks = new string[text.Length / keySize];
             for (int i = 0; i < text.Length; i += keySize)
             {
+                if (i + keySize > text.Length)
+                    break; // CDG TODO Hack for uneven input data
                 blocks[i / keySize] = text.Substring(i, keySize);
             }
 
@@ -128,7 +133,7 @@ namespace CryptoPals.Sets
 
             // Solve each transposed block as a single character XOR, combining these to get the actual key
             StringBuilder stringBuilder = new StringBuilder();
-            for(int i = 0; i < transposedBlocks.Length; i++)
+            for(int i = 0; i < keySize; i++)
             {
                 // Get the 'best' repeating key XOR for this block
                 KeyValuePair<int, Tuple<double, string>> output = challenge3.GetMaxScoringItemFromText(transposedBlocks[i]);
