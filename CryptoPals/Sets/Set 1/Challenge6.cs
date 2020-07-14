@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace CryptoPals.Sets
@@ -114,13 +115,9 @@ namespace CryptoPals.Sets
             return keySize;
         }
 
-        // Calculate the repeating key given only the input string (the text must be at least 81 characters long if we go up to a keysize of 40)
-        private string CalculateRepeatingKey(byte[] bytes)
+        // Break the ciphertext into blocks the size of the key
+        private byte[][] CreateBlocks(byte[] bytes, int keySize)
         {
-            // Calculate the key size
-            int keySize = CalculateKeySize(bytes);
-
-            // Break the ciphertext into blocks the size of the key
             byte[][] blocks = new byte[bytes.Length / keySize][];
             for (int i = 0; i < blocks.Length; i++)
             {
@@ -128,7 +125,12 @@ namespace CryptoPals.Sets
                 blocks[i] = block;
             }
 
-            // Transpose each block (using the blocks, make transposed blocks of the the 1st byte of each block, the 2nd, 3rd etc.)
+            return blocks;
+        }
+
+        // Transpose each block (using the blocks, make transposed blocks of the the 1st byte of each block, the 2nd, 3rd etc.)
+        private byte [][] TransposeBlocks(byte[][] blocks, int keySize)
+        {
             byte[][] transposedBlocks = new byte[keySize][];
             for (int transPos = 0; transPos < keySize; transPos++)
             {
@@ -141,7 +143,12 @@ namespace CryptoPals.Sets
                 transposedBlocks[transPos] = transposition;
             }
 
-            // Solve each transposed block as a single character XOR, combining these to get the actual key
+            return transposedBlocks;
+        }
+
+        // Solve each transposed block as a single character XOR, combining these to get the actual key
+        private string SolveTransposedBlocks(byte[][] transposedBlocks, int keySize)
+        {
             byte[] key = new byte[keySize];
             for (int i = 0; i < keySize; i++)
             {
@@ -152,9 +159,25 @@ namespace CryptoPals.Sets
             }
 
             // Get the actual key
-            string actualKey = new string(Encoding.ASCII.GetString(key));
+            return new string(Encoding.ASCII.GetString(key));
+        }
 
-            return actualKey;
+        // Calculate the repeating key given only the input string (the text must be at least 81 characters long if we go up to a keysize of 40)
+        private string CalculateRepeatingKey(byte[] bytes)
+        {
+            // Calculate the key size
+            int keySize = CalculateKeySize(bytes);
+
+            // Break the ciphertext into blocks the size of the key
+            byte[][] blocks = CreateBlocks(bytes, keySize);
+
+            // Transpose each block (using the blocks, make transposed blocks of the the 1st byte of each block, the 2nd, 3rd etc.)
+            byte[][] transposedBlocks = TransposeBlocks(blocks, keySize);
+
+            // Solve each transposed block as a single character XOR, combining these to get the actual key
+            string key = SolveTransposedBlocks(transposedBlocks, keySize);
+
+            return key;
         }
 
         // Get the Hamming Distance of two equal length byte arrays (the total number of set bits after XORing the bytes together)
