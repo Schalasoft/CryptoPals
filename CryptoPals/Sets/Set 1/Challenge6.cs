@@ -130,10 +130,10 @@ namespace CryptoPals.Sets
 
             // Transpose each block (using the blocks, make transposed blocks of the the 1st byte of each block, the 2nd, 3rd etc.)
             byte[][] transposedBlocks = new byte[keySize][];
-            for (int transPos = 0; transPos < keySize; transPos++)                // Transpose loop (the transposition we are building)
+            for (int transPos = 0; transPos < keySize; transPos++)
             {
                 byte[] transposition = new byte[blocks.Length];
-                for (int blockPos = 0; blockPos < blocks.Length; blockPos++)  // Block loop (the block we are grabbing a byte from)
+                for (int blockPos = 0; blockPos < blocks.Length; blockPos++)
                 {
                     transposition[blockPos] = blocks[blockPos][transPos];
                 }
@@ -142,18 +142,19 @@ namespace CryptoPals.Sets
             }
 
             // Solve each transposed block as a single character XOR, combining these to get the actual key
-            char[] key = new char[keySize];
+            byte[] key = new byte[keySize];
             for (int i = 0; i < keySize; i++)
             {
                 // Get the 'best' key XOR for this block
                 string transposedBlockText = Encoding.ASCII.GetString(transposedBlocks[i]);
                 KeyValuePair<int, Tuple<double, string>> kvp = challenge3.SingleKeyXORBruteForce(transposedBlockText);
-                key[i % keySize] = (char)kvp.Key;
+                key[i] = Convert.ToByte(kvp.Key);
             }
 
-            string keyStr = new string(key);
+            // Get the actual key
+            string actualKey = new string(Encoding.ASCII.GetString(key));
 
-            return keyStr;
+            return actualKey;
         }
 
         // Get the Hamming Distance of two equal length byte arrays (the total number of set bits after XORing the bytes together)
