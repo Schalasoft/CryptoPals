@@ -62,7 +62,7 @@ namespace CryptoPals.Sets
 
             // CDG DEBUG
             string debugKey = "1234";
-            string x = challenge5.RepeatingKeyXOR("test 123 test 123 test 123 test 123 test 123 test 123 test 123 test 123", debugKey);
+            string x = challenge5.RepeatingKeyXOR("this is a testwokka wokka!!!", debugKey);
             byte[] t = Encoding.ASCII.GetBytes(x);
             input = Convert.ToBase64String(t);
 
@@ -90,23 +90,30 @@ namespace CryptoPals.Sets
             List<int> distances = new List<int>();
             for (int i = minKeySize; i <= maxKeySize; i++)
             {
-                // Use MemoryStream to simplify taking chunks of bytes
-                MemoryStream stream = new MemoryStream(bytes); 
 
-                // Get the hamming distance between 1st and 2nd keysize worth of bytes, divide by keysize to normalize the result
-                int distance = CalculateHammingDistance(ByteConverter.GetBytes(stream, i), ByteConverter.GetBytes(stream, i)) / i;
+                // Use MemoryStream to simplify taking chunks of bytes
+                MemoryStream stream = new MemoryStream(bytes);
+                int distance = 0;
+                while (stream.Position < stream.Length)
+                {
+                    // Get the hamming distance between 1st and 2nd keysize worth of bytes, divide by keysize to normalize the result
+                    distance += CalculateHammingDistance(ByteConverter.GetBytes(stream, i), ByteConverter.GetBytes(stream, i));
+                }
+
+                // Normalize the distance by dividing by the keysize
+                distance /= i;
 
                 // Append the normalized distance to the list
                 distances.Add(distance);
             }
 
-            // Get the index of the minimum distance from all the distances, then add the minimum key size (e.g. if the index of the smallest is 0, that means it is keysize 2)
-            int keySize = distances.IndexOf(distances.Min()) + minKeySize;
+            // Get the index of the minimum distance from all the distances, then add the minimum key size (e.g. if the index of the smallest is 1 that means the keysize is 3: 1[index] + 2[minKeySize] = 3)
+            int keySize = minKeySize + distances.IndexOf(distances.Min());
 
             return keySize;
         }
 
-        // Calculate the repeating key given only the input string (the text must be at least 81 characters long)
+        // Calculate the repeating key given only the input string (the text must be at least 81 characters long if we go up to a keysize of 40)
         private string CalculateRepeatingKey(byte[] bytes, string text)
         {
             // Calculate the key size
@@ -138,20 +145,11 @@ namespace CryptoPals.Sets
 
             // Solve each transposed block as a single character XOR, combining these to get the actual key
             char[] key = new char[keySize];
-            double[] scores = new double[keySize]; 
             for (int i = 0; i < transposedBlocks.Length; i++)
             {
                 // Get the 'best' repeating key XOR for this block
                 KeyValuePair<int, Tuple<double, string>> kvp = challenge3.GetMaxScoringItem(transposedBlocks[i]);
-                double score = kvp.Value.Item1;
-
-                // If the score for this key is higher than the previous key it is more likely to be the actual key
-                if (score > scores[i % keySize])
-                {
-                    // Update with the new best scoring key
-                    key[i % keySize]    = (char)kvp.Key;
-                    scores[i % keySize] = score;
-                }
+                key[i % keySize] = (char)kvp.Key;
             }
 
             return new string(key);
