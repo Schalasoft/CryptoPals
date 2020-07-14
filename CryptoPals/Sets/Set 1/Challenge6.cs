@@ -51,6 +51,7 @@ namespace CryptoPals.Sets
         */
 
         // Reuse previous challenge functionality
+
         IChallenge2 challenge2 = (IChallenge2)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge2);
         IChallenge3 challenge3 = (IChallenge3)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge3);
         IChallenge5 challenge5 = (IChallenge5)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge5);
@@ -62,22 +63,29 @@ namespace CryptoPals.Sets
             input = input.Replace("\r\n", "");
 
             // CDG DEBUG
-            string debugKey = "1234";
-            string x = challenge5.RepeatingKeyXOR("this is a testwokka wokka!!!", debugKey);
-            byte[] t = Encoding.ASCII.GetBytes(x);
-            input = Convert.ToBase64String(t);
+            string testKey = "1234";
+            byte[] testKeyBytes = Encoding.ASCII.GetBytes(testKey);
+            string testText = "this is a testwokka wokka!!!";
+            byte[] testBytes = Encoding.ASCII.GetBytes(testText);
+            byte[] testEncrypt = challenge5.RepeatingKeyXOR(testBytes, testKeyBytes);
+            input = Convert.ToBase64String(testEncrypt);
             //
 
             // Decode Base64
             byte[] decodedBytes = Convert.FromBase64String(input);
-            string decodedString = Encoding.ASCII.GetString(decodedBytes);
 
             // Calculate the repeating key given only the input string
-            string key = CalculateRepeatingKey(decodedBytes);
+            byte[] key = CalculateRepeatingKey(decodedBytes);
 
             // Decrypt using the determined repeating key
-            string output = challenge5.RepeatingKeyXOR(decodedString, key);
-            string output1 = challenge5.RepeatingKeyXOR(decodedString, debugKey); // CDG DEBUG
+            byte[] outputBytes = challenge5.RepeatingKeyXOR(decodedBytes, key);
+
+            // CDG DEBUG
+            byte[] outputBytes1 = challenge5.RepeatingKeyXOR(decodedBytes, testKeyBytes);
+            string output = Encoding.ASCII.GetString(outputBytes);
+            string output1 = Encoding.ASCII.GetString(outputBytes1);
+            string keyPlaintext = Encoding.ASCII.GetString(key);
+            //
 
             return output;
         }
@@ -147,7 +155,7 @@ namespace CryptoPals.Sets
         }
 
         // Solve each transposed block as a single character XOR, combining these to get the actual key
-        private string SolveTransposedBlocks(byte[][] transposedBlocks, int keySize)
+        private byte[] SolveTransposedBlocks(byte[][] transposedBlocks, int keySize)
         {
             byte[] key = new byte[keySize];
             for (int i = 0; i < keySize; i++)
@@ -158,11 +166,11 @@ namespace CryptoPals.Sets
             }
 
             // Get the actual key
-            return new string(Encoding.ASCII.GetString(key));
+            return key;
         }
 
         // Calculate the repeating key given only the input string (the text must be at least 81 characters long if we go up to a keysize of 40)
-        private string CalculateRepeatingKey(byte[] bytes)
+        private byte[] CalculateRepeatingKey(byte[] bytes)
         {
             // Calculate the key size
             int keySize = CalculateKeySize(bytes);
@@ -174,7 +182,7 @@ namespace CryptoPals.Sets
             byte[][] transposedBlocks = TransposeBlocks(blocks, keySize);
 
             // Solve each transposed block as a single character XOR, combining these to get the actual key
-            string key = SolveTransposedBlocks(transposedBlocks, keySize);
+            byte[] key = SolveTransposedBlocks(transposedBlocks, keySize);
 
             return key;
         }

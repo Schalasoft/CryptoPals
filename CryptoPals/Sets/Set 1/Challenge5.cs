@@ -32,33 +32,31 @@ namespace CryptoPals.Sets
             // Split the input to get the plaintext to encrypt and the cycling key
             string[] split = input.Split(Constants.Separator);
 
+            byte[] inputBytes = Encoding.ASCII.GetBytes(split[0]);
+            byte[] keyBytes   = Encoding.ASCII.GetBytes(split[1]);
+
             // Encrypt/Decrypt
-            bool hex = true;
-            return RepeatingKeyXOR(split[0], split[1], hex);
+            byte[] result = RepeatingKeyXOR(inputBytes, keyBytes);
+
+            // Convert hex to string
+            return challenge1.HexBytesToString(result);
         }
 
         // Sequentially apply each byte of the key against each byte of the input text and return the resulting encoded text
-        public string RepeatingKeyXOR(string text, string key, bool hex = false)
+        public byte[] RepeatingKeyXOR(byte[] bytes, byte[] key)
         {
             // Go through each letter in the input text
-            byte[] bytes = new byte[text.Length];
+            byte[] output = new byte[bytes.Length];
             int keyIndex = 0;
-            for (int i = 0; i < text.Length; i++)
+            for (int i = 0; i < bytes.Length; i++)
             {
                 // Encrypt the bytes by XORing it against the appropriate part of the repeating key
-                bytes[i] = challenge2.XOR((byte)text[i], (byte)key[keyIndex++]);
+                output[i] = challenge2.XOR((byte)bytes[i], key[keyIndex++]);
 
                 // Reset repeating key index
                 if (keyIndex > 2)
                     keyIndex = 0;
             }
-
-            // Return encoded string from the encoded bytes
-            string output = "";
-            if (hex)
-                output = challenge1.HexBytesToString(bytes);
-            else
-                output = Encoding.ASCII.GetString(bytes);
 
             return output;
         }
