@@ -65,13 +65,14 @@ namespace CryptoPals.Sets
             string x = challenge5.RepeatingKeyXOR("this is a testwokka wokka!!!", debugKey);
             byte[] t = Encoding.ASCII.GetBytes(x);
             input = Convert.ToBase64String(t);
+            //
 
             // Decode Base64
             byte[] decodedBytes = Convert.FromBase64String(input);
             string decodedString = Encoding.ASCII.GetString(decodedBytes);
 
             // Calculate the repeating key given only the input string
-            string key = CalculateRepeatingKey(decodedBytes, decodedString);
+            string key = CalculateRepeatingKey(decodedBytes);
 
             // Decrypt using the determined repeating key
             string output = challenge5.RepeatingKeyXOR(decodedString, key);
@@ -114,45 +115,48 @@ namespace CryptoPals.Sets
         }
 
         // Calculate the repeating key given only the input string (the text must be at least 81 characters long if we go up to a keysize of 40)
-        private string CalculateRepeatingKey(byte[] bytes, string text)
+        private string CalculateRepeatingKey(byte[] bytes)
         {
             // Calculate the key size
             int keySize = CalculateKeySize(bytes);
 
             // Break the ciphertext into blocks the size of the key
-            string[] blocks = new string[text.Length / keySize];
-            for (int i = 0; i < text.Length; i += keySize)
+            byte[][] blocks = new byte[bytes.Length / keySize][];
+            for (int i = 0; i < blocks.Length; i++)
             {
-                if (i + keySize > text.Length)
-                    break; // Cannot grab another block, bailing out is the best we can do
-                blocks[i / keySize] = text.Substring(i, keySize);
+                byte[] block = bytes.Skip(i * keySize).Take(keySize).ToArray();
+                blocks[i] = block;
             }
 
             // Transpose each block (using the blocks, make transposed blocks of the the 1st byte of each block, the 2nd, 3rd etc.)
-            string[] transposedBlocks = new string[keySize];
-            for (int i = 0; i < keySize; i++)
+            byte[][] transposedBlocks = new byte[keySize][];
+            for (int transPos = 0; transPos < keySize; transPos++)                // Transpose loop (the transposition we are building)
             {
-                // Create a transposed block
-                StringBuilder transposition = new StringBuilder();
-                for (int j = 0; j < blocks.Length; j++)
+                for (int bytePos = 0; bytePos < keySize; bytePos++)               // Byte loop (the byte we are grabbing)
                 {
-                    transposition.Append(blocks[j][i]);
+                    byte[] transposition = new byte[blocks.Length];
+                    for (int blockPos = 0; blockPos < blocks.Length; blockPos++)  // Block loop (the block we are grabbing a byte from)
+                    {
+                        transposition[blockPos] = blocks[blockPos][transPos];
+                    }
+                    // Add the transposition to the array
+                    transposedBlocks[transPos] = transposition;
                 }
-
-                // Store the transposed block in an array
-                transposedBlocks[i] = transposition.ToString();
             }
 
             // Solve each transposed block as a single character XOR, combining these to get the actual key
             char[] key = new char[keySize];
-            for (int i = 0; i < transposedBlocks.Length; i++)
+            for (int i = 0; i < keySize; i++)
             {
-                // Get the 'best' repeating key XOR for this block
-                KeyValuePair<int, Tuple<double, string>> kvp = challenge3.GetMaxScoringItem(transposedBlocks[i]);
+                // Get the 'best' key XOR for this block
+                string transposedBlockText = Encoding.ASCII.GetString(transposedBlocks[i]);
+                KeyValuePair<int, Tuple<double, string>> kvp = challenge3.SingleKeyXORBruteForce(transposedBlockText);
                 key[i % keySize] = (char)kvp.Key;
             }
 
-            return new string(key);
+            string keyStr = new string(key);
+
+            return keyStr;
         }
 
         // Get the Hamming Distance of two equal length byte arrays (the total number of set bits after XORing the bytes together)
