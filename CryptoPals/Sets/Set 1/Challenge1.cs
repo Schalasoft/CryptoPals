@@ -62,26 +62,23 @@ namespace CryptoPals.Sets
             return binarySb.ToString();
         }
 
-        // Convert a 2 digit hex value to a byte
-        public byte[] HexStringToBytes(string text)
+        // Converts a hex string to its byte representation
+        public byte[] HexStringToBytes(string hex)
         {
-            if (text.Length % 2 != 0)
-                throw new ArgumentException("Hex input text must be divisible by 2 (even)");
+            byte[] bytes = new byte[hex.Length / 2];
 
-            byte[] bytes = new byte[text.Length / 2];
-            for (int i = 0; i < text.Length; i += hexLength)
+            for (int i = 0; i < hex.Length; i += 2)
             {
-                // Grab hex value
-                string hex = text.Substring(i, hexLength);
-
-                // Convert hex value to hextet
-                byte hextet = HexToByte(hex);
-
-                // Store the hextet in its correct position in the output array
-                bytes[i / 2] = hextet;
+                bytes[i / 2] = Convert.ToByte(hex.Substring(i, 2), 16);
             }
 
             return bytes;
+        }
+
+        // Hex bytes to string with no dashes
+        public string HexBytesToString(byte[] bytes)
+        {
+            return BitConverter.ToString(bytes).Replace("-", string.Empty).ToLower();
         }
 
         // Convert a hex value to a byte

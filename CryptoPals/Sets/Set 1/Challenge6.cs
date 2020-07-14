@@ -153,8 +153,7 @@ namespace CryptoPals.Sets
             for (int i = 0; i < keySize; i++)
             {
                 // Get the 'best' key XOR for this block
-                string transposedBlockText = Encoding.ASCII.GetString(transposedBlocks[i]);
-                KeyValuePair<int, Tuple<double, string>> kvp = challenge3.SingleKeyXORBruteForce(transposedBlockText);
+                KeyValuePair<int, Tuple<double, string>> kvp = challenge3.SingleKeyXORBruteForce(transposedBlocks[i]);
                 key[i] = Convert.ToByte(kvp.Key);
             }
 

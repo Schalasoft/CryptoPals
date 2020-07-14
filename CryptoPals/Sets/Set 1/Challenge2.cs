@@ -1,21 +1,24 @@
-﻿using CryptoPals.Interfaces;
+﻿using CryptoPals.Enumerations;
+using CryptoPals.Interfaces;
 using System;
 
 namespace CryptoPals.Sets
 {
-     /*
-     Fixed XOR
-     A function that takes two equal-length buffers and produces their XOR combination
-     input:
-     1c0111001f010100061a024b53535009181c (a)
-     After hex decoding, and when XOR'd against:
-     686974207468652062756c6c277320657965 (b)
-     output:
-     746865206b696420646f6e277420706c6179
-     */
+    /*
+    Fixed XOR
+    A function that takes two equal-length buffers and produces their XOR combination
+    input:
+    1c0111001f010100061a024b53535009181c (a)
+    After hex decoding, and when XOR'd against:
+    686974207468652062756c6c277320657965 (b)
+    output:
+    746865206b696420646f6e277420706c6179
+    */
 
     class Challenge2 : IChallenge2, IChallenge
     {
+        IChallenge1 challenge1 = (IChallenge1)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge1);
+
         public string Solve(string input)
         {
             // Separate a and b from the combined input
@@ -26,35 +29,16 @@ namespace CryptoPals.Sets
                 throw new Exception("A and B must be the same length to perform Fixed XOR");
 
             // Convert to bytes
-            byte[] a = HexStringToBytes(hexA);
-            byte[] b = HexStringToBytes(hexB);
+            byte[] a = challenge1.HexStringToBytes(hexA);
+            byte[] b = challenge1.HexStringToBytes(hexB);
 
             // Perform fixed XOR
             byte[] bytes = FixedXOR(a, b);
 
             // Convert to string
-            string xord = HexBytesToString(bytes);
+            string xord = challenge1.HexBytesToString(bytes);
 
             return xord;
-        }
-
-        // Hex bytes to string with no dashes
-        public string HexBytesToString(byte[] bytes)
-        {
-            return BitConverter.ToString(bytes).Replace("-", string.Empty).ToLower();
-        }
-
-        // Converts a hex string to its byte representation
-        public byte[] HexStringToBytes(string hex)
-        {
-            byte[] bytes = new byte[hex.Length / 2];
-
-            for (int i = 0; i < hex.Length; i += 2)
-            {
-                bytes[i / 2] = Convert.ToByte(hex.Substring(i, 2), 16);
-            }
-
-            return bytes;
         }
 
         // XOR two bytes

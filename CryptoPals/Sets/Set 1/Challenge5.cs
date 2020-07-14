@@ -23,6 +23,7 @@ namespace CryptoPals.Sets
         */
 
         // Reuse previous challenge functionality
+        IChallenge1 challenge1 = (IChallenge1)ChallengeManager.GetChallenge((int)Enumerations.ChallengeEnum.Challenge1);
         IChallenge2 challenge2 = (IChallenge2)ChallengeManager.GetChallenge((int)Enumerations.ChallengeEnum.Challenge2);
 
         // Solve the challenge
@@ -55,7 +56,7 @@ namespace CryptoPals.Sets
             // Return encoded string from the encoded bytes
             string output = "";
             if (hex)
-                output = challenge2.HexBytesToString(bytes);
+                output = challenge1.HexBytesToString(bytes);
             else
                 output = Encoding.ASCII.GetString(bytes);
 

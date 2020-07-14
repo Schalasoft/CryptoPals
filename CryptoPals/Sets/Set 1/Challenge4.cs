@@ -17,6 +17,7 @@ namespace CryptoPals.Sets
 
         // Reuse previous challenge functionality
         IChallenge1 challenge1 = (IChallenge1)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge1);
+        IChallenge2 challenge2 = (IChallenge2)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge2);
         IChallenge3 challenge3 = (IChallenge3)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge3);
 
         // Solve the challenge
@@ -50,8 +51,11 @@ namespace CryptoPals.Sets
                 }
             }
 
+            // Get line as bytes
+            byte[] bytes = challenge1.HexStringToBytes(mostMissingBytesLine);
+
             // Get the max scoring cypher for the line with the most missing bytes
-            KeyValuePair<int, Tuple<double, string>> maxScoringItem = challenge3.SingleKeyXORBruteForce(mostMissingBytesLine, true);
+            KeyValuePair<int, Tuple<double, string>> maxScoringItem = challenge3.SingleKeyXORBruteForce(bytes);
 
             // Format the output
             string output = challenge3.FormatOutput(maxScoringItem, $"{Environment.NewLine}Line   : {mostMissingBytesLineNumber}{Environment.NewLine}Bytes  : {mostMissingBytes} missing");
@@ -68,8 +72,11 @@ namespace CryptoPals.Sets
             KeyValuePair<int, Tuple<double, string>> maxScoringLine = new KeyValuePair<int, Tuple<double, string>>();
             for (int i = 0; i < lines.Length; i++)
             {
+                // Get line as bytes
+                byte[] bytes = challenge1.HexStringToBytes(lines[i]);
+
                 // Get the max scoring cypher for this line
-                KeyValuePair<int, Tuple<double, string>> maxScoringItem = challenge3.SingleKeyXORBruteForce(lines[i], true);
+                KeyValuePair<int, Tuple<double, string>> maxScoringItem = challenge3.SingleKeyXORBruteForce(bytes);
 
                 // If this line has a higher score than the previous highest, update the max and store a reference
                 if (maxScoringItem.Value.Item1 > maxLineScore)

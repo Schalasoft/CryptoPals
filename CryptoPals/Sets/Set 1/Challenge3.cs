@@ -21,6 +21,7 @@ namespace CryptoPals.Sets
         */
 
         // Reuse previous challenge functionality
+        IChallenge1 challenge1 = (IChallenge1)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge1);
         IChallenge2 challenge2 = (IChallenge2)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge2);
 
         // Letter Frequency values taken from 
@@ -59,9 +60,11 @@ namespace CryptoPals.Sets
         // Solve
         public string Solve(string input)
         {
-            // Hex as true means decipher input as values (2 char are 1 value)
-            bool hex = true;
-            KeyValuePair<int, Tuple<double, string>> maxScoringItem = SingleKeyXORBruteForce(input, hex);
+            // Input is hex so convert hex string to bytes
+            byte[] bytes = challenge1.HexStringToBytes(input);
+
+            // Get likely XOR key
+            KeyValuePair<int, Tuple<double, string>> maxScoringItem = SingleKeyXORBruteForce(bytes);
 
             // Format output
             string output = FormatOutput(maxScoringItem);
@@ -71,17 +74,10 @@ namespace CryptoPals.Sets
         }
 
         // Decode text against a single key and score it
-        public KeyValuePair<int, Tuple<double, string>> DecodeAndScore(int index, string text, bool hex = false)
+        public KeyValuePair<int, Tuple<double, string>> DecodeAndScore(int index, byte[] bytes)
         {
             // Get byte representation of key (0-255)
             byte key = (byte)index;
-
-            // Byte conversion
-            byte[] bytes;
-            if (hex)
-                bytes = challenge2.HexStringToBytes(text);
-            else
-                bytes = Encoding.ASCII.GetBytes(text);
 
             // XOR each byte of input text against the key byte
             byte[] decodedBytes = new byte[bytes.Length];
@@ -112,7 +108,7 @@ namespace CryptoPals.Sets
         }
 
         // Given an input string, XOR decrypt it against each ASCII character and return a KVP containing the key, score, and decoded text
-        public KeyValuePair<int, Tuple<double, string>> SingleKeyXORBruteForce(string text, bool hex = false)
+        public KeyValuePair<int, Tuple<double, string>> SingleKeyXORBruteForce(byte[] bytes)
         {
             // Decode string with each key (using 0-255 int values as key)
             // Key          : Int/char to use as cypher
@@ -121,7 +117,7 @@ namespace CryptoPals.Sets
             Dictionary<int, Tuple<double, string>> data = new Dictionary<int, Tuple<double, string>>();
             for (int i = 0; i <= 255; i++)
             {
-                KeyValuePair<int, Tuple<double, string>> chunk = DecodeAndScore(i, text, hex);
+                KeyValuePair<int, Tuple<double, string>> chunk = DecodeAndScore(i, bytes);
                 data.Add(chunk.Key, chunk.Value);
             }
 
