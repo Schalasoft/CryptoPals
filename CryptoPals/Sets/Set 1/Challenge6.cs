@@ -132,16 +132,13 @@ namespace CryptoPals.Sets
             byte[][] transposedBlocks = new byte[keySize][];
             for (int transPos = 0; transPos < keySize; transPos++)                // Transpose loop (the transposition we are building)
             {
-                for (int bytePos = 0; bytePos < keySize; bytePos++)               // Byte loop (the byte we are grabbing)
+                byte[] transposition = new byte[blocks.Length];
+                for (int blockPos = 0; blockPos < blocks.Length; blockPos++)  // Block loop (the block we are grabbing a byte from)
                 {
-                    byte[] transposition = new byte[blocks.Length];
-                    for (int blockPos = 0; blockPos < blocks.Length; blockPos++)  // Block loop (the block we are grabbing a byte from)
-                    {
-                        transposition[blockPos] = blocks[blockPos][transPos];
-                    }
-                    // Add the transposition to the array
-                    transposedBlocks[transPos] = transposition;
+                    transposition[blockPos] = blocks[blockPos][transPos];
                 }
+                // Add the transposition to the array
+                transposedBlocks[transPos] = transposition;
             }
 
             // Solve each transposed block as a single character XOR, combining these to get the actual key
