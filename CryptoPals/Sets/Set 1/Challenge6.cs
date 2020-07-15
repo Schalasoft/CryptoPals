@@ -96,7 +96,7 @@ namespace CryptoPals.Sets
         {
             // Try key sizes 2 to 40
             int minKeySize = 2;
-            int maxKeySize = 15;
+            int maxKeySize = 40;
             Dictionary<int, double> keySizes = new Dictionary<int, double>();
             for (int i = minKeySize; i <= maxKeySize; i++)
             {
@@ -107,7 +107,7 @@ namespace CryptoPals.Sets
                 keySizes.Add(i, blocksHammingDistance);
             }
 
-            // Get the keysize associated with the smallest block hamming distance
+            // Get the keysize associated with the smallest set of blocks hamming distance
             int keySize = keySizes.FirstOrDefault(x => x.Value == keySizes.Values.Min()).Key;
 
             return keySize;
@@ -120,23 +120,24 @@ namespace CryptoPals.Sets
             MemoryStream stream = new MemoryStream(bytes);
 
             // Get hamming distances for neighbouring chunks the full length of the bytes
-            List<double> distances = new List<double>();
-            while (stream.Position + (keySize * 2) < stream.Length) //  Don't take two full size chunks of keysize if there isn't enough bytes remaining
+            int i = 0;
+            double[] distances = new double[bytes.Length / (keySize * 2)];
+            while ((stream.Position + (keySize * 2)) < stream.Length) //  Don't take two full size chunks of keysize if there isn't enough bytes remaining
             {
                 // Get the hamming distance between neighbouring keysize worth of bytes
                 byte[] a = ByteConverter.GetBytes(stream, keySize); // This call effectively removes the bytes from the stream
                 byte[] b = ByteConverter.GetBytes(stream, keySize);
-                int distance = CalculateHammingDistance(a, b);
+                double distance = CalculateHammingDistance(a, b);
 
                 // Normalize the distance by dividing by the keysize
                 distance /= keySize;
 
                 // Append the normalized distance to the list
-                distances.Add(distance);
+                distances[i] = distance;
             }
 
             // The block hamming distance is the sum of all the hamming distances of compared blocks normalized by dividing by the number of distances
-            return distances.Sum() / distances.Count;
+            return (distances.Sum() / distances.Length);
         }
 
         // Break the ciphertext into blocks the size of the key
