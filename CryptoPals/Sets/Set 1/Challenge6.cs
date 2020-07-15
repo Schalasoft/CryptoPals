@@ -8,7 +8,7 @@ using System.Text;
 
 namespace CryptoPals.Sets
 {
-    class Challenge6 : IChallenge
+    class Challenge6 : IChallenge6, IChallenge
     {
         /*
         Break repeating-key XOR
@@ -50,7 +50,6 @@ namespace CryptoPals.Sets
         */
 
         // Reuse previous challenge functionality
-
         IChallenge2 challenge2 = (IChallenge2)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge2);
         IChallenge3 challenge3 = (IChallenge3)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge3);
         IChallenge5 challenge5 = (IChallenge5)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge5);
@@ -126,13 +125,13 @@ namespace CryptoPals.Sets
             return (distances.Sum() / distances.Length);
         }
 
-        // Break the ciphertext into blocks the size of the key
-        private byte[][] CreateBlocks(byte[] bytes, int keySize)
+        // Break the ciphertext into blocks (the size of the key)
+        public byte[][] CreateBlocks(byte[] bytes, int size)
         {
-            byte[][] blocks = new byte[bytes.Length / keySize][];
+            byte[][] blocks = new byte[bytes.Length / size][];
             for (int i = 0; i < blocks.Length; i++)
             {
-                byte[] block = bytes.Skip(i * keySize).Take(keySize).ToArray();
+                byte[] block = bytes.Skip(i * size).Take(size).ToArray();
                 blocks[i] = block;
             }
 

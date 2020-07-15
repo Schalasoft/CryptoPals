@@ -7,7 +7,7 @@ using System.Text;
 
 namespace CryptoPals.Sets
 {
-    class Challenge7 : IChallenge
+    class Challenge7 : IChallenge7, IChallenge
     {
         /*
         The Base64-encoded content in this file has been encrypted via AES-128 in ECB mode under the key
@@ -33,7 +33,7 @@ namespace CryptoPals.Sets
             byte[] key = Encoding.ASCII.GetBytes("YELLOW SUBMARINE");
 
             // Decrypt the input using the key
-            byte[] decrypted = Decrypt(bytes, key);
+            byte[] data = Decrypt(bytes, key);
 
             // Get decrypted bytes as text
             string output = Encoding.ASCII.GetString(decrypted);
@@ -42,14 +42,14 @@ namespace CryptoPals.Sets
         }
 
         // Decrypt the encrypted payload
-        private byte[] Decrypt(byte[] encryptedData, byte[] key)
+        public byte[] Decrypt(byte[] data, byte[] key)
         {
             // Setup the decryption cipher
             IBufferedCipher cipher = CipherUtilities.GetCipher("AES/ECB/NoPadding");
             cipher.Init(false, new KeyParameter(key));
 
             // Decrypt
-            byte[] decrypted = cipher.ProcessBytes(encryptedData);
+            byte[] decrypted = cipher.ProcessBytes(data);
 
             return decrypted;
         }
