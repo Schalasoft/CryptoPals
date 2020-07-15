@@ -58,35 +58,21 @@ namespace CryptoPals.Sets
         // Solve the challenge
         public string Solve(string input)
         {
-            // First, remove newlines characters from the input text
-            input = input.Replace("\r\n", "");
-
-            // CDG DEBUG
-            string testKey = "12345678";
-            byte[] testKeyBytes = Encoding.ASCII.GetBytes(testKey);
-            string testText = "this is a testwokka wokka!!!this is a testwokka wokka!!!this is a testwokka wokka!!!";
-            byte[] testBytes = Encoding.ASCII.GetBytes(testText);
-            byte[] testEncrypt = challenge5.RepeatingKeyXOR(testBytes, testKeyBytes);
-            input = Convert.ToBase64String(testEncrypt);
-            //
-
             // Decode Base64
             byte[] decodedBytes = Convert.FromBase64String(input);
 
             // Determine the repeating key using only the input bytes
-            byte[] key = CalculateRepeatingKey(decodedBytes);
+            byte[] keyBytes = CalculateRepeatingKey(decodedBytes);
 
             // Decrypt using the determined repeating key
-            byte[] outputBytes = challenge5.RepeatingKeyXOR(decodedBytes, key);
+            byte[] outputBytes = challenge5.RepeatingKeyXOR(decodedBytes, keyBytes);
 
-            // CDG DEBUG
-            byte[] outputBytes1 = challenge5.RepeatingKeyXOR(decodedBytes, testKeyBytes);
+            // Get the key and decrypted as strings to output
+            string key = Encoding.ASCII.GetString(keyBytes);
             string output = Encoding.ASCII.GetString(outputBytes);
-            string output1 = Encoding.ASCII.GetString(outputBytes1);
-            string keyPlaintext = Encoding.ASCII.GetString(key);
 
-            // Format the output to contain the decoded text and key used
-            string outputFormatted = $"{output}{Environment.NewLine}Key    : {keyPlaintext}";
+            // Format the output
+            string outputFormatted = $"{output}{Environment.NewLine}Key    : {key}";
 
             return outputFormatted;
         }
@@ -133,7 +119,7 @@ namespace CryptoPals.Sets
                 distance /= keySize;
 
                 // Append the normalized distance to the list
-                distances[i] = distance;
+                distances[i++] = distance;
             }
 
             // The block hamming distance is the sum of all the hamming distances of compared blocks normalized by dividing by the number of distances

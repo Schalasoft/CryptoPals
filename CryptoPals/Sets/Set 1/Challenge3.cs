@@ -30,7 +30,6 @@ namespace CryptoPals.Sets
         // http://www.macfreek.nl/memory/Letter_Distribution
         private Dictionary<char, float> letterFrequencyTable = new Dictionary<char, float>
         {
-            /*
             {'\"',.0267f},
             {'\'',.0243f},
             {'.',.06530f},
@@ -38,9 +37,7 @@ namespace CryptoPals.Sets
             {'-',.01530f},
             {'?',.05600f},
             {':',.03400f},
-
             {';',.03400f},
-            */
             {'!',.03300f},
             {' ',.13000f},
             {'a',.08167f},
