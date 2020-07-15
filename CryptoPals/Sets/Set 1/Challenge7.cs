@@ -1,4 +1,9 @@
 ﻿using CryptoPals.Interfaces;
+using Org.BouncyCastle.Crypto;
+using Org.BouncyCastle.Crypto.Parameters;
+using Org.BouncyCastle.Security;
+using System;
+using System.Text;
 
 namespace CryptoPals.Sets
 {
@@ -21,7 +26,32 @@ namespace CryptoPals.Sets
 
         public string Solve(string input)
         {
-            return "";
+            // Get bytes from Base64 string 
+            byte[] bytes = Convert.FromBase64String(input);
+
+            // Get key as bytes
+            byte[] key = Encoding.ASCII.GetBytes("YELLOW SUBMARINE");
+
+            // Decrypt the input using the key
+            byte[] decrypted = Decrypt(bytes, key);
+
+            // Get decrypted bytes as text
+            string output = Encoding.ASCII.GetString(decrypted);
+
+            return output;
+        }
+
+        // Decrypt the encrypted payload
+        private byte[] Decrypt(byte[] encryptedData, byte[] key)
+        {
+            // Setup the decryption cipher
+            IBufferedCipher cipher = CipherUtilities.GetCipher("AES/ECB/NoPadding");
+            cipher.Init(false, new KeyParameter(key));
+
+            // Decrypt
+            byte[] decrypted = cipher.ProcessBytes(encryptedData);
+
+            return decrypted;
         }
     }
 }

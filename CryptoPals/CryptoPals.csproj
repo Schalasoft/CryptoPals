@@ -9,4 +9,8 @@
     <Folder Include="Sets\Set 2\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="BouncyCastle" Version="1.8.6.1" />
+  </ItemGroup>
+
 </Project>
