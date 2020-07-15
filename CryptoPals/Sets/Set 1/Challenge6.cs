@@ -62,7 +62,7 @@ namespace CryptoPals.Sets
             input = input.Replace("\r\n", "");
 
             // CDG DEBUG
-            string testKey = "1234";
+            string testKey = "12345";
             byte[] testKeyBytes = Encoding.ASCII.GetBytes(testKey);
             string testText = "this is a testwokka wokka!!!";
             byte[] testBytes = Encoding.ASCII.GetBytes(testText);
@@ -96,7 +96,7 @@ namespace CryptoPals.Sets
         {
             // Try key sizes 2 to 40
             int minKeySize = 2;
-            int maxKeySize = 4;
+            int maxKeySize = 40;
 
             List<int> distances = new List<int>();
             for (int i = minKeySize; i <= maxKeySize; i++)

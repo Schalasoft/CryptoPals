@@ -55,7 +55,7 @@ namespace CryptoPals.Sets
 
                 // Reset repeating key index
                 if (keyIndex >= key.Length)
-                    keyIndex = 0;
+                    keyIndex = 0;                   
             }
 
             return output;

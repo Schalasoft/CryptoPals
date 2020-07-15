@@ -25,10 +25,23 @@ namespace CryptoPals.Sets
         IChallenge2 challenge2 = (IChallenge2)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge2);
 
         // Letter Frequency values taken from 
-        // Alphabet:        https://en.wikipedia.org/wiki/Letter_frequency
-        // Space frequency: http://www.macfreek.nl/memory/Letter_Distribution
+        // https://en.wikipedia.org/wiki/Letter_frequency
+        // https://en.wikipedia.org/wiki/English_punctuation#Frequency
+        // http://www.macfreek.nl/memory/Letter_Distribution
         private Dictionary<char, float> letterFrequencyTable = new Dictionary<char, float>
         {
+            /*
+            {'\"',.0267f},
+            {'\'',.0243f},
+            {'.',.06530f},
+            {',',.06130f},
+            {'-',.01530f},
+            {'?',.05600f},
+            {':',.03400f},
+
+            {';',.03400f},
+            */
+            {'!',.03300f},
             {' ',.13000f},
             {'a',.08167f},
             {'b',.01492f},
