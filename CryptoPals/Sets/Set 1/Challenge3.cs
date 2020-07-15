@@ -130,11 +130,11 @@ namespace CryptoPals.Sets
         private double GetScore(string text)
         {
             double score = 0;
-            for (int j = 0; j < text.Length; j++)
+            foreach(char character in text)
             {
                 for (int k = 0; k < letterFrequencyTable.Count; k++)
                 {
-                    score += letterFrequencyTable.FirstOrDefault(x => x.Key == text[j]).Value;
+                    score += letterFrequencyTable.FirstOrDefault(x => x.Key.Equals(character)).Value;
                 }
             }
             return score;
