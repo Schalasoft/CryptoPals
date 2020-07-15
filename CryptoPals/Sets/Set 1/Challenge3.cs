@@ -87,10 +87,11 @@ namespace CryptoPals.Sets
             }
 
             // Convert to string, lowercasing each character
-            string decoded = Encoding.ASCII.GetString(decodedBytes).ToLower();
+            string decoded = Encoding.ASCII.GetString(decodedBytes);
 
-            // Calculate score using the letter frequency table
-            double score = GetScore(decoded);
+            // Calculate score using the letter frequency table, use lowercase of input string as table is lowercase
+            string decodedLowercase = decoded.ToLower();
+            double score = GetScore(decodedLowercase);
 
             // Return KVP containing the key (index), score, and decoded text
             return new KeyValuePair<int, Tuple<double, string>>(index, new Tuple<double, string>(score, decoded));
