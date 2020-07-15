@@ -62,9 +62,9 @@ namespace CryptoPals.Sets
             input = input.Replace("\r\n", "");
 
             // CDG DEBUG
-            string testKey = "12345";
+            string testKey = "12345678";
             byte[] testKeyBytes = Encoding.ASCII.GetBytes(testKey);
-            string testText = "this is a testwokka wokka!!!";
+            string testText = "this is a testwokka wokka!!!this is a testwokka wokka!!!this is a testwokka wokka!!!";
             byte[] testBytes = Encoding.ASCII.GetBytes(testText);
             byte[] testEncrypt = challenge5.RepeatingKeyXOR(testBytes, testKeyBytes);
             input = Convert.ToBase64String(testEncrypt);
@@ -96,31 +96,47 @@ namespace CryptoPals.Sets
         {
             // Try key sizes 2 to 40
             int minKeySize = 2;
-            int maxKeySize = 40;
-
-            List<int> distances = new List<int>();
+            int maxKeySize = 15;
+            Dictionary<int, double> keySizes = new Dictionary<int, double>();
             for (int i = minKeySize; i <= maxKeySize; i++)
             {
-                // Use MemoryStream to simplify taking chunks of bytes
-                MemoryStream stream = new MemoryStream(bytes);
-                int distance = 0;
-                while (stream.Position < stream.Length)
-                {
-                    // Get the hamming distance between 1st and 2nd keysize worth of bytes, divide by keysize to normalize the result
-                    distance += CalculateHammingDistance(ByteConverter.GetBytes(stream, i), ByteConverter.GetBytes(stream, i));
-                }
+                // Get the hamming distance of all adjacent blocks based of the current keysize
+                double blocksHammingDistance = CalculateBlockHammingDistance(bytes, i);
+
+                // Add the key size and hamming distance to the dictionary of possible key sizes
+                keySizes.Add(i, blocksHammingDistance);
+            }
+
+            // Get the keysize associated with the smallest block hamming distance
+            int keySize = keySizes.FirstOrDefault(x => x.Value == keySizes.Values.Min()).Key;
+
+            return keySize;
+        }
+
+        // Get the hamming distance of consecutive adjacent blocks of bytes the length of keysize
+        private double CalculateBlockHammingDistance(byte[] bytes, int keySize)
+        {
+            // Use MemoryStream to simplify taking chunks of bytes
+            MemoryStream stream = new MemoryStream(bytes);
+
+            // Get hamming distances for neighbouring chunks the full length of the bytes
+            List<double> distances = new List<double>();
+            while (stream.Position + (keySize * 2) < stream.Length) //  Don't take two full size chunks of keysize if there isn't enough bytes remaining
+            {
+                // Get the hamming distance between neighbouring keysize worth of bytes
+                byte[] a = ByteConverter.GetBytes(stream, keySize); // This call effectively removes the bytes from the stream
+                byte[] b = ByteConverter.GetBytes(stream, keySize);
+                int distance = CalculateHammingDistance(a, b);
 
                 // Normalize the distance by dividing by the keysize
-                distance /= i;
+                distance /= keySize;
 
                 // Append the normalized distance to the list
                 distances.Add(distance);
             }
 
-            // Get the index of the minimum distance from all the distances, then add the minimum key size (e.g. if the index of the smallest is 1 that means the keysize is 3: 1[index] + 2[minKeySize] = 3)
-            int keySize = minKeySize + distances.IndexOf(distances.Min());
-
-            return keySize;
+            // The block hamming distance is the sum of all the hamming distances of compared blocks normalized by dividing by the number of distances
+            return distances.Sum() / distances.Count;
         }
 
         // Break the ciphertext into blocks the size of the key
