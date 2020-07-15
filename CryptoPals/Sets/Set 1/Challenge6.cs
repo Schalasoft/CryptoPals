@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Security.Cryptography;
 using System.Text;
 
 namespace CryptoPals.Sets
@@ -139,7 +138,7 @@ namespace CryptoPals.Sets
         }
 
         // Transpose each block (using the blocks, make transposed blocks of the the 1st byte of each block, the 2nd, 3rd etc.)
-        private byte [][] TransposeBlocks(byte[][] blocks, int keySize)
+        private byte[][] TransposeBlocks(byte[][] blocks, int keySize)
         {
             byte[][] transposedBlocks = new byte[keySize][];
             for (int transPos = 0; transPos < keySize; transPos++)
