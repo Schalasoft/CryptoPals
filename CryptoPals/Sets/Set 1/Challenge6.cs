@@ -101,7 +101,6 @@ namespace CryptoPals.Sets
             List<int> distances = new List<int>();
             for (int i = minKeySize; i <= maxKeySize; i++)
             {
-
                 // Use MemoryStream to simplify taking chunks of bytes
                 MemoryStream stream = new MemoryStream(bytes);
                 int distance = 0;
