@@ -54,7 +54,7 @@ namespace CryptoPals.Sets
                 output[i] = challenge2.XOR((byte)bytes[i], key[keyIndex++]);
 
                 // Reset repeating key index
-                if (keyIndex > 2)
+                if (keyIndex >= key.Length)
                     keyIndex = 0;
             }
 
