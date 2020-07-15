@@ -25,36 +25,37 @@ namespace CryptoPals.Sets
         IChallenge2 challenge2 = (IChallenge2)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge2);
 
         // Letter Frequency values taken from 
-        // Alphabet:        http://pi.math.cornell.edu/~mec/2003-2004/cryptography/subs/frequencies.html
+        // Alphabet:        https://en.wikipedia.org/wiki/Letter_frequency
         // Space frequency: http://www.macfreek.nl/memory/Letter_Distribution
         private Dictionary<char, float> letterFrequencyTable = new Dictionary<char, float>
         {
-            {' ',18.00f},
-            {'e',12.02f},
-            {'t',9.10f},
-            {'a',8.12f},
-            {'o',7.68f},
-            {'i',7.31f},
-            {'n',6.95f},
-            {'s',6.28f},
-            {'r',6.02f},
-            {'h',5.92f},
-            {'d',4.32f},
-            {'l',3.98f},
-            {'u',2.88f},
-            {'c',2.71f},
-            {'m',2.61f},
-            {'f',2.30f},
-            {'y',2.11f},
-            {'w',2.09f},
-            {'g',2.03f},
-            {'p',1.82f},
-            {'b',1.49f},
-            {'v',1.11f},
-            {'x',0.17f},
-            {'q',0.11f},
-            {'j',0.10f},
-            {'z',0.07f}
+            {' ',.13000f},
+            {'a',.08167f},
+            {'b',.01492f},
+            {'c',.02782f},
+            {'d',.04253f},
+            {'e',.12702f},
+            {'f',.02228f},
+            {'g',.02015f},
+            {'h',.06094f},
+            {'i',.06094f},
+            {'j',.00153f},
+            {'k',.00772f},
+            {'l',.04025f},
+            {'m',.02406f},
+            {'n',.06749f},
+            {'o',.07507f},
+            {'p',.01929f},
+            {'q',.00095f},
+            {'r',.05987f},
+            {'s',.06327f},
+            {'t',.09056f},
+            {'u',.02758f},
+            {'v',.00978f},
+            {'w',.02360f},
+            {'x',.00150f},
+            {'y',.01974f},
+            {'z',.00074f}
         };
 
         // Solve
