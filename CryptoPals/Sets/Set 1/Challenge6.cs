@@ -74,7 +74,7 @@ namespace CryptoPals.Sets
             // Decode Base64
             byte[] decodedBytes = Convert.FromBase64String(input);
 
-            // Calculate the repeating key given only the input string
+            // Determine the repeating key using only the input bytes
             byte[] key = CalculateRepeatingKey(decodedBytes);
 
             // Decrypt using the determined repeating key
@@ -85,9 +85,11 @@ namespace CryptoPals.Sets
             string output = Encoding.ASCII.GetString(outputBytes);
             string output1 = Encoding.ASCII.GetString(outputBytes1);
             string keyPlaintext = Encoding.ASCII.GetString(key);
-            //
 
-            return output;
+            // Format the output to contain the decoded text and key used
+            string outputFormatted = $"{output}{Environment.NewLine}Key    : {keyPlaintext}";
+
+            return outputFormatted;
         }
 
         // Calculate the key size by taking the lowest normalized hamming distance between equal sized sets of bytes in the text
@@ -147,6 +149,7 @@ namespace CryptoPals.Sets
                 {
                     transposition[blockPos] = blocks[blockPos][transPos];
                 }
+
                 // Add the transposition to the array
                 transposedBlocks[transPos] = transposition;
             }
@@ -212,7 +215,7 @@ namespace CryptoPals.Sets
         private int CountSetBits(byte b)
         {
             int count = 0;
-            while (b > 0)
+            while (b > 0) 
             {
                 count += b & 1;
                 b >>= 1;

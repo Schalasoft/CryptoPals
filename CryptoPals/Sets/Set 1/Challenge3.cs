@@ -30,31 +30,31 @@ namespace CryptoPals.Sets
         private Dictionary<char, float> letterFrequencyTable = new Dictionary<char, float>
         {
             {' ',18.00f},
-            {'E',12.02f},
-            {'T',9.10f},
-            {'A',8.12f},
-            {'O',7.68f},
-            {'I',7.31f},
-            {'N',6.95f},
-            {'S',6.28f},
-            {'R',6.02f},
-            {'H',5.92f},
-            {'D',4.32f},
-            {'L',3.98f},
-            {'U',2.88f},
-            {'C',2.71f},
-            {'M',2.61f},
-            {'F',2.30f},
-            {'Y',2.11f},
-            {'W',2.09f},
-            {'G',2.03f},
-            {'P',1.82f},
-            {'B',1.49f},
-            {'V',1.11f},
-            {'X',0.17f},
-            {'Q',0.11f},
-            {'J',0.10f},
-            {'Z',0.07f}
+            {'e',12.02f},
+            {'t',9.10f},
+            {'a',8.12f},
+            {'o',7.68f},
+            {'i',7.31f},
+            {'n',6.95f},
+            {'s',6.28f},
+            {'r',6.02f},
+            {'h',5.92f},
+            {'d',4.32f},
+            {'l',3.98f},
+            {'u',2.88f},
+            {'c',2.71f},
+            {'m',2.61f},
+            {'f',2.30f},
+            {'y',2.11f},
+            {'w',2.09f},
+            {'g',2.03f},
+            {'p',1.82f},
+            {'b',1.49f},
+            {'v',1.11f},
+            {'x',0.17f},
+            {'q',0.11f},
+            {'j',0.10f},
+            {'z',0.07f}
         };
 
         // Solve
@@ -86,12 +86,11 @@ namespace CryptoPals.Sets
                 decodedBytes[j] = challenge2.XOR(bytes[j], key);
             }
 
-            // Decode the hex string as ASCII
-            string decoded = Encoding.ASCII.GetString(decodedBytes);
-            string decodedUpper = decoded.ToUpper();
+            // Convert to string, lowercasing each character
+            string decoded = Encoding.ASCII.GetString(decodedBytes).ToLower();
 
             // Calculate score using the letter frequency table
-            double score = GetScore(decodedUpper);
+            double score = GetScore(decoded);
 
             // Return KVP containing the key (index), score, and decoded text
             return new KeyValuePair<int, Tuple<double, string>>(index, new Tuple<double, string>(score, decoded));
