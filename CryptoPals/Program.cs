@@ -37,11 +37,12 @@ namespace CryptoPals
         private static void SolveChallenges()
         {
             // Initialize the Challenge Manager used to hold the instance of each challenge
+            int startChallenge = 1;
             int challengeCount = 8;
             InitializeChallengeManager(challengeCount);
 
             string input, fileName;
-            for (int i = challengeCount; i <= challengeCount; i++)
+            for (int i = startChallenge; i <= challengeCount; i++)
             {
                 // Alias for input when it is too long for outputting to the console
                 string inputAlias = "";
@@ -71,10 +72,15 @@ namespace CryptoPals
                 if (!inputAlias.Equals(""))
                     input = inputAlias;
 
+                // Truncate the output to a max length
+                int maxLength = 200;
+                if (output.Length > maxLength)
+                    output = $"{output.Substring(0, maxLength)}... TRUNCATED";
+
                 // Output challenge information
-                Console.WriteLine("Challenge {0}", i);
-                Console.WriteLine("Input  : {0}", input);
-                Console.WriteLine("Output : {0}", output);
+                Console.WriteLine($"Challenge {i}");
+                Console.WriteLine($"Input  :{Environment.NewLine}{input}");
+                Console.WriteLine($"Output :{Environment.NewLine}{output}");
                 Console.WriteLine("-------------------------------------------------------------------------------------------------------------\n");
             }
         }
