@@ -30,13 +30,13 @@ namespace CryptoPals.Sets
 
             // Go through each line
             int[] repeatedBlockCounts = new int[lines.Length];
-            for(int i = 0; i < lines.Length; i++)
+            int size = 16;
+            for (int i = 0; i < lines.Length; i++)
             {
                 // Get the hex line as bytes
-                byte[] bytes = challenge1.HexStringToBytes(lines[0]);
+                byte[] bytes = challenge1.HexStringToBytes(lines[i]);
 
                 // Break into blocks (size of 16 as the challenge hinted at this number)
-                int size = 16;
                 byte[][] blocks = challenge6.CreateBlocks(bytes, size);
 
                 // Count the amount of repeated blocks we find
