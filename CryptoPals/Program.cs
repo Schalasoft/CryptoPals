@@ -37,7 +37,7 @@ namespace CryptoPals
         private static void SolveChallenges()
         {
             // Initialize the Challenge Manager used to hold the instance of each challenge
-            int startChallenge = 1;
+            int startChallenge = 8;
             int challengeCount = 8;
             InitializeChallengeManager(challengeCount);
 
@@ -75,7 +75,7 @@ namespace CryptoPals
                 // Truncate the output to a max length
                 int maxLength = 200;
                 if (output.Length > maxLength)
-                    output = $"{output.Substring(0, maxLength)}...{Environment.NewLine}TRUNCATED";
+                    output = $"{output.Substring(0, maxLength)} ...{Environment.NewLine}TRUNCATED";
 
                 // Output challenge information
                 Console.WriteLine($"Challenge {i}");

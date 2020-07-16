@@ -52,7 +52,7 @@ namespace CryptoPals.Sets
                     }
                 }
 
-                // Add the amount of repeated blocks for this line to an array (to find the line index)
+                // Add the amount of repeated blocks for this line to an array (to identify the line index with the most repetitions)
                 repeatedBlockCounts[i] = repeatedBlockCount;
             }
 
@@ -61,7 +61,7 @@ namespace CryptoPals.Sets
             int encryptedLineIndex = Array.FindIndex(repeatedBlockCounts, x => x == mostRepetitions);
 
             // Format the output
-            string output = $"{lines[encryptedLineIndex]}{Environment.NewLine}Index  : {encryptedLineIndex}{Environment.NewLine}Dupes  : {mostRepetitions}";
+            string output = $"Index  : {encryptedLineIndex}{Environment.NewLine}Dupes  : {mostRepetitions}{Environment.NewLine}{lines[encryptedLineIndex]}";
 
             return output;
         }
