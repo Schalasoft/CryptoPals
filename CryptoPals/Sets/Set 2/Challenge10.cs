@@ -29,30 +29,55 @@ namespace CryptoPals.Sets
         */
 
         // Reuse previous challenge functionality
+        IChallenge2 challenge2 = (IChallenge2)ChallengeFactory.InitializeChallenge(Enumerations.ChallengeEnum.Challenge2);
+        IChallenge6 challenge6 = (IChallenge6)ChallengeFactory.InitializeChallenge(Enumerations.ChallengeEnum.Challenge6);
         IChallenge7 challenge7 = (IChallenge7)ChallengeFactory.InitializeChallenge(Enumerations.ChallengeEnum.Challenge7);
         IChallenge9 challenge9 = (IChallenge9)ChallengeFactory.InitializeChallenge(Enumerations.ChallengeEnum.Challenge9);
 
+        // The size of the cipher blocks
+        int blockSize = 16;
+
         public string Solve(string input)
         {
-            // CDG DEBUG
-            input = "Tell me and I forget. Teach me and I remember. Involve me and I learn.";
-
+            // Get input and key as bytes
             byte[] bytes = Encoding.ASCII.GetBytes(input);
-            byte[] key   = Encoding.ASCII.GetBytes("YELLOW SUBMARINE");
+            byte[] key = Encoding.ASCII.GetBytes("YELLOW SUBMARINE");
 
-            // ECB Encrypt/Decrypt
-            byte[] encrypted = challenge7.AES_ECB(true, bytes, key);
-            string encryptedString = Encoding.ASCII.GetString(encrypted);
-            byte[] decrypted = challenge7.AES_ECB(false, encrypted, key);
-            string decryptedString = Encoding.ASCII.GetString(decrypted);
-            // NOTE that the encrypted/decrypted bytes are missing bytes as we are not using padding!
+            // Create Initialization Vector (a block the same size as the cipher blocks but filled with ASCII 0 bytes)
+            byte paddingByte = (byte)0x00;
+            byte[] iv = challenge9.PadBlock(new byte[0], paddingByte, blockSize);
 
-            // XOR Combine
+            // Decrypt
+            byte[] decryptedBytes = AES_CBC(bytes, key, iv);
 
-
-            string output = "";
+            // Convert decrypted bytes to string
+            string output = Encoding.ASCII.GetString(decryptedBytes);
 
             return output;
+        }
+
+        // Decrypt using AES CBC (Advanced Encryption Standard Cipher Block Chaining Mode)
+        private byte[] AES_CBC(byte[] bytes, byte[] key, byte[] iv)
+        {
+            // Break input into blocks
+            byte[][] blocks = challenge6.CreateBlocks(bytes, blockSize);
+
+            // Iterate blocks
+            byte[] xor = new byte[bytes.Length];
+            for (int i = 0; i < blocks.Length; i++)
+            {
+                // First block is XORed against the Initialization Vector
+                if (i == 0)
+                {
+                    challenge2.FixedXOR(iv, blocks[i]).CopyTo(xor, i);
+                }
+                else // XOR current block against the previous block
+                {
+                    challenge2.FixedXOR(blocks[i-1], blocks[i]).CopyTo(xor, i * blockSize);
+                }
+            }
+
+            return xor;
         }
     }
 }

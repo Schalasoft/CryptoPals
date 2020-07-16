@@ -27,8 +27,9 @@ namespace CryptoPals.Sets
             byte[] bytes = Encoding.ASCII.GetBytes(input);
 
             // Pad the text bytes to the specified length
+            byte paddingByte = (byte)0x04;
             int length = 20;
-            byte[] paddedBytes = PadBlock(bytes, length);
+            byte[] paddedBytes = PadBlock(bytes, paddingByte, length);
 
             // Convert to string for output
             string output = Encoding.ASCII.GetString(paddedBytes);
@@ -37,18 +38,18 @@ namespace CryptoPals.Sets
         }
 
         // Pad an input bytes to the specified number of bytes
-        public byte[] PadBlock(byte[] bytes, int length)
+        public byte[] PadBlock(byte[] bytes, byte paddingByte, int size)
         {
             // Create a byte array the size of the desired length
-            byte[] paddedBytes = new byte[length];
+            byte[] paddedBytes = new byte[size];
 
             // Copy in the bytes to the padded bytes array
             bytes.CopyTo(paddedBytes, 0);
             
             // Pad the remaining unset bytes with EOT bytes (decimal 4)
-            for(int i = bytes.Length; i < length; i++)
+            for(int i = bytes.Length; i < size; i++)
             {
-                paddedBytes[i] = 4;
+                paddedBytes[i] = paddingByte;
             }
 
             return paddedBytes;

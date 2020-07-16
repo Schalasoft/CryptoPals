@@ -48,7 +48,7 @@ namespace CryptoPals.Sets
         }
 
         // XOR two equal length byte arrays
-        private byte[] FixedXOR(byte[] a, byte[] b)
+        public byte[] FixedXOR(byte[] a, byte[] b)
         {
             byte[] c = new byte[a.Length];
 
