@@ -1,10 +1,9 @@
 ﻿using CryptoPals.Interfaces;
-using Org.BouncyCastle.Crypto.Paddings;
 using System.Text;
 
 namespace CryptoPals.Sets
 {
-    class Challenge9 : IChallenge
+    class Challenge9 : IChallenge9, IChallenge
     {
         /*
         Implement PKCS#7 padding
