@@ -2,6 +2,6 @@
 {
     interface IChallenge9 : IChallenge
     {
-        public byte[] PadBlock(byte[] bytes, byte paddingByte, int size);
+        public byte[] PadBytes(byte[] bytes, int size, byte paddingByte = (byte)0x04);
     }
 }

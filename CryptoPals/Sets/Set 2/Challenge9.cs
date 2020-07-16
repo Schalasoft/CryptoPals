@@ -27,9 +27,8 @@ namespace CryptoPals.Sets
             byte[] bytes = Encoding.ASCII.GetBytes(input);
 
             // Pad the text bytes to the specified length
-            byte paddingByte = (byte)0x04;
-            int length = 20;
-            byte[] paddedBytes = PadBlock(bytes, paddingByte, length);
+            int size = 20;
+            byte[] paddedBytes = PadBytes(bytes, size);
 
             // Convert to string for output
             string output = Encoding.ASCII.GetString(paddedBytes);
@@ -37,9 +36,13 @@ namespace CryptoPals.Sets
             return output;
         }
 
-        // Pad an input bytes to the specified number of bytes
-        public byte[] PadBlock(byte[] bytes, byte paddingByte, int size)
+        // Pad input bytes to the specified number of bytes
+        public byte[] PadBytes(byte[] bytes, int size, byte paddingByte = (byte)0x04)
         {
+            // If the blocksize we get is bigger than the the size specified, we are padding bytes to be evenly divisible by the size
+            if (bytes.Length > size)
+                size = bytes.Length + (bytes.Length % size);
+
             // Create a byte array the size of the desired length
             byte[] paddedBytes = new byte[size];
 

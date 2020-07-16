@@ -37,16 +37,22 @@ namespace CryptoPals.Sets
 
         public string Solve(string input)
         {
+            //CDG DEBUG
+            input = "YELLOW SUBMARINE YELLOW SUBMARINE YELLOW SUBMARINE";
+
             // Get input and key as bytes
             byte[] bytes = Encoding.ASCII.GetBytes(input);
             byte[] key = Encoding.ASCII.GetBytes("YELLOW SUBMARINE");
 
             // Create Initialization Vector (a block the same size as the key/block but filled with ASCII 0 bytes)
             byte paddingByte = (byte)0x00;
-            byte[] iv = challenge9.PadBlock(new byte[0], paddingByte, key.Length); // Could just let use a default byte array but this reads clearer
+            byte[] iv = challenge9.PadBytes(new byte[0], key.Length, paddingByte); // Could just let use a default byte array but this reads clearer
+
+            // CDG DEBUG
+            byte[] encryptedBytes = AES_CBC(true, bytes, key, iv);
 
             // Decrypt
-            byte[] decryptedBytes = AES_CBC(bytes, key, iv);
+            byte[] decryptedBytes = AES_CBC(false, encryptedBytes, key, iv);
 
             // Convert decrypted bytes to string
             string output = Encoding.ASCII.GetString(decryptedBytes);
@@ -54,31 +60,48 @@ namespace CryptoPals.Sets
             return output;
         }
 
-        // Decrypt using AES CBC (Advanced Encryption Standard Cipher Block Chaining Mode)
-        private byte[] AES_CBC(byte[] bytes, byte[] key, byte[] iv)
+        // Encrypt/Decrypt using AES CBC (Advanced Encryption Standard Cipher Block Chaining Mode)
+        private byte[] AES_CBC(bool encrypt, byte[] bytes, byte[] key, byte[] iv)
         {
+            // Encrypt & decrypt in the one function is a bit hard to read but reduces code duplication
+            // If we are encrypting and the bytes are not divisible by the key, pad the bytes
+            if (encrypt && bytes.Length % key.Length != 0)
+                bytes = challenge9.PadBytes(bytes, key.Length);
+
             // Break input into blocks
             byte[][] blocks = challenge6.CreateBlocks(bytes, key.Length);
 
-            // Iterate blocks, decrypting the blocks in place
+            // Iterate blocks, encrypting/decrypting the blocks in place
             byte[] previousBlock = iv;
             for (int i = 0; i < blocks.Length; i++)
             {
+                // Get a reference to the current block
+                byte[] block = new byte[key.Length];
+                blocks[i].CopyTo(block, 0);
+
                 // Decrypt block with ECB
-                blocks[i] = challenge7.AES_ECB(false, blocks[i], key);
+                if (!encrypt)
+                    blocks[i] = challenge7.AES_ECB(encrypt, blocks[i], key); // Decrypt
 
                 // XOR block against the previous block
-                byte[] xor = challenge2.XORByteArray(previousBlock, blocks[i]);
+                byte[] xor = challenge2.XORByteArray(blocks[i], previousBlock);
 
-                // Update the reference to the previous block for block chain
-                previousBlock = blocks[i];
+                // Replace unencrypted block with the encrypted block
+                if (encrypt)
+                    blocks[i] = challenge7.AES_ECB(encrypt, xor, key); // Encrypt
 
-                // Replace encrypted block with the decrypted block
-                blocks[i] = xor;
+                // Update the reference of the previous block
+                previousBlock = block;
             }
 
             // Return the blocks as a flattend array (2d to 1d)
-            return blocks.SelectMany(x => x).ToArray();
+            byte[] output = new byte[blocks.Length * key.Length];
+            int index = 0;
+            foreach (byte[] byteArr in blocks)
+                foreach (byte byt in byteArr)
+                    output[index++] = byt;
+
+            return output;
         }
     }
 }
