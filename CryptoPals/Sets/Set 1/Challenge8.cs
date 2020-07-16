@@ -42,8 +42,7 @@ namespace CryptoPals.Sets
                 // Get the number of distinct blocks, due to being a 2d array we use LINQ select to effectively flatten the arrays for use with Distinct
                 int distinctBlocks = blocks.Select(x => string.Join(",", x)).Distinct().ToArray().Length;
 
-                // Get the amount of repeated blocks we find by subtracting the amount of blocks
-                // from the number of distinct blocks
+                // Get the amount of repeated blocks we find by subtracting the amount of blocks from the number of distinct blocks
                 int repeatedBlockCount = blocks.Length - distinctBlocks;
 
                 // Add the amount of repeated blocks for this line to an array (to identify the line index with the most repetitions)
