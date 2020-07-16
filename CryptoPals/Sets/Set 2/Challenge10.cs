@@ -1,6 +1,5 @@
 ﻿using CryptoPals.Factories;
 using CryptoPals.Interfaces;
-using System;
 using System.Linq;
 using System.Text;
 
