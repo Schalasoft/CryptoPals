@@ -1,5 +1,6 @@
 ﻿using CryptoPals.Enumerations;
 using CryptoPals.Interfaces;
+using Org.BouncyCastle.Crypto.Paddings;
 using System;
 using System.Linq;
 
@@ -31,26 +32,16 @@ namespace CryptoPals.Sets
             int[] repeatedBlockCounts = new int[lines.Length];
             for(int i = 0; i < lines.Length; i++)
             {
-                // Get the line/hex as bytes
+                // Get the hex line as bytes
                 byte[] bytes = challenge1.HexStringToBytes(lines[0]);
 
-                // Break into blocks (16 as the challenge hinted at this number)
+                // Break into blocks (size of 16 as the challenge hinted at this number)
                 int size = 16;
                 byte[][] blocks = challenge6.CreateBlocks(bytes, size);
 
                 // Count the amount of repeated blocks we find
-                int repeatedBlockCount = 0;
-                for (int j = 0; j < blocks.Length; j++)
-                {
-                    for (int k = 0; k < blocks.Length; k++)
-                    {
-                        // Check if the block matches another block, exclude matching the block against itself
-                        if (j != k && Enumerable.SequenceEqual(blocks[j], blocks[k]))
-                        {
-                            repeatedBlockCount++;
-                        } 
-                    }
-                }
+                // Do this by subtracting the size of a set of blocks with only unique values from the size of the original set of blocks
+                int repeatedBlockCount = blocks.Length - blocks.Distinct().ToArray().Length;
 
                 // Add the amount of repeated blocks for this line to an array (to identify the line index with the most repetitions)
                 repeatedBlockCounts[i] = repeatedBlockCount;
