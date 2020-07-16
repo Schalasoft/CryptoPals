@@ -38,7 +38,7 @@ namespace CryptoPals.Factories
                 
                 case ChallengeEnum.Challenge8:
                     return new Challenge8();
-                /*
+                
                 case ChallengeEnum.Challenge9:
                     return new Challenge9();
                 /*

@@ -21,16 +21,15 @@ namespace CryptoPals.Sets
 
         private const int binaryBase = 2;    // Binary is 0 or 1 == 2 bit
         private const int hexBase    = 16;   // Hex value is 2 bytes == 16 bit
-        private const int hexLength  = 2;    // Length of a hex value in characters
         private const string base64Table = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
         // Convert hex to base 64 (2 char hex value is 1 byte, base64 is 4 characters per 3 bytes/hex values)
         // Input  : 49276d206b696c6c696e6720796f757220627261696e206c696b65206120706f69736f6e6f7573206d757368726f6f6d
         // Output : SSdtIGtpbGxpbmcgeW91ciBicmFpbiBsaWtlIGEgcG9pc29ub3VzIG11c2hyb29t
-        public string Solve(string hex)
+        public string Solve(string input)
         {
             // Encode Hex to Base64
-            return Decode(hex);
+            return Decode(input);
         }
 
         private string Decode(string hex)
