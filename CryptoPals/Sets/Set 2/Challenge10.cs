@@ -1,4 +1,6 @@
-﻿using CryptoPals.Interfaces;
+﻿using CryptoPals.Factories;
+using CryptoPals.Interfaces;
+using System.Text;
 
 namespace CryptoPals.Sets
 {
@@ -26,8 +28,28 @@ namespace CryptoPals.Sets
         What's the point of even doing this stuff if you aren't going to learn from it?
         */
 
+        // Reuse previous challenge functionality
+        IChallenge7 challenge7 = (IChallenge7)ChallengeFactory.InitializeChallenge(Enumerations.ChallengeEnum.Challenge7);
+        IChallenge9 challenge9 = (IChallenge9)ChallengeFactory.InitializeChallenge(Enumerations.ChallengeEnum.Challenge9);
+
         public string Solve(string input)
         {
+            // CDG DEBUG
+            input = "Tell me and I forget. Teach me and I remember. Involve me and I learn.";
+
+            byte[] bytes = Encoding.ASCII.GetBytes(input);
+            byte[] key   = Encoding.ASCII.GetBytes("YELLOW SUBMARINE");
+
+            // ECB Encrypt/Decrypt
+            byte[] encrypted = challenge7.AES_ECB(true, bytes, key);
+            string encryptedString = Encoding.ASCII.GetString(encrypted);
+            byte[] decrypted = challenge7.AES_ECB(false, encrypted, key);
+            string decryptedString = Encoding.ASCII.GetString(decrypted);
+            // NOTE that the encrypted/decrypted bytes are missing bytes as we are not using padding!
+
+            // XOR Combine
+
+
             string output = "";
 
             return output;

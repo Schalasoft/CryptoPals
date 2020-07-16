@@ -2,6 +2,6 @@
 {
     interface IChallenge7 : IChallenge
     {
-        public byte[] Decrypt(byte[] data, byte[] key);
+        public byte[] AES_ECB(bool encrypt, byte[] data, byte[] key);
     }
 }

@@ -33,7 +33,7 @@ namespace CryptoPals.Sets
             byte[] key = Encoding.ASCII.GetBytes("YELLOW SUBMARINE");
 
             // Decrypt the input using the key
-            byte[] data = Decrypt(bytes, key);
+            byte[] data = AES_ECB(false, bytes, key);
 
             // Get decrypted bytes as text
             string output = Encoding.ASCII.GetString(data);
@@ -41,13 +41,13 @@ namespace CryptoPals.Sets
             return output;
         }
 
-        // Decrypt the encrypted payload
-        public byte[] Decrypt(byte[] data, byte[] key)
+        // Encrypt/Decrypt bytes
+        public byte[] AES_ECB(bool encrypt, byte[] data, byte[] key)
         {
             // Setup the decryption cipher
             IBufferedCipher cipher = CipherUtilities.GetCipher("AES/ECB/NoPadding");
-            cipher.Init(false, new KeyParameter(key));
-
+            cipher.Init(encrypt, new KeyParameter(key));
+            
             // Decrypt
             byte[] decrypted = cipher.ProcessBytes(data);
 
