@@ -36,7 +36,7 @@ namespace CryptoPals.Sets
             byte[] data = Decrypt(bytes, key);
 
             // Get decrypted bytes as text
-            string output = Encoding.ASCII.GetString(decrypted);
+            string output = Encoding.ASCII.GetString(data);
 
             return output;
         }
