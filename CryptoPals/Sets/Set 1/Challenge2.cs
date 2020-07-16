@@ -33,7 +33,7 @@ namespace CryptoPals.Sets
             byte[] b = challenge1.HexStringToBytes(hexB);
 
             // Perform fixed XOR
-            byte[] bytes = FixedXOR(a, b);
+            byte[] bytes = XORByteArray(a, b);
 
             // Convert to string
             string xord = challenge1.HexBytesToString(bytes);
@@ -42,19 +42,19 @@ namespace CryptoPals.Sets
         }
 
         // XOR two bytes
-        public byte XOR(byte a, byte b)
+        public byte XORByte(byte a, byte b)
         {
             return (byte)(a ^ b);
         }
 
         // XOR two equal length byte arrays
-        public byte[] FixedXOR(byte[] a, byte[] b)
+        public byte[] XORByteArray(byte[] a, byte[] b)
         {
             byte[] c = new byte[a.Length];
 
             // XOR a and b to get c
             for (int i = 0; i < a.Length; i++)
-                c[i] = XOR(a[i], b[i]);
+                c[i] = XORByte(a[i], b[i]);
 
             return c;
         }

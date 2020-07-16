@@ -198,7 +198,7 @@ namespace CryptoPals.Sets
             for (int i = 0; i < a.Length; i++)
             {
                 // Perform XOR
-                byte c = challenge2.XOR(a[i], b[i]);
+                byte c = challenge2.XORByte(a[i], b[i]);
 
                 // Count set bits
                 int count = CountSetBits(c);

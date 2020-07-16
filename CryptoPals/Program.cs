@@ -60,6 +60,7 @@ namespace CryptoPals
                     case 6:
                     case 7:
                     case 8:
+                    case 10:
                         inputAlias = fileName;
                     break;
 

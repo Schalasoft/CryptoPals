@@ -61,7 +61,7 @@ namespace CryptoPals.Sets
             // Break input into blocks
             byte[][] blocks = challenge6.CreateBlocks(bytes, key.Length);
 
-            // Iterate blocks
+            // Iterate blocks, decrypting the blocks in place
             byte[] previousBlock = iv;
             for (int i = 0; i < blocks.Length; i++)
             {
@@ -69,7 +69,7 @@ namespace CryptoPals.Sets
                 blocks[i] = challenge7.AES_ECB(false, blocks[i], key);
 
                 // XOR block against the previous block
-                byte[] xor = challenge2.FixedXOR(previousBlock, blocks[i]);
+                byte[] xor = challenge2.XORByteArray(previousBlock, blocks[i]);
 
                 // Update the reference to the previous block for block chain
                 previousBlock = blocks[i];

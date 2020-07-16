@@ -94,7 +94,7 @@ namespace CryptoPals.Sets
             byte[] decodedBytes = new byte[bytes.Length];
             for (int j = 0; j < bytes.Length; j++)
             {
-                decodedBytes[j] = challenge2.XOR(bytes[j], key);
+                decodedBytes[j] = challenge2.XORByte(bytes[j], key);
             }
 
             // Convert to string, lowercasing each character

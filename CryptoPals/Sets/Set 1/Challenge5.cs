@@ -51,7 +51,7 @@ namespace CryptoPals.Sets
             for (int i = 0; i < bytes.Length; i++)
             {
                 // Encrypt the bytes by XORing it against the appropriate part of the repeating key
-                output[i] = challenge2.XOR((byte)bytes[i], key[keyIndex++]);
+                output[i] = challenge2.XORByte((byte)bytes[i], key[keyIndex++]);
 
                 // Reset repeating key index
                 if (keyIndex >= key.Length)
