@@ -39,9 +39,12 @@ namespace CryptoPals.Sets
                 // Break into blocks (size of 16 as the challenge hinted at this number)
                 byte[][] blocks = challenge6.CreateBlocks(bytes, size);
 
-                // Count the amount of repeated blocks we find
-                // Do this by subtracting the size of a set of blocks with only unique values from the size of the original set of blocks
-                int repeatedBlockCount = blocks.Length - blocks.Distinct().ToArray().Length;
+                // Get the number of distinct blocks, due to being a 2d array we use LINQ select to effectively flatten the arrays for use with Distinct
+                int distinctBlocks = blocks.Select(x => string.Join(",", x)).Distinct().ToArray().Length;
+
+                // Get the amount of repeated blocks we find by subtracting the amount of blocks
+                // from the number of distinct blocks
+                int repeatedBlockCount = blocks.Length - distinctBlocks;
 
                 // Add the amount of repeated blocks for this line to an array (to identify the line index with the most repetitions)
                 repeatedBlockCounts[i] = repeatedBlockCount;
@@ -49,7 +52,7 @@ namespace CryptoPals.Sets
 
             // Get the AES encrypted line by getting the index of the line with the most repeated block
             int mostRepetitions = repeatedBlockCounts.Max();
-            int encryptedLineIndex = Array.FindIndex(repeatedBlockCounts, x => x == mostRepetitions);
+            int encryptedLineIndex = Array.FindIndex(repeatedBlockCounts, x => x == mostRepetitions) + 1; // Add 1 as we count lines from 1 not 0
 
             // Format the output
             string output = $"Index  : {encryptedLineIndex}{Environment.NewLine}Dupes  : {mostRepetitions}{Environment.NewLine}{lines[encryptedLineIndex]}";
