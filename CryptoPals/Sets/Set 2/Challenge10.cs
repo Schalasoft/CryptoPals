@@ -1,5 +1,7 @@
 ﻿using CryptoPals.Factories;
 using CryptoPals.Interfaces;
+using System;
+using System.Linq;
 using System.Text;
 
 namespace CryptoPals.Sets
@@ -34,18 +36,15 @@ namespace CryptoPals.Sets
         IChallenge7 challenge7 = (IChallenge7)ChallengeFactory.InitializeChallenge(Enumerations.ChallengeEnum.Challenge7);
         IChallenge9 challenge9 = (IChallenge9)ChallengeFactory.InitializeChallenge(Enumerations.ChallengeEnum.Challenge9);
 
-        // The size of the cipher blocks
-        int blockSize = 16;
-
         public string Solve(string input)
         {
             // Get input and key as bytes
             byte[] bytes = Encoding.ASCII.GetBytes(input);
             byte[] key = Encoding.ASCII.GetBytes("YELLOW SUBMARINE");
 
-            // Create Initialization Vector (a block the same size as the cipher blocks but filled with ASCII 0 bytes)
+            // Create Initialization Vector (a block the same size as the key/block but filled with ASCII 0 bytes)
             byte paddingByte = (byte)0x00;
-            byte[] iv = challenge9.PadBlock(new byte[0], paddingByte, blockSize);
+            byte[] iv = challenge9.PadBlock(new byte[0], paddingByte, key.Length); // Could just let use a default byte array but this reads clearer
 
             // Decrypt
             byte[] decryptedBytes = AES_CBC(bytes, key, iv);
@@ -60,24 +59,27 @@ namespace CryptoPals.Sets
         private byte[] AES_CBC(byte[] bytes, byte[] key, byte[] iv)
         {
             // Break input into blocks
-            byte[][] blocks = challenge6.CreateBlocks(bytes, blockSize);
+            byte[][] blocks = challenge6.CreateBlocks(bytes, key.Length);
 
             // Iterate blocks
-            byte[] xor = new byte[bytes.Length];
+            byte[] previousBlock = iv;
             for (int i = 0; i < blocks.Length; i++)
             {
-                // First block is XORed against the Initialization Vector
-                if (i == 0)
-                {
-                    challenge2.FixedXOR(iv, blocks[i]).CopyTo(xor, i);
-                }
-                else // XOR current block against the previous block
-                {
-                    challenge2.FixedXOR(blocks[i-1], blocks[i]).CopyTo(xor, i * blockSize);
-                }
+                // Decrypt block with ECB
+                blocks[i] = challenge7.AES_ECB(false, blocks[i], key);
+
+                // XOR block against the previous block
+                byte[] xor = challenge2.FixedXOR(previousBlock, blocks[i]);
+
+                // Update the reference to the previous block for block chain
+                previousBlock = blocks[i];
+
+                // Replace encrypted block with the decrypted block
+                blocks[i] = xor;
             }
 
-            return xor;
+            // Return the blocks as a flattend array (2d to 1d)
+            return blocks.SelectMany(x => x).ToArray();
         }
     }
 }
