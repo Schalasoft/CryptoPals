@@ -26,25 +26,23 @@ namespace CryptoPals.Sets
 
         public string Solve(string input)
         {
-            // Split input into lines
+            // Split hex encoded input into lines
             string[] lines = input.Split(Environment.NewLine);
 
-            // Split each line into blocks of a particular size to find repeating patterns
+            // Go through each line
             int[] repeatedChunkCounts = new int[lines.Length];
             for(int i = 0; i < lines.Length; i++)
             {
-                // Get lines hex string as bytes
+                // Get the line/hex as bytes
                 byte[] bytes = challenge1.HexStringToBytes(lines[0]);
 
-                // Count the amount of repeated chunks we find in a line
-                int repeatedChunkCount = 0;
-
-                // Break text up into blocks (16 as the challenge hinted at this number)
+                // Break into blocks (16 as the challenge hinted at this number)
                 int size = 16;
                 byte[][] blocks = challenge6.CreateBlocks(bytes, size);
 
-                // Check if there are any recurring patterns in the blocks
-                for(int j = 0; j < blocks.Length; j++)
+                // Count the amount of repeated chunks we find
+                int repeatedChunkCount = 0;
+                for (int j = 0; j < blocks.Length; j++)
                 {
                     for (int k = 0; k < blocks.Length; k++)
                     {
@@ -56,18 +54,15 @@ namespace CryptoPals.Sets
                     }
                 }
 
-                // Add the amount of repeated chunks for this line to the array containing the repeat counts for all lines
+                // Add the amount of repeated chunks for this line to the array of line chunk counts (to find the line index)
                 repeatedChunkCounts[i] = repeatedChunkCount;
             }
 
-            // Get the AES encrypted line by getting the index of the line with the most repetitions
-            int encryptedLine = Array.FindIndex(repeatedChunkCounts, x => x == repeatedChunkCounts.Max());
+            // Get the AES encrypted line by getting the index of the line with the most repeated chunks
+            int mostRepetitions = repeatedChunkCounts.Max();
+            int encryptedLineIndex = Array.FindIndex(repeatedChunkCounts, x => x == mostRepetitions);
 
-            // Decrypt
-            //byte[] decrypted = challenge7.Decrypt(encryptedBytes, key);
-            //string output = Encoding.ASCII.GetString(decrypted);
-
-            string output = "";
+            string output = $"{lines[encryptedLineIndex]}{Environment.NewLine}Index  : {encryptedLineIndex}{Environment.NewLine}Dupes  : {mostRepetitions}";
 
             return output;
         }
