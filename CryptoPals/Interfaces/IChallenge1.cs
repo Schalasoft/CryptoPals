@@ -9,7 +9,7 @@
         /// Convert Hex bytes to a string (no dashes)
         /// </summary>
         /// <param name="bytes">The byte representation of hex bytes</param>
-        /// <returns>Hex string</returns>
+        /// <returns>The hex string representation of the bytes</returns>
         public string HexBytesToString(byte[] bytes);
 
         /// <summary>
