@@ -6,7 +6,7 @@
     interface IChallenge
     {
         /// <summary>
-        /// Solve a challenge
+        /// Solve the challenge
         /// </summary>
         /// <param name="input">The input/problem string</param>
         /// <returns>The solution string</returns>
