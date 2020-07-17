@@ -21,13 +21,14 @@ namespace CryptoPals.Sets
 
         // Reuse previous challenge functionality
         IChallenge1 challenge1 = (IChallenge1)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge1);
+        IChallenge4 challenge4 = (IChallenge4)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge4);
         IChallenge6 challenge6 = (IChallenge6)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge6);
 
         /// <inheritdoc />
         public string Solve(string input)
         {
             // Split hex encoded input into lines
-            string[] lines = input.Split(Environment.NewLine);
+            string[] lines = challenge4.SplitTextIntoLines(input, Environment.NewLine);
 
             // Go through each line
             int[] repeatedBlockCounts = new int[lines.Length];

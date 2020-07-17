@@ -7,6 +7,6 @@
         public const string Directory = "..\\..\\..\\Data\\";
 
         // Data Parsing
-        public const char Separator = '/';
+        public const string Separator = "/";
     }
 }

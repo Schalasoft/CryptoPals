@@ -26,12 +26,14 @@ namespace CryptoPals.Sets
         // Reuse previous challenge functionality
         IChallenge1 challenge1 = (IChallenge1)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge1);
         IChallenge2 challenge2 = (IChallenge2)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge2);
+        IChallenge4 challenge4 = (IChallenge4)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge4);
+
 
         // Solve the challenge
         public string Solve(string input)
         {
             // Split the input to get the plaintext to encrypt and the cycling key
-            string[] split = input.Split(Constants.Separator);
+            string[] split = challenge4.SplitTextIntoLines(input, Constants.Separator.ToString());
 
             byte[] inputBytes = Encoding.ASCII.GetBytes(split[0]);
             byte[] keyBytes   = Encoding.ASCII.GetBytes(split[1]);
