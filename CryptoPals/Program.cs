@@ -22,7 +22,7 @@ namespace CryptoPals
 
     class Program
     {
-        private static List<int> challengesWithoutInputs = new List<int>() { 11 };
+        private static List<int> challengesWithoutInputs = new List<int>() { };
 
         // Main entry point
         public static void Main(string[] args)
@@ -42,7 +42,7 @@ namespace CryptoPals
             // Initialize the Challenge Manager used to hold the instance of each challenge
             // DEBUG Should start at 1 and end at the last challenge but for speed we only run the current challenge
             int currentChallenge = 11;
-            int startChallenge = currentChallenge;
+            int startChallenge = 1;
             int challengeCount = currentChallenge;
             InitializeChallengeManager(challengeCount);
 
@@ -70,11 +70,8 @@ namespace CryptoPals
                         inputAlias = fileName;
                     break;
 
-                    case 11:
-                        inputAlias = "No input required for this challenge.";
-                        break;
-
                     default:
+                        
                         break;
                 }
 

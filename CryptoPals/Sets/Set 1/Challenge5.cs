@@ -1,4 +1,5 @@
-﻿using CryptoPals.Interfaces;
+﻿using CryptoPals.Enumerations;
+using CryptoPals.Interfaces;
 using System.Text;
 
 namespace CryptoPals.Sets
@@ -23,8 +24,8 @@ namespace CryptoPals.Sets
         */
 
         // Reuse previous challenge functionality
-        IChallenge1 challenge1 = (IChallenge1)ChallengeManager.GetChallenge((int)Enumerations.ChallengeEnum.Challenge1);
-        IChallenge2 challenge2 = (IChallenge2)ChallengeManager.GetChallenge((int)Enumerations.ChallengeEnum.Challenge2);
+        IChallenge1 challenge1 = (IChallenge1)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge1);
+        IChallenge2 challenge2 = (IChallenge2)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge2);
 
         // Solve the challenge
         public string Solve(string input)

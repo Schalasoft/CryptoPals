@@ -1,11 +1,11 @@
-﻿using CryptoPals.Factories;
+﻿using CryptoPals.Enumerations;
 using CryptoPals.Interfaces;
 using System;
 using System.Text;
 
 namespace CryptoPals.Sets
 {
-    class Challenge10 : IChallenge
+    class Challenge10 : IChallenge10, IChallenge
     {
         /*
         Implement CBC mode
@@ -30,10 +30,10 @@ namespace CryptoPals.Sets
         */
 
         // Reuse previous challenge functionality
-        IChallenge2 challenge2 = (IChallenge2)ChallengeFactory.InitializeChallenge(Enumerations.ChallengeEnum.Challenge2);
-        IChallenge6 challenge6 = (IChallenge6)ChallengeFactory.InitializeChallenge(Enumerations.ChallengeEnum.Challenge6);
-        IChallenge7 challenge7 = (IChallenge7)ChallengeFactory.InitializeChallenge(Enumerations.ChallengeEnum.Challenge7);
-        IChallenge9 challenge9 = (IChallenge9)ChallengeFactory.InitializeChallenge(Enumerations.ChallengeEnum.Challenge9);
+        IChallenge2 challenge2 = (IChallenge2)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge2);
+        IChallenge6 challenge6 = (IChallenge6)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge6);
+        IChallenge7 challenge7 = (IChallenge7)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge7);
+        IChallenge9 challenge9 = (IChallenge9)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge9);
 
         public string Solve(string input)
         {
@@ -55,7 +55,7 @@ namespace CryptoPals.Sets
         }
 
         // Encrypt/Decrypt using AES CBC (Advanced Encryption Standard Cipher Block Chaining Mode)
-        private byte[] AES_CBC(bool encrypt, byte[] bytes, byte[] key, byte[] iv)
+        public byte[] AES_CBC(bool encrypt, byte[] bytes, byte[] key, byte[] iv)
         {
             // Encrypt & decrypt in the one function is a bit hard to read but reduces code duplication
             // If we are encrypting and the bytes are not divisible by the key, pad the bytes
