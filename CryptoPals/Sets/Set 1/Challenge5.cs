@@ -4,6 +4,7 @@ using System.Text;
 
 namespace CryptoPals.Sets
 {
+    ///<inheritdoc cref="IChallenge5"/>
     class Challenge5 : IChallenge5, IChallenge
     {
         /*

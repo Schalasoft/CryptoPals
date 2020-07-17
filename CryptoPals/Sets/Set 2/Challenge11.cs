@@ -6,7 +6,8 @@ using System.Text;
 
 namespace CryptoPals.Sets
 {
-    class Challenge11 : IChallenge
+    /// <inheritdoc cref="IChallenge11"/>
+    class Challenge11 : IChallenge11, IChallenge
     {
         /*
         An ECB/CBC detection oracle

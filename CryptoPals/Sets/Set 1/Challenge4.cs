@@ -5,9 +5,7 @@ using System.Collections.Generic;
 
 namespace CryptoPals.Sets
 {
-    /// <summary>
-    /// Detect single-character XOR
-    /// </summary>
+    /// <inheritdoc cref="IChallenge4"/>
     class Challenge4 : IChallenge
     {
         /*
