@@ -48,16 +48,24 @@ namespace CryptoPals.Sets
             int keyLength = 16;
             byte[] encryptedBytes = EncryptWithUnknownKey(bytes, keyLength);
 
-            // Break encrypted bytes into blocks the size of the key
-            byte[][] blocks = challenge6.CreateBlocks(encryptedBytes, keyLength);
-
-            // Determine encryption type that has been used on each block
-            string[] types = DetectBlocksEncryptionType(blocks);
+            // Detect the encrypt types used
+            EncryptionTypeEnum[] types = DetectEncryptionTypes(encryptedBytes, keyLength);
 
             // Get the formatted output
             string output = FormatOutput(types);
 
             return output;
+        }
+
+        private EncryptionTypeEnum[] DetectEncryptionTypes(byte[] bytes, int blockLength)
+        {
+            // Break encrypted bytes into blocks the size of the key
+            byte[][] blocks = challenge6.CreateBlocks(bytes, blockLength);
+
+            // Determine encryption type that has been used on each block
+            EncryptionTypeEnum[] types = DetectBlocksEncryptionTypes(blocks);
+
+            return types;
         }
 
         // Detects the encryption type for a block of bytes
@@ -70,13 +78,13 @@ namespace CryptoPals.Sets
         }
 
         // Create an array containing the encryption type of each block
-        private string[] DetectBlocksEncryptionType(byte[][] blocks)
+        private EncryptionTypeEnum[] DetectBlocksEncryptionTypes(byte[][] blocks)
         {
-            string[] types = new string[blocks.Length];
+            EncryptionTypeEnum[] types = new EncryptionTypeEnum[blocks.Length];
             for (int i = 0; i < blocks.Length; i++)
             {
                 // Determine the block encryption type and return it as an enum
-                types[i] = DetectBlockEncryptionType(blocks[i]).ToString();
+                types[i] = DetectBlockEncryptionType(blocks[i]);
             }
 
             return types;
@@ -147,7 +155,7 @@ namespace CryptoPals.Sets
         }
 
         // Format the output
-        private string FormatOutput(string[] types)
+        private string FormatOutput(EncryptionTypeEnum[] types)
         {
             // Build the output string from the types array
             StringBuilder stringBuilder = new StringBuilder();
