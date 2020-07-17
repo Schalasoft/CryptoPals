@@ -1,4 +1,5 @@
-﻿using CryptoPals.Interfaces;
+﻿using CryptoPals.Enumerations;
+using CryptoPals.Interfaces;
 
 namespace CryptoPals.Sets
 {
@@ -26,13 +27,31 @@ namespace CryptoPals.Sets
         */
 
         // Reuse previous challenge functionality
-        //IChallenge2 challenge2 = (IChallenge2)ChallengeFactory.InitializeChallenge(Enumerations.ChallengeEnum.Challenge2);
+        IChallenge10 challenge10 = (IChallenge10)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge10);
 
         public string Solve(string input)
         {
+            // Encrypt data
+
             string output = "";
 
             return output;
+        }
+
+        // Generates a random key of the specified size
+        private byte[] GenerateRandomAESKey(int length)
+        {
+            byte[] key = new byte[length];
+
+            return key;
+        }
+
+        // Encrypts data under a randomly generated key
+        private byte[] EncryptWithUnknownKey(byte[] bytes)
+        {
+            byte[] encrypted = new byte[bytes.Length];
+
+            return encrypted;
         }
     }
 }
