@@ -35,6 +35,7 @@ namespace CryptoPals.Sets
         // Reuse previous challenge functionality
         IChallenge6 challenge6   = (IChallenge6)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge6);
         IChallenge7 challenge7   = (IChallenge7)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge7);
+        IChallenge9 challenge9   = (IChallenge9)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge9);
         IChallenge10 challenge10 = (IChallenge10)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge10);
 
         public string Solve(string input)
@@ -120,6 +121,10 @@ namespace CryptoPals.Sets
                 bytesWithInserts[i] = byteToAdd;
             }
 
+            // Pad the constructed byte array if it is not divisible by the key length
+            if(bytesWithInserts.Length % keyLength != 0)
+                bytesWithInserts = challenge9.PadBytes(bytesWithInserts, keyLength);
+
             // Create a random key
             byte[] key = GenerateRandomASCIIBytes(keyLength);
 
@@ -127,12 +132,16 @@ namespace CryptoPals.Sets
             byte[] encryptedBytes = new byte[bytesWithInserts.Length];
             for (int i = 0; i < encryptedBytes.Length / keyLength; i++)
             {
-                byte[] encryptedBlock = new byte[keyLength];
-                int encryptionType = random.Next(1, 2);
+                // Get the unencrypted block
+                byte[] unencryptedBlock = (byte[])new ArrayList(bytesWithInserts).GetRange(i * keyLength, keyLength).ToArray(typeof(byte));
+
+                // Encrypt the block
+                byte[] encryptedBlock = unencryptedBlock;
+                EncryptionTypeEnum encryptionType = (EncryptionTypeEnum)random.Next(1, 2);
                 if (encryptionType.Equals(EncryptionTypeEnum.ECB))
                 {
                     // Encrypt using ECB
-                    encryptedBlock = challenge7.AES_ECB(true, bytesWithInserts, key);
+                    encryptedBlock = challenge7.AES_ECB(true, unencryptedBlock, key);
                 }
                 else if (encryptionType.Equals(EncryptionTypeEnum.CBC))
                 {
@@ -140,19 +149,13 @@ namespace CryptoPals.Sets
                     byte[] iv = GenerateRandomASCIIBytes(keyLength);
 
                     // Encrypt using CBC
-                    encryptedBlock = challenge10.AES_CBC(true, bytesWithInserts, key, iv);
-                }
-                else
-                {
-                    // This is really unnecessary but we'll add it for posterity
-                    // No valid encryption chosen, just output the unencrypted bytes
-                    encryptedBlock = (byte[])new ArrayList(bytesWithInserts).GetRange(i * keyLength, keyLength).ToArray(typeof(byte));
+                    encryptedBlock = challenge10.AES_CBC(true, unencryptedBlock, key, iv);
                 }
 
                 // Add the encrypted block to the encrytedBytes array for returning
                 for(int j = 0; j < encryptedBlock.Length; j++)
                 {
-                    encryptedBytes[j + (i * keyLength)] = encryptedBlock[j]; // CDG Missing last 12 bytes, something is wrong here
+                    encryptedBytes[j + (i * keyLength)] = encryptedBlock[j];
                 }
             }
 
