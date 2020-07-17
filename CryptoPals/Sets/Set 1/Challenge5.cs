@@ -28,8 +28,7 @@ namespace CryptoPals.Sets
         IChallenge2 challenge2 = (IChallenge2)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge2);
         IChallenge4 challenge4 = (IChallenge4)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge4);
 
-
-        // Solve the challenge
+        ///<inheritdoc />
         public string Solve(string input)
         {
             // Split the input to get the plaintext to encrypt and the cycling key
@@ -45,7 +44,7 @@ namespace CryptoPals.Sets
             return challenge1.HexBytesToString(result);
         }
 
-        // Sequentially apply each byte of the key against each byte of the input text and return the resulting encoded text
+        ///<inheritdoc />        
         public byte[] RepeatingKeyXOR(byte[] bytes, byte[] key)
         {
             // Go through each letter in the input text
