@@ -16,11 +16,12 @@ namespace CryptoPals.Interfaces
         public KeyValuePair<int, Tuple<double, string>> SingleKeyXORBruteForce(byte[] bytes);
 
         /// <summary>
-        /// Format a Key Value Pair for output so we can see the output, key, and score
+        /// Format a Key Value Pair for output so we can see the output, key, and score, as well as any additional information
+        /// appended to the end
         /// </summary>
-        /// <param name="kvp">The Key Value Pair containing the key, score, and output text</param>
+        /// <param name="kvp">The Key Value Pair containing the key, score, and decoded output text</param>
         /// <param name="additionalInformation">Any additional information to append to the end</param>
-        /// <returns>A string containing the output, key, and score formatted together</returns>
+        /// <returns>A string containing the key, score and decoded output, all formatted together</returns>
         public string FormatOutput(KeyValuePair<int, Tuple<double, string>> kvp, string additionalInformation = "");
     }
 }
