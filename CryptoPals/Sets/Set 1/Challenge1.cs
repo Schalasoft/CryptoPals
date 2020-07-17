@@ -4,7 +4,7 @@ using CryptoPals.Interfaces;
 
 namespace CryptoPals.Sets
 {
-    // Convert Hex string to Base64
+    ///<inheritdoc cref="IChallenge1"/>
     class Challenge1 : IChallenge1, IChallenge
     {
         /*
@@ -19,13 +19,12 @@ namespace CryptoPals.Sets
         So go ahead and make that happen. You'll need to use this code for the rest of the exercises.
         */
 
+        // Note: 2 char hex value is 1 byte, base64 is 4 characters per 3 bytes/hex values
         private const int binaryBase = 2;    // Binary is 0 or 1 == 2 bit
         private const int hexBase    = 16;   // Hex value is 2 bytes == 16 bit
         private const string base64Table = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
-        // Convert hex to base 64 (2 char hex value is 1 byte, base64 is 4 characters per 3 bytes/hex values)
-        // Input  : 49276d206b696c6c696e6720796f757220627261696e206c696b65206120706f69736f6e6f7573206d757368726f6f6d
-        // Output : SSdtIGtpbGxpbmcgeW91ciBicmFpbiBsaWtlIGEgcG9pc29ub3VzIG11c2hyb29t
+        ///<inheritdoc />
         public string Solve(string input)
         {
             // Encode Hex to Base64
@@ -41,7 +40,11 @@ namespace CryptoPals.Sets
             return BinaryStringToBase64(binary);
         }
 
-        // Convert hex string to binary string
+        /// <summary>
+        /// Convert hex string to its binary representation
+        /// </summary>
+        /// <param name="text">The hex text to convert</param>
+        /// <returns>A string containing the binary representation of the hex string</returns>
         private string HexStringToBinaryString(string text)
         {
             // Convert to bytes
@@ -61,7 +64,7 @@ namespace CryptoPals.Sets
             return binarySb.ToString();
         }
 
-        // Converts a hex string to its byte representation
+        ///<inheritdoc cref="IChallenge1.HexStringToBytes(string)"/>
         public byte[] HexStringToBytes(string hex)
         {
             byte[] bytes = new byte[hex.Length / 2];
@@ -74,19 +77,27 @@ namespace CryptoPals.Sets
             return bytes;
         }
 
-        // Hex bytes to string with no dashes
+        ///<inheritdoc cref="IChallenge1.HexBytesToString(byte[])"/>
         public string HexBytesToString(byte[] bytes)
         {
             return BitConverter.ToString(bytes).Replace("-", string.Empty).ToLower();
         }
 
-        // Convert a hex value to a byte
+        /// <summary>
+        /// Convert a hex value to a byte
+        /// </summary>
+        /// <param name="hex">The hex to convert</param>
+        /// <returns>The byte representation of the hex 2 character value</returns>
         private byte HexToByte(string hex)
         {
             return Convert.ToByte(hex, hexBase);
         }
 
-        // Convert hex binary string to Base64 string
+        /// <summary>
+        /// Convert hex binary string to Base64 string
+        /// </summary>
+        /// <param name="text">Hex byte represented as binary text</param>
+        /// <returns>Base64 representation of the binary string</returns>
         private string BinaryStringToBase64(string text)
         {
             // Grab sextets from binary sequence
