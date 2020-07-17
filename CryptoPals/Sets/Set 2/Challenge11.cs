@@ -1,6 +1,7 @@
 ﻿using CryptoPals.Enumerations;
 using CryptoPals.Interfaces;
 using System;
+using System.Collections;
 using System.Text;
 
 namespace CryptoPals.Sets
@@ -90,7 +91,7 @@ namespace CryptoPals.Sets
             return key;
         }
 
-        // Encrypts data under a randomly generated key
+        // Encrypts data under a randomly generated key, randomly using ECB or CBC for each block
         private byte[] EncryptWithUnknownKey(byte[] bytes, int keyLength)
         {
             // Create byte arrays containing 5-10 random bytes for inserting & after before the bytes to encrypt
@@ -99,33 +100,60 @@ namespace CryptoPals.Sets
             byte[] beforeBytes = GenerateRandomASCIIBytes(insertBeforeCount);
             byte[] afterBytes  = GenerateRandomASCIIBytes(insertAfterCount);
 
-            // Create byte array to store encrypted bytes, plus room for the inserted before & after bytes
+            // Populate byte array with the inserted before bytes, original bytes, and inserted after bytes
             byte[] bytesWithInserts = new byte[beforeBytes.Length + bytes.Length + afterBytes.Length];
+            for(int i = 0; i < bytesWithInserts.Length; i++)
+            {
+                // Determine which byte to add
+                byte byteToAdd;
+                if (i < insertBeforeCount)
+                    // Before byte
+                    byteToAdd = beforeBytes[i]; // i is the same for both
+                else if (i < insertBeforeCount + bytes.Length)
+                    // Original byte
+                    byteToAdd = bytes[i - insertBeforeCount]; // Normalize by subtracting the added before byte count
+                else
+                    // After byte
+                    byteToAdd = afterBytes[i % (insertBeforeCount + bytes.Length)]; // Normalize by getting the remainder after the already added added bytes
+
+                // Add the appropriate byte
+                bytesWithInserts[i] = byteToAdd;
+            }
 
             // Create a random key
             byte[] key = GenerateRandomASCIIBytes(keyLength);
 
-            // Encrypt with ECB or CBC randomly
+            // Encrypt blocks with ECB or CBC randomly
             byte[] encryptedBytes = new byte[bytesWithInserts.Length];
-            int encryptionType = random.Next(1, 2);
-            if (encryptionType.Equals(EncryptionTypeEnum.ECB))
+            for (int i = 0; i < encryptedBytes.Length / keyLength; i++)
             {
-                // Encrypt using ECB
-                encryptedBytes = challenge7.AES_ECB(true, bytesWithInserts, key);
-            }
-            else if(encryptionType.Equals(EncryptionTypeEnum.CBC))
-            {
-                // Create an initialization vector (use random IV)
-                byte[] iv = GenerateRandomASCIIBytes(keyLength);
+                byte[] encryptedBlock = new byte[keyLength];
+                int encryptionType = random.Next(1, 2);
+                if (encryptionType.Equals(EncryptionTypeEnum.ECB))
+                {
+                    // Encrypt using ECB
+                    encryptedBlock = challenge7.AES_ECB(true, bytesWithInserts, key);
+                }
+                else if (encryptionType.Equals(EncryptionTypeEnum.CBC))
+                {
+                    // Create an initialization vector (use random IV)
+                    byte[] iv = GenerateRandomASCIIBytes(keyLength);
 
-                // Encrypt using CBC
-                encryptedBytes = challenge10.AES_CBC(true, bytesWithInserts, key, iv);
-            }
-            else
-            {
-                // This is really unnecessary but we'll add it for posterity
-                // No valid encryption chosen, just output bytes with the before & after inserts
-                encryptedBytes = bytesWithInserts;
+                    // Encrypt using CBC
+                    encryptedBlock = challenge10.AES_CBC(true, bytesWithInserts, key, iv);
+                }
+                else
+                {
+                    // This is really unnecessary but we'll add it for posterity
+                    // No valid encryption chosen, just output the unencrypted bytes
+                    encryptedBlock = (byte[])new ArrayList(bytesWithInserts).GetRange(i * keyLength, keyLength).ToArray(typeof(byte));
+                }
+
+                // Add the encrypted block to the encrytedBytes array for returning
+                for(int j = 0; j < encryptedBlock.Length; j++)
+                {
+                    encryptedBytes[j + (i * keyLength)] = encryptedBlock[j]; // CDG Missing last 12 bytes, something is wrong here
+                }
             }
 
             return encryptedBytes;
