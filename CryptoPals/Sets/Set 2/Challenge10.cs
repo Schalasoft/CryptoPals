@@ -79,19 +79,23 @@ namespace CryptoPals.Sets
                 byte[] block = new byte[key.Length];
                 blocks[i].CopyTo(block, 0);
 
-                // Decrypt block with ECB
-                if (!encrypt)
-                    blocks[i] = challenge7.AES_ECB(encrypt, blocks[i], key); // Decrypt
-
-                // XOR block against the previous block
-                byte[] xor = challenge2.XORByteArray(blocks[i], previousBlock);
-
                 // Replace unencrypted block with the encrypted block
                 if (encrypt)
-                    blocks[i] = challenge7.AES_ECB(encrypt, xor, key); // Encrypt
+                {
+                    // Encrypt
+                    blocks[i] = AES_CBC_Encrypt(block, previousBlock, key);
 
-                // Update the reference of the previous block
-                previousBlock = block;
+                    // Update previous block
+                    previousBlock = blocks[i];
+                }
+                else
+                {
+                    // Decrypt
+                    blocks[i] = AES_CBC_Decrypt(block, previousBlock, key);
+
+                    // Update previous block
+                    previousBlock = block;
+                }
             }
 
             // Return the blocks as a flattend array (2d to 1d)
@@ -102,6 +106,26 @@ namespace CryptoPals.Sets
                     output[index++] = byt;
 
             return output;
+        }
+
+        // ECB Encrypt
+        private byte[] AES_CBC_Encrypt(byte[] block, byte[] previousBlock, byte[] key)
+        {
+            // XOR block against the previous block
+            byte[] xor = challenge2.XORByteArray(block, previousBlock);
+
+            // ECB Encrypt
+            return challenge7.AES_ECB(true, xor, key);
+        }
+
+        // ECB Decrypt
+        private byte[] AES_CBC_Decrypt(byte[] block, byte[] previousBlock, byte[] key)
+        {
+            // ECB Decrypt
+            byte[] decryptedBlock = challenge7.AES_ECB(false, block, key);
+
+            // XOR block against the previous block
+            return challenge2.XORByteArray(decryptedBlock, previousBlock);
         }
     }
 }
