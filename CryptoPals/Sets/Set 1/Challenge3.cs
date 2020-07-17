@@ -68,7 +68,7 @@ namespace CryptoPals.Sets
             {'z',.00074f}
         };
 
-        ///<inheritdoc cref="IChallenge3"/>
+        ///<inheritdoc />
         public string Solve(string input)
         {
             // Input is hex so convert hex string to bytes
