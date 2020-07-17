@@ -5,6 +5,7 @@ using System.Linq;
 
 namespace CryptoPals.Sets
 {
+    ///<inheritdoc cref="IChallenge8"/>
     class Challenge8 : IChallenge8, IChallenge
     {
         /*
@@ -22,6 +23,7 @@ namespace CryptoPals.Sets
         IChallenge1 challenge1 = (IChallenge1)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge1);
         IChallenge6 challenge6 = (IChallenge6)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge6);
 
+        /// <inheritdoc />
         public string Solve(string input)
         {
             // Split hex encoded input into lines
@@ -55,11 +57,19 @@ namespace CryptoPals.Sets
             return FormatOutput(encryptedLineIndex, mostRepetitions, lines[encryptedLineIndex]);
         }
 
+        /// <summary>
+        /// Format the output
+        /// </summary>
+        /// <param name="lineIndex">The line index of the ECB encrypted text</param>
+        /// <param name="repetitions">How many block repetitions were found</param>
+        /// <param name="line">The encrypted line</param>
+        /// <returns>The formatted output containing the line index, repetitions, and encrypted line</returns>
         private string FormatOutput(int lineIndex, int repetitions, string line)
         {
             return $"Index  : {lineIndex}{Environment.NewLine}Dupes  : {repetitions}{Environment.NewLine}{line}";
         }
 
+        ///<inheritdoc cref="IChallenge8.IsECBEncrypted(byte[])"/>
         public bool IsECBEncrypted(byte[] bytes)
         {
             // CDG TODO
