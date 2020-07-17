@@ -76,6 +76,8 @@ namespace CryptoPals.Sets
             // Determine encryption type being used
             EncryptionTypeEnum type = 0;
 
+            // CDG TODO
+
             return type;
         }
 

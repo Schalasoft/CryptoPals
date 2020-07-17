@@ -61,6 +61,8 @@ namespace CryptoPals.Sets
         // Detects if the bytes have been ECB encrypted
         public bool IsECBEncrypted(byte[] bytes)
         {
+            // CDG TODO
+
             return true;
         }
     }
