@@ -57,5 +57,11 @@ namespace CryptoPals.Sets
 
             return output;
         }
+
+        // Detects if the bytes have been ECB encrypted
+        public bool IsECBEncrypted(byte[] bytes)
+        {
+            return true;
+        }
     }
 }
