@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace CryptoPals
 {
@@ -21,6 +22,8 @@ namespace CryptoPals
 
     class Program
     {
+        private static List<int> challengesWithoutInputs = new List<int>() { 11 };
+
         // Main entry point
         public static void Main(string[] args)
         {
@@ -38,20 +41,23 @@ namespace CryptoPals
         {
             // Initialize the Challenge Manager used to hold the instance of each challenge
             // DEBUG Should start at 1 and end at the last challenge but for speed we only run the current challenge
-            int currentChallenge = 10;
+            int currentChallenge = 11;
             int startChallenge = currentChallenge;
             int challengeCount = currentChallenge;
             InitializeChallengeManager(challengeCount);
 
-            string input, fileName;
+            string input = "";
             for (int i = startChallenge; i <= challengeCount; i++)
             {
                 // Alias for input when it is too long for outputting to the console
                 string inputAlias = "";
 
-                // Read input
-                fileName = $"Challenge{i}.txt";
-                input = FileHandling.ReadFile(Constants.Directory, fileName);
+                // Construct challenge input filename
+                string fileName = $"Challenge{i}.txt";
+
+                // Read the challenge input file, unless it is a challenge without an input
+                if(!challengesWithoutInputs.Contains(i))
+                    input = FileHandling.ReadFile(Constants.Directory, fileName);
 
                 // Perform any additional preparation operations for specific challenges
                 switch (i)
@@ -64,8 +70,12 @@ namespace CryptoPals
                         inputAlias = fileName;
                     break;
 
+                    case 11:
+                        inputAlias = "No input required for this challenge.";
+                        break;
+
                     default:
-                    break;
+                        break;
                 }
 
                 // Solve the challenge
