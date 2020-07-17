@@ -15,10 +15,13 @@ namespace CryptoPals.Sets
     746865206b696420646f6e277420706c6179
     */
 
+    ///<inheritdoc cref="IChallenge2"/>
     class Challenge2 : IChallenge2, IChallenge
     {
+        // Reusue previous challenge functionality
         IChallenge1 challenge1 = (IChallenge1)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge1);
 
+        ///<inheritdoc />
         public string Solve(string input)
         {
             // Separate a and b from the combined input
@@ -39,13 +42,13 @@ namespace CryptoPals.Sets
             return challenge1.HexBytesToString(bytes);
         }
 
-        // XOR two bytes
+        ///<inheritdoc cref="IChallenge2.XORByte(byte, byte)"/>
         public byte XORByte(byte a, byte b)
         {
             return (byte)(a ^ b);
         }
 
-        // XOR two equal length byte arrays
+        ///<inheritdoc cref="IChallenge2.XORByteArray(byte[], byte[])"/>
         public byte[] XORByteArray(byte[] a, byte[] b)
         {
             byte[] c = new byte[a.Length];
