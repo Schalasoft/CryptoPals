@@ -68,7 +68,7 @@ namespace CryptoPals.Sets
             {'z',.00074f}
         };
 
-        // Solve
+        ///<inheritdoc cref="IChallenge3"/>
         public string Solve(string input)
         {
             // Input is hex so convert hex string to bytes
@@ -81,11 +81,16 @@ namespace CryptoPals.Sets
             return FormatOutput(maxScoringItem);
         }
 
-        // Decode text against a single key and score it
-        public KeyValuePair<int, Tuple<double, string>> DecodeAndScore(int index, byte[] bytes)
+        /// <summary>
+        /// Decode text bytes against a single ASCII character  and score it
+        /// </summary>
+        /// <param name="value">The ASCII character value</param>
+        /// <param name="bytes">The bytes to decode</param>
+        /// <returns>A Key Value Pair containing the ASCII character, score, and decoded text</returns>
+        public KeyValuePair<int, Tuple<double, string>> DecodeAndScore(int value, byte[] bytes)
         {
             // Get byte representation of key (0-255)
-            byte key = (byte)index;
+            byte key = (byte)value;
 
             // XOR each byte of input text against the key byte
             byte[] decodedBytes = new byte[bytes.Length];
@@ -102,10 +107,10 @@ namespace CryptoPals.Sets
             double score = GetScore(decodedLowercase);
 
             // Return KVP containing the key (index), score, and decoded text
-            return new KeyValuePair<int, Tuple<double, string>>(index, new Tuple<double, string>(score, decoded));
+            return new KeyValuePair<int, Tuple<double, string>>(value, new Tuple<double, string>(score, decoded));
         }
 
-        // Format a Key Value Pair for output so we can see the output, key, and score
+        ///<inheritdoc cref="IChallenge3.FormatOutput(KeyValuePair{int, Tuple{double, string}}, string)"/>
         public string FormatOutput(KeyValuePair<int, Tuple<double, string>> kvp, string additionalInformation = "")
         {
             string deducedKey = kvp.Key.ToString();
@@ -115,7 +120,25 @@ namespace CryptoPals.Sets
             return $"{output}{Environment.NewLine}Key    : {deducedKey}{Environment.NewLine}Score  : {maxScore}{additionalInformation}";
         }
 
-        // Given an input string, XOR decrypt it against each ASCII character and return a KVP containing the key, score, and decoded text
+        /// <summary>
+        /// Get the cumultive score of a given string using the letter frequency table to provide a score for each character
+        /// </summary>
+        /// <param name="text">The text to score using the letter frequency table</param>
+        /// <returns>The cumulitive score of the input string</returns>
+        private double GetScore(string text)
+        {
+            double score = 0;
+            foreach (char character in text)
+            {
+                for (int k = 0; k < letterFrequencyTable.Count; k++)
+                {
+                    score += letterFrequencyTable.FirstOrDefault(x => x.Key.Equals(character)).Value;
+                }
+            }
+            return score;
+        }
+
+        ///<inheritdoc cref="IChallenge3.SingleKeyXORBruteForce(byte[])"/>
         public KeyValuePair<int, Tuple<double, string>> SingleKeyXORBruteForce(byte[] bytes)
         {
             // Decode string with each key (using 0-255 int values as key)
@@ -131,20 +154,6 @@ namespace CryptoPals.Sets
 
             // Return the KVP with the max score
             return data.FirstOrDefault(x => x.Value.Item1 == data.Values.Max(x => x.Item1));
-        }
-
-        // Get the max score of a given string using the letter frequency table
-        private double GetScore(string text)
-        {
-            double score = 0;
-            foreach(char character in text)
-            {
-                for (int k = 0; k < letterFrequencyTable.Count; k++)
-                {
-                    score += letterFrequencyTable.FirstOrDefault(x => x.Key.Equals(character)).Value;
-                }
-            }
-            return score;
         }
     }
 }
