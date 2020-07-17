@@ -32,6 +32,9 @@ namespace CryptoPals.Sets
         // Create a random number generator (Random uses Environment.TickCount under the hood as the seed, this should be sufficiently random)
         private readonly Random random = new Random();
 
+        // Variables to determine if the oracle is correct in its ECB/CBC detection
+        EncryptionTypeEnum[] actualEncryption;
+
         // Reuse previous challenge functionality
         IChallenge6 challenge6   = (IChallenge6)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge6);
         IChallenge7 challenge7   = (IChallenge7)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge7);
@@ -92,6 +95,9 @@ namespace CryptoPals.Sets
         // Encrypt bytes using ECB and CBC randomly for each block
         private byte[] EncryptBytesRandomly(byte[] bytes, int blockLength, byte[] key)
         {
+            // Array used to record the encryption type that was used per block for validation
+            actualEncryption = new EncryptionTypeEnum[bytes.Length / blockLength];
+
             // Encrypt blocks with ECB or CBC randomly
             byte[] encryptedBytes = new byte[bytes.Length];
             for (int i = 0; i < encryptedBytes.Length / blockLength; i++)
@@ -101,7 +107,7 @@ namespace CryptoPals.Sets
 
                 // Encrypt the block
                 byte[] encryptedBlock = unencryptedBlock;
-                EncryptionTypeEnum encryptionType = (EncryptionTypeEnum)random.Next(1, 2);
+                EncryptionTypeEnum encryptionType = (EncryptionTypeEnum)random.Next(1, 3);
                 if (encryptionType.Equals(EncryptionTypeEnum.ECB))
                 {
                     // Encrypt using ECB
@@ -115,6 +121,9 @@ namespace CryptoPals.Sets
                     // Encrypt using CBC
                     encryptedBlock = challenge10.AES_CBC(true, unencryptedBlock, key, iv);
                 }
+
+                // Record which encryption type we used for this block
+                actualEncryption[i] = encryptionType;
 
                 // Add the encrypted block to the encrytedBytes array for returning
                 for (int j = 0; j < encryptedBlock.Length; j++)
@@ -151,7 +160,7 @@ namespace CryptoPals.Sets
             for (int i = 0; i < types.Length - 5; i++)
             {
                 // Whitespace padding for output uniformity: will work up until 2 digit indexes (blocks in the 3 digits will be truncated from the output anyway)
-                stringBuilder.Append($"Block {i,2} has been encrypted with: {types[i].ToString()}{Environment.NewLine}");
+                stringBuilder.Append($"Block {i,2} has been encrypted with: oracle({types[i].ToString()}) actual({actualEncryption[i].ToString()}) {Environment.NewLine}");
             }
 
             return stringBuilder.ToString();
@@ -165,7 +174,7 @@ namespace CryptoPals.Sets
 
             // Assign each part of the key to a random byte value (0-256 for full ASCII range)
             int min = 0;
-            int max = 256;
+            int max = 257;
             for(int i = 0; i < length; i++)
             {
                 key[i] = (byte)random.Next(min, max);
@@ -199,8 +208,8 @@ namespace CryptoPals.Sets
         private byte[] InsertRandomBytes(byte[] bytes, int keyLength)
         {
             // Create byte arrays containing 5-10 random bytes for inserting & after before the bytes to encrypt
-            int insertBeforeCount = random.Next(5, 10);
-            int insertAfterCount = random.Next(5, 10);
+            int insertBeforeCount = random.Next(5, 11);
+            int insertAfterCount = random.Next(5, 11);
             byte[] beforeBytes = GenerateRandomASCIIBytes(insertBeforeCount);
             byte[] afterBytes = GenerateRandomASCIIBytes(insertAfterCount);
 
