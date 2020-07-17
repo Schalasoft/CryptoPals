@@ -31,9 +31,7 @@ namespace CryptoPals.Sets
             byte[] paddedBytes = PadBytes(bytes, size);
 
             // Convert to string for output
-            string output = Encoding.ASCII.GetString(paddedBytes);
-
-            return output;
+            return Encoding.ASCII.GetString(paddedBytes);
         }
 
         // Pad input bytes to the specified number of bytes

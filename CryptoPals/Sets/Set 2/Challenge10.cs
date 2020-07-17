@@ -49,9 +49,7 @@ namespace CryptoPals.Sets
             byte[] decryptedBytes = AES_CBC(false, bytes, key, iv);
 
             // Convert decrypted bytes to string
-            string output = Encoding.ASCII.GetString(decryptedBytes);
-
-            return output;
+            return Encoding.ASCII.GetString(decryptedBytes);
         }
 
         // Encrypt/Decrypt using AES CBC (Advanced Encryption Standard Cipher Block Chaining Mode)

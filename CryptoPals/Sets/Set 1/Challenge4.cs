@@ -57,9 +57,12 @@ namespace CryptoPals.Sets
             KeyValuePair<int, Tuple<double, string>> maxScoringItem = challenge3.SingleKeyXORBruteForce(bytes);
 
             // Format the output
-            string output = challenge3.FormatOutput(maxScoringItem, $"{Environment.NewLine}Line   : {mostMissingBytesLineNumber}{Environment.NewLine}Bytes  : {mostMissingBytes} missing");
+            return FormatOutput(maxScoringItem, mostMissingBytesLineNumber, mostMissingBytes);
+        }
 
-            return output;
+        private string FormatOutput(KeyValuePair<int, Tuple<double, string>> item, int lineNumber, int missingByteCount)
+        {
+            return challenge3.FormatOutput(item, $"{Environment.NewLine}Line   : {lineNumber}{Environment.NewLine}Bytes  : {missingByteCount} missing"); ;
         }
 
         // Go through each line, XOR decode and choose the line with the highest score

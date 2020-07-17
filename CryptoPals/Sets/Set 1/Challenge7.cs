@@ -36,9 +36,7 @@ namespace CryptoPals.Sets
             byte[] data = AES_ECB(false, bytes, key);
 
             // Get decrypted bytes as text
-            string output = Encoding.ASCII.GetString(data);
-
-            return output;
+            return Encoding.ASCII.GetString(data);
         }
 
         // Encrypt/Decrypt bytes
@@ -49,9 +47,7 @@ namespace CryptoPals.Sets
             cipher.Init(encrypt, new KeyParameter(key));
             
             // Decrypt
-            byte[] decrypted = cipher.ProcessBytes(data);
-
-            return decrypted;
+            return cipher.ProcessBytes(data);
         }
     }
 }

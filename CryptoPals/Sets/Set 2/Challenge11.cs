@@ -54,9 +54,7 @@ namespace CryptoPals.Sets
             EncryptionTypeEnum[] types = DetectEncryptionTypes(encryptedBytes, keyLength);
 
             // Get the formatted output
-            string output = FormatOutput(types);
-
-            return output;
+            return FormatOutput(types);
         }
 
         private EncryptionTypeEnum[] DetectEncryptionTypes(byte[] bytes, int blockLength)
@@ -65,9 +63,7 @@ namespace CryptoPals.Sets
             byte[][] blocks = challenge6.CreateBlocks(bytes, blockLength);
 
             // Determine encryption type that has been used on each block
-            EncryptionTypeEnum[] types = DetectBlocksEncryptionTypes(blocks);
-
-            return types;
+            return DetectBlocksEncryptionTypes(blocks);
         }
 
         // Detects the encryption type for a block of bytes
@@ -149,9 +145,7 @@ namespace CryptoPals.Sets
             byte[] key = GenerateRandomASCIIBytes(keyLength);
 
             // Encrypt the data where each block has been randomly encrypted with ECB or CBC
-            byte[] encryptedBytes = EncryptBytesRandomly(bytesWithInserts, keyLength, key);
-
-            return encryptedBytes;
+            return EncryptBytesRandomly(bytesWithInserts, keyLength, key);
         }
 
         // Format the output

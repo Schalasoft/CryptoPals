@@ -52,10 +52,12 @@ namespace CryptoPals.Sets
             int mostRepetitions = repeatedBlockCounts.Max();
             int encryptedLineIndex = Array.FindIndex(repeatedBlockCounts, x => x == mostRepetitions) + 1; // Add 1 as we count lines from 1 not 0
 
-            // Format the output
-            string output = $"Index  : {encryptedLineIndex}{Environment.NewLine}Dupes  : {mostRepetitions}{Environment.NewLine}{lines[encryptedLineIndex]}";
+            return FormatOutput(encryptedLineIndex, mostRepetitions, lines[encryptedLineIndex]);
+        }
 
-            return output;
+        private string FormatOutput(int lineIndex, int repetitions, string line)
+        {
+            return $"Index  : {lineIndex}{Environment.NewLine}Dupes  : {repetitions}{Environment.NewLine}{line}";
         }
 
         // Detects if the bytes have been ECB encrypted

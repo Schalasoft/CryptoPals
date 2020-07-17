@@ -36,9 +36,7 @@ namespace CryptoPals.Sets
             byte[] bytes = XORByteArray(a, b);
 
             // Convert to string
-            string xord = challenge1.HexBytesToString(bytes);
-
-            return xord;
+            return challenge1.HexBytesToString(bytes);
         }
 
         // XOR two bytes

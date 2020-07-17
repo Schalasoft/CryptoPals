@@ -77,11 +77,8 @@ namespace CryptoPals.Sets
             // Get likely XOR key
             KeyValuePair<int, Tuple<double, string>> maxScoringItem = SingleKeyXORBruteForce(bytes);
 
-            // Format output
-            string output = FormatOutput(maxScoringItem);
-
             // Return combined output so we can see output, and key, and score
-            return output;
+            return FormatOutput(maxScoringItem);
         }
 
         // Decode text against a single key and score it
@@ -132,10 +129,8 @@ namespace CryptoPals.Sets
                 data.Add(chunk.Key, chunk.Value);
             }
 
-            // Get the KVP with the max score
-            KeyValuePair<int, Tuple<double, string>> maxScoringItem = data.FirstOrDefault(x => x.Value.Item1 == data.Values.Max(x => x.Item1));
-
-            return maxScoringItem;
+            // Return the KVP with the max score
+            return data.FirstOrDefault(x => x.Value.Item1 == data.Values.Max(x => x.Item1));
         }
 
         // Get the max score of a given string using the letter frequency table

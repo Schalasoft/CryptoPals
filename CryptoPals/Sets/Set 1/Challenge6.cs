@@ -67,13 +67,16 @@ namespace CryptoPals.Sets
             byte[] outputBytes = challenge5.RepeatingKeyXOR(decodedBytes, keyBytes);
 
             // Get the key and decrypted as strings to output
-            string key = Encoding.ASCII.GetString(keyBytes);
             string output = Encoding.ASCII.GetString(outputBytes);
+            string key = Encoding.ASCII.GetString(keyBytes);
 
             // Format the output
-            string outputFormatted = $"{output}{Environment.NewLine}Key    : {key}";
+            return FormatOutput(output, key);
+        }
 
-            return outputFormatted;
+        private string FormatOutput(string output, string key)
+        {
+            return $"{output}{Environment.NewLine}Key    : {key}";
         }
 
         // Calculate the key size by taking the lowest normalized hamming distance between equal sized sets of bytes in the text
