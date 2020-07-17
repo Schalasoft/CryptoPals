@@ -140,7 +140,7 @@ namespace CryptoPals.Sets
         {
             // Insert 5-10 random bytes before and after the bytes
             byte[] bytesWithInserts = InsertRandomBytes(bytes, keyLength);
-            // CDG we might not want to be using the key length for InsertRandomBytes as we don't "know it"
+            // TODO CDG we might not want to be using the key length for InsertRandomBytes as we don't "know it"
             // Same for EncryptBytesRandomly
 
             // Create a random key
