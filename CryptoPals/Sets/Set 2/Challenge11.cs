@@ -114,7 +114,7 @@ namespace CryptoPals.Sets
                     byteToAdd = bytes[i - insertBeforeCount]; // Normalize by subtracting the added before byte count
                 else
                     // After byte
-                    byteToAdd = afterBytes[i % (insertBeforeCount + bytes.Length)]; // Normalize by getting the remainder after the already added added bytes
+                    byteToAdd = afterBytes[i % (insertBeforeCount + bytes.Length)]; // Normalize by getting the remainder after the already added bytes
 
                 // Add the appropriate byte
                 bytesWithInserts[i] = byteToAdd;
