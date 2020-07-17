@@ -38,6 +38,7 @@ namespace CryptoPals.Sets
         // Reuse previous challenge functionality
         IChallenge6 challenge6   = (IChallenge6)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge6);
         IChallenge7 challenge7   = (IChallenge7)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge7);
+        IChallenge8 challenge8   = (IChallenge8)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge8);
         IChallenge9 challenge9   = (IChallenge9)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge9);
         IChallenge10 challenge10 = (IChallenge10)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge10);
 
@@ -73,6 +74,7 @@ namespace CryptoPals.Sets
             EncryptionTypeEnum type = 0;
 
             // CDG TODO
+            bool ecb = challenge8.IsECBEncrypted(block);
 
             return type;
         }

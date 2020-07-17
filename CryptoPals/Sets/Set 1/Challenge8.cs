@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace CryptoPals.Sets
 {
-    class Challenge8 : IChallenge
+    class Challenge8 : IChallenge8, IChallenge
     {
         /*
         Detect AES in ECB mode
@@ -60,7 +60,6 @@ namespace CryptoPals.Sets
             return $"Index  : {lineIndex}{Environment.NewLine}Dupes  : {repetitions}{Environment.NewLine}{line}";
         }
 
-        // Detects if the bytes have been ECB encrypted
         public bool IsECBEncrypted(byte[] bytes)
         {
             // CDG TODO
