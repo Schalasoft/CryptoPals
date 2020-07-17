@@ -1,5 +1,6 @@
 ﻿using CryptoPals.Enumerations;
 using CryptoPals.Interfaces;
+using Org.BouncyCastle.Asn1;
 using System;
 using System.Collections;
 using System.Text;
@@ -51,45 +52,34 @@ namespace CryptoPals.Sets
             byte[][] blocks = challenge6.CreateBlocks(encryptedBytes, keyLength);
 
             // Determine encryption type that has been used on each block
-            string[] types = new string[blocks.Length];
-            for(int i = 0; i < blocks.Length; i++)
-            {
-                // Determine the block encryption type and return it as an enum
-                EncryptionTypeEnum type = DetectBlockEncryptionType(encryptedBytes);
+            string[] types = DetectBlocksEncryptionType(blocks);
 
-                // Store the type of encryption used for the block index
-                types[i] = type.ToString();
-            }
-
-            // Build the output string from the types array
-            StringBuilder stringBuilder = new StringBuilder();
-            for(int i = 0; i < types.Length - 5; i++)
-            {
-                // Whitespace padding for output uniformity: will work up until 2 digit indexes (blocks in the 3 digits will be truncated from the output anyway)
-                stringBuilder.Append($"Block {i,2} has been encrypted with: {types[i].ToString()}{Environment.NewLine}");
-            }
-
-            // Get the built string for output
-            string output = stringBuilder.ToString();
+            // Get the formatted output
+            string output = FormatOutput(types);
 
             return output;
         }
 
-        // Generates a random key of the specified size
-        private byte[] GenerateRandomASCIIBytes(int length)
+        // Detects the encryption type for a block of bytes
+        private EncryptionTypeEnum DetectBlockEncryptionType(byte[] block)
         {
-            // Create byte array to store encrypted key
-            byte[] key = new byte[length];
+            // Determine encryption type being used
+            EncryptionTypeEnum type = 0;
 
-            // Assign each part of the key to a random byte value (0-256 for full ASCII range)
-            int min = 0;
-            int max = 256;
-            for(int i = 0; i < length; i++)
+            return type;
+        }
+
+        // Create an array containing the encryption type of each block
+        private string[] DetectBlocksEncryptionType(byte[][] blocks)
+        {
+            string[] types = new string[blocks.Length];
+            for (int i = 0; i < blocks.Length; i++)
             {
-                key[i] = (byte)random.Next(min, max);
+                // Determine the block encryption type and return it as an enum
+                types[i] = DetectBlockEncryptionType(blocks[i]).ToString();
             }
-                
-            return key;
+
+            return types;
         }
 
         // Encrypts data under a randomly generated key, randomly using ECB or CBC for each block
@@ -99,11 +89,11 @@ namespace CryptoPals.Sets
             int insertBeforeCount = random.Next(5, 10);
             int insertAfterCount = random.Next(5, 10);
             byte[] beforeBytes = GenerateRandomASCIIBytes(insertBeforeCount);
-            byte[] afterBytes  = GenerateRandomASCIIBytes(insertAfterCount);
+            byte[] afterBytes = GenerateRandomASCIIBytes(insertAfterCount);
 
             // Populate byte array with the inserted before bytes, original bytes, and inserted after bytes
             byte[] bytesWithInserts = new byte[beforeBytes.Length + bytes.Length + afterBytes.Length];
-            for(int i = 0; i < bytesWithInserts.Length; i++)
+            for (int i = 0; i < bytesWithInserts.Length; i++)
             {
                 // Determine which byte to add
                 byte byteToAdd;
@@ -122,7 +112,7 @@ namespace CryptoPals.Sets
             }
 
             // Pad the constructed byte array if it is not divisible by the key length
-            if(bytesWithInserts.Length % keyLength != 0)
+            if (bytesWithInserts.Length % keyLength != 0)
                 bytesWithInserts = challenge9.PadBytes(bytesWithInserts, keyLength);
 
             // Create a random key
@@ -153,7 +143,7 @@ namespace CryptoPals.Sets
                 }
 
                 // Add the encrypted block to the encrytedBytes array for returning
-                for(int j = 0; j < encryptedBlock.Length; j++)
+                for (int j = 0; j < encryptedBlock.Length; j++)
                 {
                     encryptedBytes[j + (i * keyLength)] = encryptedBlock[j];
                 }
@@ -162,13 +152,35 @@ namespace CryptoPals.Sets
             return encryptedBytes;
         }
 
-        // Detects the encryption type for a block of bytes
-        private EncryptionTypeEnum DetectBlockEncryptionType(byte[] block)
+        // Format the output
+        private string FormatOutput(string[] types)
         {
-            // Determine encryption type being used
-            EncryptionTypeEnum type = 0;
+            // Build the output string from the types array
+            StringBuilder stringBuilder = new StringBuilder();
+            for (int i = 0; i < types.Length - 5; i++)
+            {
+                // Whitespace padding for output uniformity: will work up until 2 digit indexes (blocks in the 3 digits will be truncated from the output anyway)
+                stringBuilder.Append($"Block {i,2} has been encrypted with: {types[i].ToString()}{Environment.NewLine}");
+            }
 
-            return type;
+            return stringBuilder.ToString();
+        }
+
+        // Generates a random key of the specified size
+        private byte[] GenerateRandomASCIIBytes(int length)
+        {
+            // Create byte array to store encrypted key
+            byte[] key = new byte[length];
+
+            // Assign each part of the key to a random byte value (0-256 for full ASCII range)
+            int min = 0;
+            int max = 256;
+            for(int i = 0; i < length; i++)
+            {
+                key[i] = (byte)random.Next(min, max);
+            }
+                
+            return key;
         }
     }
 }
