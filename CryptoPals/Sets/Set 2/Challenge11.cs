@@ -82,48 +82,15 @@ namespace CryptoPals.Sets
             return types;
         }
 
-        // Encrypts data under a randomly generated key, randomly using ECB or CBC for each block
-        private byte[] EncryptWithUnknownKey(byte[] bytes, int keyLength)
+        // Encrypt bytes using ECB and CBC randomly for each block
+        private byte[] EncryptBytesRandomly(byte[] bytes, int blockLength, byte[] key)
         {
-            // Create byte arrays containing 5-10 random bytes for inserting & after before the bytes to encrypt
-            int insertBeforeCount = random.Next(5, 10);
-            int insertAfterCount = random.Next(5, 10);
-            byte[] beforeBytes = GenerateRandomASCIIBytes(insertBeforeCount);
-            byte[] afterBytes = GenerateRandomASCIIBytes(insertAfterCount);
-
-            // Populate byte array with the inserted before bytes, original bytes, and inserted after bytes
-            byte[] bytesWithInserts = new byte[beforeBytes.Length + bytes.Length + afterBytes.Length];
-            for (int i = 0; i < bytesWithInserts.Length; i++)
-            {
-                // Determine which byte to add
-                byte byteToAdd;
-                if (i < insertBeforeCount)
-                    // Before byte
-                    byteToAdd = beforeBytes[i]; // i is the same for both
-                else if (i < insertBeforeCount + bytes.Length)
-                    // Original byte
-                    byteToAdd = bytes[i - insertBeforeCount]; // Normalize by subtracting the added before byte count
-                else
-                    // After byte
-                    byteToAdd = afterBytes[i % (insertBeforeCount + bytes.Length)]; // Normalize by getting the remainder after the already added bytes
-
-                // Add the appropriate byte
-                bytesWithInserts[i] = byteToAdd;
-            }
-
-            // Pad the constructed byte array if it is not divisible by the key length
-            if (bytesWithInserts.Length % keyLength != 0)
-                bytesWithInserts = challenge9.PadBytes(bytesWithInserts, keyLength);
-
-            // Create a random key
-            byte[] key = GenerateRandomASCIIBytes(keyLength);
-
             // Encrypt blocks with ECB or CBC randomly
-            byte[] encryptedBytes = new byte[bytesWithInserts.Length];
-            for (int i = 0; i < encryptedBytes.Length / keyLength; i++)
+            byte[] encryptedBytes = new byte[bytes.Length];
+            for (int i = 0; i < encryptedBytes.Length / blockLength; i++)
             {
                 // Get the unencrypted block
-                byte[] unencryptedBlock = (byte[])new ArrayList(bytesWithInserts).GetRange(i * keyLength, keyLength).ToArray(typeof(byte));
+                byte[] unencryptedBlock = (byte[])new ArrayList(bytes).GetRange(i * blockLength, blockLength).ToArray(typeof(byte));
 
                 // Encrypt the block
                 byte[] encryptedBlock = unencryptedBlock;
@@ -136,7 +103,7 @@ namespace CryptoPals.Sets
                 else if (encryptionType.Equals(EncryptionTypeEnum.CBC))
                 {
                     // Create an initialization vector (use random IV)
-                    byte[] iv = GenerateRandomASCIIBytes(keyLength);
+                    byte[] iv = GenerateRandomASCIIBytes(blockLength);
 
                     // Encrypt using CBC
                     encryptedBlock = challenge10.AES_CBC(true, unencryptedBlock, key, iv);
@@ -145,9 +112,36 @@ namespace CryptoPals.Sets
                 // Add the encrypted block to the encrytedBytes array for returning
                 for (int j = 0; j < encryptedBlock.Length; j++)
                 {
-                    encryptedBytes[j + (i * keyLength)] = encryptedBlock[j];
+                    encryptedBytes[j + (i * blockLength)] = encryptedBlock[j];
                 }
             }
+
+            return encryptedBytes;
+        }
+
+        // Encrypts data under a randomly generated key, randomly using ECB or CBC for each block
+        private byte[] EncryptWithUnknownKey(byte[] bytes, int keyLength)
+        {
+            // Create byte arrays containing 5-10 random bytes for inserting & after before the bytes to encrypt
+            int insertBeforeCount = random.Next(5, 10);
+            int insertAfterCount = random.Next(5, 10);
+            byte[] beforeBytes = GenerateRandomASCIIBytes(insertBeforeCount);
+            byte[] afterBytes = GenerateRandomASCIIBytes(insertAfterCount);
+
+            // Construct byte array with the original bytes after adding the additional bytes
+            byte[] bytesWithInserts;
+            bytesWithInserts = InsertBytes(bytes, beforeBytes, true); // Append before
+            bytesWithInserts = InsertBytes(bytes, afterBytes, false); // Append after
+
+            // Pad the constructed byte array if it is not divisible by the key length
+            if (bytesWithInserts.Length % keyLength != 0)
+                bytesWithInserts = challenge9.PadBytes(bytesWithInserts, keyLength);
+
+            // Create a random key
+            byte[] key = GenerateRandomASCIIBytes(keyLength);
+
+            // Encrypt the data where each block has been randomly encrypted with ECB or CBC
+            byte[] encryptedBytes = EncryptBytesRandomly(bytesWithInserts, keyLength, key);
 
             return encryptedBytes;
         }
@@ -181,6 +175,27 @@ namespace CryptoPals.Sets
             }
                 
             return key;
+        }
+
+        // Create a byte array with the bytes to insert put before or after the original set of bytes
+        private byte[] InsertBytes(byte[] bytesOriginal, byte[] bytesToInsert, bool insertBefore)
+        {
+            byte[] bytesWithInserts = new byte[bytesToInsert.Length + bytesOriginal.Length];
+
+            if (insertBefore)
+            {
+                // Insert bytes before the original bytes
+                bytesToInsert.CopyTo(bytesWithInserts, 0);
+                bytesOriginal.CopyTo(bytesWithInserts, bytesToInsert.Length);
+            }
+            else
+            {
+                // Insert bytes after the original bytes
+                bytesOriginal.CopyTo(bytesWithInserts, 0);
+                bytesToInsert.CopyTo(bytesWithInserts, bytesOriginal.Length);
+            }
+
+            return bytesWithInserts;
         }
     }
 }
