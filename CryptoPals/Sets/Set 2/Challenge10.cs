@@ -122,7 +122,7 @@ namespace CryptoPals.Sets
         private byte[] AES_CBC_Decrypt(byte[] block, byte[] previousBlock, byte[] key)
         {
             // ECB Decrypt
-            byte[] decryptedBlock = challenge7.AES_ECB(false, block, key);
+            byte[] decryptedBlock = challenge7.AES_ECB(block, key);
 
             // XOR block against the previous block
             return challenge2.XORByteArray(decryptedBlock, previousBlock);

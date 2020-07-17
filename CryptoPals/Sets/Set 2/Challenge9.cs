@@ -41,7 +41,7 @@ namespace CryptoPals.Sets
         {
             // If the blocksize we get is bigger than the the size specified, we are padding bytes to be evenly divisible by the size
             if (bytes.Length > size)
-                size = bytes.Length + (bytes.Length % size);
+                size = bytes.Length + (size - (bytes.Length % size));
 
             // Create a byte array the size of the desired length
             byte[] paddedBytes = new byte[size];
