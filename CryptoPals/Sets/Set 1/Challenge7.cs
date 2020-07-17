@@ -42,6 +42,8 @@ namespace CryptoPals.Sets
         // Encrypt/Decrypt bytes
         public byte[] AES_ECB(bool encrypt, byte[] data, byte[] key)
         {
+            // TODO decrypt
+
             // Setup the decryption cipher
             IBufferedCipher cipher = CipherUtilities.GetCipher("AES/ECB/NoPadding");
             cipher.Init(encrypt, new KeyParameter(key));

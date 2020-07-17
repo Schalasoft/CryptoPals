@@ -4,7 +4,7 @@ using CryptoPals.Interfaces;
 
 namespace CryptoPals.Sets
 {
-    // Convert Hex string as Base64
+    // Convert Hex string to Base64
     class Challenge1 : IChallenge1, IChallenge
     {
         /*
@@ -68,7 +68,7 @@ namespace CryptoPals.Sets
 
             for (int i = 0; i < hex.Length; i += 2)
             {
-                bytes[i / 2] = Convert.ToByte(hex.Substring(i, 2), 16);
+                bytes[i / 2] = HexToByte(hex);
             }
 
             return bytes;
