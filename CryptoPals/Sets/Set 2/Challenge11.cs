@@ -1,6 +1,5 @@
 ﻿using CryptoPals.Enumerations;
 using CryptoPals.Interfaces;
-using Org.BouncyCastle.Asn1;
 using System;
 using System.Collections;
 using System.Text;
@@ -130,20 +129,10 @@ namespace CryptoPals.Sets
         // Encrypts data under a randomly generated key, randomly using ECB or CBC for each block
         private byte[] EncryptWithUnknownKey(byte[] bytes, int keyLength)
         {
-            // Create byte arrays containing 5-10 random bytes for inserting & after before the bytes to encrypt
-            int insertBeforeCount = random.Next(5, 10);
-            int insertAfterCount = random.Next(5, 10);
-            byte[] beforeBytes = GenerateRandomASCIIBytes(insertBeforeCount);
-            byte[] afterBytes = GenerateRandomASCIIBytes(insertAfterCount);
-
-            // Construct byte array with the original bytes after adding the additional bytes
-            byte[] bytesWithInserts;
-            bytesWithInserts = InsertBytes(bytes, beforeBytes, true); // Append before
-            bytesWithInserts = InsertBytes(bytes, afterBytes, false); // Append after
-
-            // Pad the constructed byte array if it is not divisible by the key length
-            if (bytesWithInserts.Length % keyLength != 0)
-                bytesWithInserts = challenge9.PadBytes(bytesWithInserts, keyLength);
+            // Insert 5-10 random bytes before and after the bytes
+            byte[] bytesWithInserts = InsertRandomBytes(bytes, keyLength);
+            // CDG we might not want to be using the key length for InsertRandomBytes as we don't "know it"
+            // Same for EncryptBytesRandomly
 
             // Create a random key
             byte[] key = GenerateRandomASCIIBytes(keyLength);
@@ -202,6 +191,27 @@ namespace CryptoPals.Sets
                 bytesOriginal.CopyTo(bytesWithInserts, 0);
                 bytesToInsert.CopyTo(bytesWithInserts, bytesOriginal.Length);
             }
+
+            return bytesWithInserts;
+        }
+
+        // Insert 5-10 random bytes before and after the bytes
+        private byte[] InsertRandomBytes(byte[] bytes, int keyLength)
+        {
+            // Create byte arrays containing 5-10 random bytes for inserting & after before the bytes to encrypt
+            int insertBeforeCount = random.Next(5, 10);
+            int insertAfterCount = random.Next(5, 10);
+            byte[] beforeBytes = GenerateRandomASCIIBytes(insertBeforeCount);
+            byte[] afterBytes = GenerateRandomASCIIBytes(insertAfterCount);
+
+            // Construct byte array with the original bytes after adding the additional bytes
+            byte[] bytesWithInserts;
+            bytesWithInserts = InsertBytes(bytes, beforeBytes, true); // Append before
+            bytesWithInserts = InsertBytes(bytes, afterBytes, false); // Append after
+
+            // Pad the constructed byte array if it is not divisible by the key length
+            if (bytesWithInserts.Length % keyLength != 0)
+                bytesWithInserts = challenge9.PadBytes(bytesWithInserts, keyLength);
 
             return bytesWithInserts;
         }
