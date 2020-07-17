@@ -38,7 +38,7 @@ namespace CryptoPals.Sets
         public string Solve(string input)
         {
             //CDG DEBUG
-            input = "YELLOW SUBMARINE YELLOW SUBMARINE YELLOW SUBMARINE";
+            //input = "YELLOW SUBMARINE YELLOW SUBMARINE YELLOW SUBMARINE";
 
             // Get input and key as bytes
             byte[] bytes = Encoding.ASCII.GetBytes(input);
@@ -49,7 +49,8 @@ namespace CryptoPals.Sets
             byte[] iv = challenge9.PadBytes(new byte[0], key.Length, paddingByte); // Could just let use a default byte array but this reads clearer
 
             // CDG DEBUG
-            byte[] encryptedBytes = AES_CBC(true, bytes, key, iv);
+            //byte[] encryptedBytes = AES_CBC(true, bytes, key, iv);
+            byte[] encryptedBytes = bytes;
 
             // Decrypt
             byte[] decryptedBytes = AES_CBC(false, encryptedBytes, key, iv);
@@ -122,7 +123,7 @@ namespace CryptoPals.Sets
         private byte[] AES_CBC_Decrypt(byte[] block, byte[] previousBlock, byte[] key)
         {
             // ECB Decrypt
-            byte[] decryptedBlock = challenge7.AES_ECB(block, key);
+            byte[] decryptedBlock = challenge7.AES_ECB(false, block, key);
 
             // XOR block against the previous block
             return challenge2.XORByteArray(decryptedBlock, previousBlock);
