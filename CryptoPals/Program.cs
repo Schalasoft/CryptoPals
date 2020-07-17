@@ -83,7 +83,7 @@ namespace CryptoPals
                     input = inputAlias;
 
                 // Truncate the output to a max length
-                int maxLength = 200;
+                int maxLength = 1000;
                 if (output.Length > maxLength)
                     output = $"{output.Substring(0, maxLength)} ...{Environment.NewLine}TRUNCATED";
 
