@@ -100,7 +100,7 @@ namespace CryptoPals.Sets
             }
 
             // Return the blocks as a flattend array (2d to 1d)
-            byte[] output = new byte[blocks.Length * key.Length];
+            byte[] output = new byte[bytes.Length];
             int index = 0;
             foreach (byte[] byteArr in blocks)
                 foreach (byte byt in byteArr)
