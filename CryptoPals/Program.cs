@@ -42,7 +42,7 @@ namespace CryptoPals
             // Initialize the Challenge Manager used to hold the instance of each challenge
             // DEBUG Should start at 1 and end at the last challenge but for speed we only run the current challenge
             int currentChallenge = 11;
-            int startChallenge = 1;
+            int startChallenge = currentChallenge;
             int challengeCount = currentChallenge;
             InitializeChallengeManager(challengeCount);
 
