@@ -4,12 +4,19 @@ using CryptoPals.Interfaces;
 
 namespace CryptoPals
 {
+    /// <summary>
+    /// Challenge Manager initializes each challenge class with the ChallengeFactory.
+    /// This is done so the challenges are only initialized once, where they can be requested by subsequent challenges
+    /// </summary>
     static class ChallengeManager
     {
         // Array of all the challenges (for reuse in later challenges)
-        static public IChallenge[] Challenges;
+        static private IChallenge[] Challenges;
 
-        // Initialize all challenges
+        /// <summary>
+        /// Initialize the number of specified challenges (starting from 1)
+        /// </summary>
+        /// <param name="challengeCount">The number of challenges to initialize</param>
         static public void Initialize(int challengeCount)
         {
             Challenges = new IChallenge[challengeCount];
@@ -19,7 +26,11 @@ namespace CryptoPals
             }
         }
 
-        // Get a challenge based on its ID
+        /// <summary>
+        /// Get a challenge interface based on its ID
+        /// </summary>
+        /// <param name="challengeId">The challenge ID</param>
+        /// <returns>The challenge interface associated with the ID (see ChallengeEnum)</returns>
         static public IChallenge GetChallenge(int challengeId)
         {
             return Challenges[challengeId-1];
