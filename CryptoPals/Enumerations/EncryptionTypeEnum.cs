@@ -1,5 +1,8 @@
 ﻿namespace CryptoPals.Enumerations
 {
+    /// <summary>
+    /// An enumeration for encryption types
+    /// </summary>
     enum EncryptionTypeEnum : int
     {
         None = 0,

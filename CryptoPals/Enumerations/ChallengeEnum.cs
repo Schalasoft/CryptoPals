@@ -1,5 +1,8 @@
 ﻿namespace CryptoPals.Enumerations
 {
+    /// <summary>
+    /// An enumeration for challenges
+    /// </summary>
     enum ChallengeEnum : int
     {
         None = 0,
