@@ -7,6 +7,7 @@ using System.Text;
 
 namespace CryptoPals.Sets
 {
+    ///<inheritdoc cref="IChallenge7"/>
     class Challenge7 : IChallenge7, IChallenge
     {
         /*
@@ -24,6 +25,7 @@ namespace CryptoPals.Sets
         You'll need it a lot later on, and not just for attacking ECB.
         */
 
+        ///<inheritdoc />
         public string Solve(string input)
         {
             // Get bytes from Base64 string 
@@ -39,7 +41,7 @@ namespace CryptoPals.Sets
             return Encoding.ASCII.GetString(data);
         }
 
-        // Encrypt/Decrypt bytes
+        ///<inheritdoc cref="IChallenge7.AES_ECB(bool, byte[], byte[])"/>
         public byte[] AES_ECB(bool encrypt, byte[] data, byte[] key)
         {
             // TODO decrypt
