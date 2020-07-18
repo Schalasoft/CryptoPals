@@ -5,12 +5,20 @@ using System;
 
 namespace CryptoPals.Factories
 {
+    /// <summary>
+    /// Factory pattern for creating challenges
+    /// </summary>
     static class ChallengeFactory
     {
-        public static IChallenge InitializeChallenge(ChallengeEnum type)
+        /// <summary>
+        /// Inititalize a challenge based on its enumeration
+        /// </summary>
+        /// <param name="challenge">The challenge to initialize</param>
+        /// <returns>The class associated with the challenge enumeration specified</returns>
+        public static IChallenge InitializeChallenge(ChallengeEnum challenge)
         {
-            // Initialize the appropriate decoder
-            switch (type)
+            // Initialize the appropriate class based on the provided enumeration
+            switch (challenge)
             {
                 case ChallengeEnum.None:
                     return null;
