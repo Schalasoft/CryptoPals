@@ -5,6 +5,7 @@ using System.Text;
 
 namespace CryptoPals.Sets
 {
+    ///<inheritdoc cref="IChallenge10"/>
     class Challenge10 : IChallenge10, IChallenge
     {
         /*
@@ -35,6 +36,7 @@ namespace CryptoPals.Sets
         IChallenge7 challenge7 = (IChallenge7)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge7);
         IChallenge9 challenge9 = (IChallenge9)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge9);
 
+        ///<inheritdoc />
         public string Solve(string input)
         {
             // Get input and key as bytes
@@ -52,7 +54,7 @@ namespace CryptoPals.Sets
             return Encoding.ASCII.GetString(decryptedBytes);
         }
 
-        // Encrypt/Decrypt using AES CBC (Advanced Encryption Standard Cipher Block Chaining Mode)
+        ///<inheritdoc cref="IChallenge10.AES_CBC(bool, byte[], byte[], byte[])"/>
         public byte[] AES_CBC(bool encrypt, byte[] bytes, byte[] key, byte[] iv)
         {
             // Encrypt & decrypt in the one function is a bit hard to read but reduces code duplication
@@ -100,7 +102,13 @@ namespace CryptoPals.Sets
             return output;
         }
 
-        // ECB Encrypt
+        /// <summary>
+        /// Encrypt a block using ECB
+        /// </summary>
+        /// <param name="block">The block to encrypt</param>
+        /// <param name="previousBlock">The previous block for the encryption chain</param>
+        /// <param name="key">The key to encrypt with</param>
+        /// <returns>The block encrypted with the key and previous block</returns>
         private byte[] AES_CBC_Encrypt(byte[] block, byte[] previousBlock, byte[] key)
         {
             // XOR block against the previous block
@@ -110,7 +118,13 @@ namespace CryptoPals.Sets
             return challenge7.AES_ECB(true, xorBlock, key);
         }
 
-        // ECB Decrypt
+        /// <summary>
+        /// Decrypt a block using ECB
+        /// </summary>
+        /// <param name="block">The block to decrypt</param>
+        /// <param name="previousBlock">The previous block for the decryption chain</param>
+        /// <param name="key">The key to decrypt with</param>
+        /// <returns>The block decrypted with the key and previous block</returns>
         private byte[] AES_CBC_Decrypt(byte[] block, byte[] previousBlock, byte[] key)
         {
             // ECB Decrypt
