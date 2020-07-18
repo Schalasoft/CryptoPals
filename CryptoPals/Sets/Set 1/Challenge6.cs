@@ -8,6 +8,7 @@ using System.Text;
 
 namespace CryptoPals.Sets
 {
+    ///<inheritdoc cref="IChallenge6"/>
     class Challenge6 : IChallenge6, IChallenge
     {
         /*
@@ -54,7 +55,7 @@ namespace CryptoPals.Sets
         IChallenge3 challenge3 = (IChallenge3)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge3);
         IChallenge5 challenge5 = (IChallenge5)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge5);
 
-        // Solve the challenge
+        ///<inheritdoc />
         public string Solve(string input)
         {
             // Decode Base64
@@ -66,7 +67,7 @@ namespace CryptoPals.Sets
             // Decrypt using the determined repeating key
             byte[] outputBytes = challenge5.RepeatingKeyXOR(decodedBytes, keyBytes);
 
-            // Get the key and decrypted as strings to output
+            // Get the key and decrypted bytes as strings to output
             string output = Encoding.ASCII.GetString(outputBytes);
             string key = Encoding.ASCII.GetString(keyBytes);
 
@@ -74,15 +75,25 @@ namespace CryptoPals.Sets
             return FormatOutput(output, key);
         }
 
+        /// <summary>
+        /// Format string and key on seperate lines for outputting
+        /// </summary>
+        /// <param name="output">Decrypted string to display on first line</param>
+        /// <param name="key">Determined key to display on the second line</param>
+        /// <returns>Formatted string containing the output and key on seperate lines</returns>
         private string FormatOutput(string output, string key)
         {
             return $"{output}{Environment.NewLine}Key    : {key}";
         }
 
-        // Calculate the key size by taking the lowest normalized hamming distance between equal sized sets of bytes in the text
+        /// <summary>
+        /// Calculate the key size by taking the lowest normalized hamming distance between equal sized sets of bytes in the text
+        /// </summary>
+        /// <param name="bytes">The bytes to examine</param>
+        /// <returns>The likely key size for the bytes provided</returns>
         private int CalculateKeySize(byte[] bytes)
         {
-            // Try key sizes 2 to 40
+            // Try key sizes in the range minKeySize to maxKeySize
             int minKeySize = 2;
             int maxKeySize = 40;
             Dictionary<int, double> keySizes = new Dictionary<int, double>();
@@ -95,13 +106,16 @@ namespace CryptoPals.Sets
                 keySizes.Add(i, blocksHammingDistance);
             }
 
-            // Get the keysize associated with the smallest set of blocks hamming distance
-            int keySize = keySizes.FirstOrDefault(x => x.Value == keySizes.Values.Min()).Key;
-
-            return keySize;
+            // Return the keysize associated with the smallest set of blocks hamming distance
+            return keySizes.FirstOrDefault(x => x.Value == keySizes.Values.Min()).Key;
         }
 
-        // Get the hamming distance of consecutive adjacent blocks of bytes the length of keysize
+        /// <summary>
+        /// Get the hamming distance of consecutive adjacent blocks of bytes the length of keysize
+        /// </summary>
+        /// <param name="bytes">The bytes to convert to blocks that will be examined</param>
+        /// <param name="keySize">The key/block size to use</param>
+        /// <returns>The sum of the hamming distances of all compared neighbouring blocks</returns>
         private double CalculateBlockHammingDistance(byte[] bytes, int keySize)
         {
             // Use MemoryStream to simplify taking chunks of bytes
@@ -128,7 +142,12 @@ namespace CryptoPals.Sets
             return (distances.Sum() / distances.Length);
         }
 
-        // Break the ciphertext into blocks (the size of the key)
+        /// <summary>
+        /// Break the ciphertext into blocks (the size of the key)
+        /// </summary>
+        /// <param name="bytes">bytes to convert to blocks</param>
+        /// <param name="size">The size of each block</param>
+        /// <returns>The bytes converted to blocks of the specified size</returns>
         public byte[][] CreateBlocks(byte[] bytes, int size)
         {
             byte[][] blocks = new byte[bytes.Length / size][];
@@ -141,11 +160,16 @@ namespace CryptoPals.Sets
             return blocks;
         }
 
-        // Transpose each block (using the blocks, make transposed blocks of the the 1st byte of each block, the 2nd, 3rd etc.)
-        private byte[][] TransposeBlocks(byte[][] blocks, int keySize)
+        /// <summary>
+        /// Transpose each block (using the blocks, make transposed blocks of the the 1st byte of each block, the 2nd, 3rd etc.)
+        /// </summary>
+        /// <param name="blocks">The blocks to transpose</param>
+        /// <param name="blockSize">The block size</param>
+        /// <returns>The tranposed blocks</returns>
+        private byte[][] TransposeBlocks(byte[][] blocks, int blockSize)
         {
-            byte[][] transposedBlocks = new byte[keySize][];
-            for (int transPos = 0; transPos < keySize; transPos++)
+            byte[][] transposedBlocks = new byte[blockSize][];
+            for (int transPos = 0; transPos < blockSize; transPos++)
             {
                 byte[] transposition = new byte[blocks.Length];
                 for (int blockPos = 0; blockPos < blocks.Length; blockPos++)
@@ -160,11 +184,17 @@ namespace CryptoPals.Sets
             return transposedBlocks;
         }
 
-        // Solve each transposed block as a single character XOR, combining these to get the actual key
-        private byte[] SolveTransposedBlocks(byte[][] transposedBlocks, int keySize)
+        /// <summary>
+        /// Solve each transposed block as a single character XOR, combining these to get the actual key
+        /// </summary>
+        /// <param name="transposedBlocks">Made up of a block containing every 1st byte from each block, 
+        /// every 2nd byte from each block etc.</param>
+        /// <param name="blockSize">The size of each block</param>
+        /// <returns></returns>
+        private byte[] SolveTransposedBlocks(byte[][] transposedBlocks, int blockSize)
         {
-            byte[] key = new byte[keySize];
-            for (int i = 0; i < keySize; i++)
+            byte[] key = new byte[blockSize];
+            for (int i = 0; i < blockSize; i++)
             {
                 // Get the 'best' key XOR for this block
                 KeyValuePair<int, Tuple<double, string>> kvp = challenge3.SingleKeyXORBruteForce(transposedBlocks[i]);
@@ -175,7 +205,11 @@ namespace CryptoPals.Sets
             return key;
         }
 
-        // Calculate the repeating key given only the input string (the text must be at least 81 characters long if we go up to a keysize of 40)
+        /// <summary>
+        /// Calculate the repeating key given only the input string (the text must be at least 81 characters long if we go up to a keysize of 40)
+        /// </summary>
+        /// <param name="bytes">The bytes to determine the key with</param>
+        /// <returns>The repeating key that was calculated based on the input bytes</returns>
         private byte[] CalculateRepeatingKey(byte[] bytes)
         {
             // Calculate the key size
@@ -188,12 +222,15 @@ namespace CryptoPals.Sets
             byte[][] transposedBlocks = TransposeBlocks(blocks, keySize);
 
             // Solve each transposed block as a single character XOR, combining these to get the actual key
-            byte[] key = SolveTransposedBlocks(transposedBlocks, keySize);
-
-            return key;
+            return SolveTransposedBlocks(transposedBlocks, keySize);
         }
 
-        // Get the Hamming Distance of two equal length byte arrays (the total number of set bits after XORing the bytes together)
+        /// <summary>
+        /// Get the Hamming Distance of two equal length byte arrays (the total number of set bits after XORing the bytes together)
+        /// </summary>
+        /// <param name="a">The first byte array</param>
+        /// <param name="b">The second byte array</param>
+        /// <returns>The edit/hamming distance between the input byte arrays</returns>
         private int CalculateHammingDistance(byte[] a, byte[] b)
         {
             // Calculate hamming distance by XORing each byte, counting the number of 1s and summing them
@@ -204,7 +241,7 @@ namespace CryptoPals.Sets
                 byte c = challenge2.XORByte(a[i], b[i]);
 
                 // Count set bits
-                int count = CountSetBits(c);
+                int count = GetSetBitCount(c);
 
                 // Add to the running total (hamming distance)
                 hammingDistance += count;
@@ -213,9 +250,13 @@ namespace CryptoPals.Sets
             return hammingDistance;
         }
 
-        // Count the number of set bits in a byte by adding on any 1s using logical AND to the count, then right shifting to get the next bit
-        // This is done until the byte is zero (has no 1s left)
-        private int CountSetBits(byte b)
+        /// <summary>
+        /// Count the number of set bits in a byte by adding on any 1s using logical AND to the count, then right shifting to get the next bit.
+        /// This is done until the byte is zero (has no 1s left)
+        /// </summary>
+        /// <param name="b">The byte to count the number of set bits</param>
+        /// <returns>The number of set bits for the input byte</returns>
+        private int GetSetBitCount(byte b)
         {
             int count = 0;
             while (b > 0) 
