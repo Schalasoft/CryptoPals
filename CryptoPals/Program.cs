@@ -22,21 +22,30 @@ namespace CryptoPals
 
     class Program
     {
+        // Used to identify challenges that do not require input files
         private static List<int> challengesWithoutInputs = new List<int>() { };
 
-        // Main entry point
+        /// <summary>
+        /// Main entry point
+        /// </summary>
+        /// <param name="args">Additional command line arguments (unused)</param>
         public static void Main(string[] args)
         {
             SolveChallenges();
         }
 
-        // Challenge Manager holds instances of challenges for reuse
+        /// <summary>
+        /// Initialize the Challenge Manager that holds instances of challenges for reuse
+        /// </summary>
+        /// <param name="challengeCount"></param>
         private static void InitializeChallengeManager(int challengeCount)
         {
             ChallengeManager.Initialize(challengeCount);
         }
 
-        // Solve all challenges
+        /// <summary>
+        /// Solve all the challenges
+        /// </summary>
         private static void SolveChallenges()
         {
             // Initialize the Challenge Manager used to hold the instance of each challenge
@@ -95,7 +104,12 @@ namespace CryptoPals
             }
         }
 
-        // Solve an individual challenge
+        /// <summary>
+        /// Solve an individual challenge
+        /// </summary>
+        /// <param name="challengeId">The challenge to solve (its ID relates to its ChallengeEnum value)</param>
+        /// <param name="input">The input string for the challenge (files from the Data directory)</param>
+        /// <returns>The output of the challenge class (specific to each challenge)</returns>
         private static string SolveChallenge(int challengeId, string input)
         {
             return ChallengeManager.GetChallenge(challengeId).Solve(input);
