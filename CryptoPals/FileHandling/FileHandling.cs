@@ -3,10 +3,18 @@ using System.Text.RegularExpressions;
 
 namespace CryptoPals
 {
+    /// <summary>
+    /// The class handles files
+    /// </summary>
     static class FileHandling
     {
-        // Get the text from a file in a directory
-        public static string ReadFile(string dir, string fileName)
+        /// <summary>
+        /// Get the text from a file in a directory, if no directory provided then use the default data directory
+        /// </summary>
+        /// <param name="fileName">The name of the file (including .txt)</param>
+        /// <param name="dir">The directory the file is found in</param>
+        /// <returns>The plaintext from the file, with additional escape characters unescaped (as this causes issues with encryption/decryption)</returns>
+        public static string ReadFile(string fileName, string dir = "..\\..\\..\\Data\\")
         {
             // Read entire file
             string text = File.ReadAllText($"{dir}{fileName}");

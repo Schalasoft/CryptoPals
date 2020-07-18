@@ -57,7 +57,7 @@ namespace CryptoPals
 
                 // Read the challenge input file, unless it is a challenge without an input
                 if(!challengesWithoutInputs.Contains(i))
-                    input = FileHandling.ReadFile(Constants.Directory, fileName);
+                    input = FileHandling.ReadFile(fileName);
 
                 // Perform any additional preparation operations for specific challenges
                 switch (i)
