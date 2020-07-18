@@ -3,6 +3,7 @@ using System.Text;
 
 namespace CryptoPals.Sets
 {
+    ///<inheritdoc cref="IChallenge9"/>
     class Challenge9 : IChallenge9, IChallenge
     {
         /*
@@ -21,6 +22,7 @@ namespace CryptoPals.Sets
         "YELLOW SUBMARINE\x04\x04\x04\x04"
         */
 
+        ///<inheritdoc />
         public string Solve(string input)
         {
             // Get the text to pad
@@ -34,7 +36,7 @@ namespace CryptoPals.Sets
             return Encoding.ASCII.GetString(paddedBytes);
         }
 
-        // Pad input bytes to the specified number of bytes
+        ///<inheritdoc cref="IChallenge9.PadBytes(byte[], int, byte)"/>
         public byte[] PadBytes(byte[] bytes, int size, byte paddingByte = (byte)0x04)
         {
             // If the blocksize we get is bigger than the the size specified, we are padding bytes to be evenly divisible by the size
