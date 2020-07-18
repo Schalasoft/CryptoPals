@@ -43,6 +43,7 @@ namespace CryptoPals.Sets
         IChallenge9 challenge9   = (IChallenge9)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge9);
         IChallenge10 challenge10 = (IChallenge10)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge10);
 
+        /// <inheritdoc />
         public string Solve(string input)
         {
             // Convert input string to bytes
@@ -59,16 +60,33 @@ namespace CryptoPals.Sets
             return FormatOutput(types);
         }
 
+        /// <summary>
+        /// Detect the encryption types used in each block (size of input length) of the input bytes
+        /// </summary>
+        /// <param name="bytes">The bytes to check</param>
+        /// <param name="blockLength">The length of each block to check the encryption type of</param>
+        /// <returns>An array of EncryptionTypeEnum relating to the encryption type of each block (ECB or CBC)</returns>
         private EncryptionTypeEnum[] DetectEncryptionTypes(byte[] bytes, int blockLength)
         {
             // Break encrypted bytes into blocks the size of the key
             byte[][] blocks = challenge6.CreateBlocks(bytes, blockLength);
 
             // Determine encryption type that has been used on each block
-            return DetectBlocksEncryptionTypes(blocks);
+            EncryptionTypeEnum[] types = new EncryptionTypeEnum[blocks.Length];
+            for (int i = 0; i < blocks.Length; i++)
+            {
+                // Determine the block encryption type and return it as an enum
+                types[i] = DetectBlockEncryptionType(blocks[i]);
+            }
+
+            return types;
         }
 
-        // Detects the encryption type for a block of bytes
+        /// <summary>
+        /// Detects the encryption type for a block of bytes
+        /// </summary>
+        /// <param name="block">The block to check</param>
+        /// <returns>The encryption type of the block (ECB/CBC)</returns>
         private EncryptionTypeEnum DetectBlockEncryptionType(byte[] block)
         {
             // Determine encryption type being used
@@ -80,20 +98,13 @@ namespace CryptoPals.Sets
             return type;
         }
 
-        // Create an array containing the encryption type of each block
-        private EncryptionTypeEnum[] DetectBlocksEncryptionTypes(byte[][] blocks)
-        {
-            EncryptionTypeEnum[] types = new EncryptionTypeEnum[blocks.Length];
-            for (int i = 0; i < blocks.Length; i++)
-            {
-                // Determine the block encryption type and return it as an enum
-                types[i] = DetectBlockEncryptionType(blocks[i]);
-            }
-
-            return types;
-        }
-
-        // Encrypt bytes using ECB and CBC randomly for each block
+        /// <summary>
+        /// Encrypt bytes using ECB and CBC randomly for each block
+        /// </summary>
+        /// <param name="bytes">The bytes to encrypt</param>
+        /// <param name="blockLength">The length of each block to encrypt</param>
+        /// <param name="key">The key used to encrypt</param>
+        /// <returns>A byte array containing the encrypted bytes (where each block has a 50% chance of being ECB or CBC encrypted)</returns>
         private byte[] EncryptBytesRandomly(byte[] bytes, int blockLength, byte[] key)
         {
             // Array used to record the encryption type that was used per block for validation
@@ -136,12 +147,21 @@ namespace CryptoPals.Sets
             return encryptedBytes;
         }
 
-        // Encrypts data under a randomly generated key, randomly using ECB or CBC for each block
+        /// <summary>
+        /// Encrypts data under a randomly generated key, randomly using ECB or CBC for each block
+        /// </summary>
+        /// <param name="bytes">The bytes to encrypt</param>
+        /// <param name="keyLength">The length of the key to populate with random bytes (0-256)</param>
+        /// <returns>The bytes encrypted with an unknown key, where each block is ECB or CBC encrypted</returns>
         private byte[] EncryptWithUnknownKey(byte[] bytes, int keyLength)
         {
             // Insert 5-10 random bytes before and after the bytes
-            byte[] bytesWithInserts = InsertRandomBytes(bytes, keyLength);
-            // TODO CDG we might not want to be using the key length for InsertRandomBytes as we don't "know it"
+            byte[] bytesWithInserts = InsertRandomBytes(bytes);
+
+            // Pad the constructed byte array if it is not divisible by the key length
+            if (bytesWithInserts.Length % keyLength != 0)
+                bytesWithInserts = challenge9.PadBytes(bytesWithInserts, keyLength);
+            // TODO CDG we might not want to be using the key length to pad
             // Same for EncryptBytesRandomly
 
             // Create a random key
@@ -151,12 +171,16 @@ namespace CryptoPals.Sets
             return EncryptBytesRandomly(bytesWithInserts, keyLength, key);
         }
 
-        // Format the output
+        /// <summary>
+        /// Format the output to display the block number, the oracles determination, and the actual encryption used on the block
+        /// </summary>
+        /// <param name="types">An enum array containing the oracles determination of the encryption type used for each block</param>
+        /// <returns>The formatted output</returns>
         private string FormatOutput(EncryptionTypeEnum[] types)
         {
             // Build the output string from the types array
             StringBuilder stringBuilder = new StringBuilder();
-            for (int i = 0; i < types.Length - 5; i++)
+            for (int i = 0; i < types.Length; i++)
             {
                 // Whitespace padding for output uniformity: will work up until 2 digit indexes (blocks in the 3 digits will be truncated from the output anyway)
                 stringBuilder.Append($"Block {i,2} has been encrypted with: oracle({types[i].ToString()}) actual({actualEncryption[i].ToString()}) {Environment.NewLine}");
@@ -165,7 +189,11 @@ namespace CryptoPals.Sets
             return stringBuilder.ToString();
         }
 
-        // Generates a random key of the specified size
+        /// <summary>
+        /// Generates a random key of the specified size
+        /// </summary>
+        /// <param name="length">The size of the byte array to create</param>
+        /// <returns>A byte array of the specified size containing random bytes in the range 0-256</returns>
         private byte[] GenerateRandomASCIIBytes(int length)
         {
             // Create byte array to store encrypted key
@@ -182,7 +210,13 @@ namespace CryptoPals.Sets
             return key;
         }
 
-        // Create a byte array with the bytes to insert put before or after the original set of bytes
+        /// <summary>
+        /// Create a byte array with the bytes to insert put before or after the original set of bytes
+        /// </summary>
+        /// <param name="bytesOriginal">The original bytes</param>
+        /// <param name="bytesToInsert">The bytes to insert</param>
+        /// <param name="insertBefore">Whether to insert the bytes before, or after, the original bytes</param>
+        /// <returns>A byte array with the bytes to insert added before/after the original bytes</returns>
         private byte[] InsertBytes(byte[] bytesOriginal, byte[] bytesToInsert, bool insertBefore)
         {
             byte[] bytesWithInserts = new byte[bytesToInsert.Length + bytesOriginal.Length];
@@ -203,8 +237,12 @@ namespace CryptoPals.Sets
             return bytesWithInserts;
         }
 
-        // Insert 5-10 random bytes before and after the bytes
-        private byte[] InsertRandomBytes(byte[] bytes, int keyLength)
+        /// <summary>
+        /// Insert 5-10 random bytes before and after the bytes
+        /// </summary>
+        /// <param name="bytes">The original bytes</param>
+        /// <returns>The original bytes with 5-10 random bytes inserted before and after them</returns>
+        private byte[] InsertRandomBytes(byte[] bytes)
         {
             // Create byte arrays containing 5-10 random bytes for inserting & after before the bytes to encrypt
             int insertBeforeCount = random.Next(5, 11);
@@ -216,10 +254,6 @@ namespace CryptoPals.Sets
             byte[] bytesWithInserts;
             bytesWithInserts = InsertBytes(bytes, beforeBytes, true); // Append before
             bytesWithInserts = InsertBytes(bytes, afterBytes, false); // Append after
-
-            // Pad the constructed byte array if it is not divisible by the key length
-            if (bytesWithInserts.Length % keyLength != 0)
-                bytesWithInserts = challenge9.PadBytes(bytesWithInserts, keyLength);
 
             return bytesWithInserts;
         }
