@@ -1,6 +1,7 @@
 ﻿using CryptoPals.Enumerations;
 using CryptoPals.Interfaces;
 using System;
+using System.Collections.Generic;
 using System.Text;
 
 namespace CryptoPals.Sets
@@ -34,18 +35,19 @@ namespace CryptoPals.Sets
 
         Here's roughly how:
 
-        Feed identical bytes of your-string to the function 1 at a time --- start with 1 byte ("A"), 
+        1) Feed identical bytes of your-string to the function 1 at a time --- start with 1 byte ("A"), 
         then "AA", then "AAA" and so on. Discover the block size of the cipher. You know it, 
         but do this step anyway.
-        Detect that the function is using ECB. You already know, but do this step anyways.
-        Knowing the block size, craft an input block that is exactly 1 byte short 
+        2) Detect that the function is using ECB. You already know, but do this step anyways.
+        3) Knowing the block size, craft an input block that is exactly 1 byte short 
         (for instance, if the block size is 8 bytes, make "AAAAAAA"). 
         Think about what the oracle function is going to put in that last byte position.
-        Make a dictionary of every possible last byte by feeding different strings to the oracle; 
+        4) Make a dictionary of every possible last byte by feeding different strings to the oracle; 
         for instance, "AAAAAAAA", "AAAAAAAB", "AAAAAAAC", remembering the first block of each invocation.
-        Match the output of the one-byte-short input to one of the entries in your dictionary. 
+        5) Match the output of the one-byte-short input to one of the entries in your dictionary. 
         You've now discovered the first byte of unknown-string.
-        Repeat for the next byte.
+        6) Repeat for the next byte.
+
         Congratulations.
         This is the first challenge we've given you whose solution will break real crypto. 
         Lots of people know that when you encrypt something in ECB mode, you can see penguins through it. 
@@ -55,7 +57,9 @@ namespace CryptoPals.Sets
         */
 
         // Reuse previous challenge functionality
-        IChallenge7 challenge7 = (IChallenge7)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge7);
+        IChallenge7 challenge7   = (IChallenge7)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge7);
+        IChallenge8 challenge8   = (IChallenge8)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge8);
+        IChallenge9 challenge9   = (IChallenge9)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge9);
         IChallenge11 challenge11 = (IChallenge11)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge11);
 
         /// <inheritdoc />
@@ -73,26 +77,86 @@ namespace CryptoPals.Sets
             // Generate a random key
             byte[] key = challenge11.GenerateRandomASCIIBytes(16);
 
+            // Append additional bytes after the input bytes
+            byte[] appendedBytes = challenge11.InsertBytes(bytes, base64Bytes, false);
+
             // Encrypt the bytes with the key
-            byte[] encryptedBytes = ECB_EncryptWithKnownKey(bytes, key, base64Bytes);
+            byte[] encryptedBytes = challenge7.AES_ECB(true, appendedBytes, key);
+
+            // Decrypt the Base64 text
+            return DecryptUnknownString(bytes, key);
+        }
+
+        private string DecryptUnknownString(byte[] bytes, byte[] key)
+        {
+            // The character we are going to use for encryption
+            char character = 'A';
+
+            // Feed identical bytes to encryptor
+            for (int i = 1; i <= 16; i++)
+            {
+                // Create a string of identical characters of the specified length
+                string text = "".PadRight(i, character);
+
+                // Convert text to bytes
+                byte[] checkBytes = Encoding.ASCII.GetBytes(text);
+
+                // Pad the bytes up to the appropriate size CDG TODO this might be a problem...
+                checkBytes = challenge9.PadBytes(checkBytes, 16);
+
+                // Encrypt the text
+                byte[] resultBytes = challenge7.AES_ECB(true, checkBytes, key);
+
+                // Detect the block size of the cipher
+                int blockSize = 4;//todo
+
+                // Detect if the function is using ECB
+                bool isUsingECB = challenge8.IsECBEncrypted(resultBytes);
+
+                // Create a block exactly 1 byte short of the block size
+                string shortBlockText = "".PadRight(blockSize - 1, character);
+
+                // Convert the short block to bytes
+                byte[] shortBlockBytes = Encoding.ASCII.GetBytes(shortBlockText);
+
+                // Dictionary used to hold all possible last byte combinations for the identical strings ("AAAAAAAA", "AAAAAAAB", "AAAAAAAC" etc.)
+                Dictionary<string, char> lastByteCombinations = PopulateLastByteCombinationsDictionary(shortBlockText, character);
+
+                // Pad the bytes up to the appropriate size CDG TODO this might be a problem...
+                shortBlockBytes = challenge9.PadBytes(shortBlockBytes, 16);
+
+                // Encrypt the short block
+                byte[] shortEncrypt = challenge7.AES_ECB(true, shortBlockBytes, key);
+
+                // Convert the encryption to a string for matching against the dictionary
+                string shortEncryptText = Encoding.ASCII.GetString(shortEncrypt);
+
+                // Match the output of the short block to the dictionary key to get the first character of the unknown string
+                char c = lastByteCombinations[shortEncryptText];
+            }
 
             return "";
         }
 
-        /// <summary>
-        /// Encrypt bytes appended with additional bytes using a specific key
-        /// </summary>
-        /// <param name="bytes">The original bytes</param>
-        /// <param name="key">The key used for encryption</param>
-        /// <param name="additionalBytes">The bytes to append to the original bytes</param>
-        /// <returns>The encrypted bytes (after appending the additional bytes)</returns>
-        private byte[] ECB_EncryptWithKnownKey(byte[] bytes, byte[] key, byte[] additionalBytes)
-        {
-            // Append additional bytes after the input bytes
-            byte[] appendedBytes = challenge11.InsertBytes(bytes, additionalBytes, false);
 
-            // Return the encrypted bytes
-            return challenge7.AES_ECB(true, appendedBytes, key);
+        private Dictionary<string, char> PopulateLastByteCombinationsDictionary(string block, char character)
+        {
+            Dictionary<string, char> combinations = new Dictionary<string, char>();
+            for (int i = 0; i <= 256; i++)
+            {
+                // Create a string of identical characters of the specified length
+                string text = block.PadRight(block.Length, character);
+
+                // Create the character to append
+                char lastCharacter = Convert.ToChar(i);
+
+                // Add the last character
+                text += lastCharacter;
+
+                // Add it to the dictionary
+                combinations.Add(text, lastCharacter);
+            }
+            return combinations;
         }
     }
 }
