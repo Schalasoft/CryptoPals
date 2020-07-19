@@ -27,11 +27,16 @@ namespace CryptoPals.Sets
         ///<inheritdoc />
         public string Solve(string input)
         {
-            // Encode Hex to Base64
-            return Decode(input);
+            // Convert Hex to Base64
+            return HexStringToBase64(input);
         }
 
-        private string Decode(string hex)
+        /// <summary>
+        /// Convert a hex string to Base64
+        /// </summary>
+        /// <param name="hex">The hex string</param>
+        /// <returns>The Base64 representation of the input hex string</returns>
+        private string HexStringToBase64(string hex)
         {
             // Get binary string representation of hex string
             string binary = HexStringToBinaryString(hex);

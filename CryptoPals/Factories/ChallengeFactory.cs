@@ -1,7 +1,6 @@
 ﻿using CryptoPals.Enumerations;
 using CryptoPals.Interfaces;
 using CryptoPals.Sets;
-using System;
 
 namespace CryptoPals.Factories
 {
