@@ -70,7 +70,7 @@ namespace CryptoPals.Sets
             // Convert input to bytes
             byte[] bytes = Encoding.ASCII.GetBytes(input);
 
-            // The text to append before the input bytes
+            // The text to append after the input bytes
             string base64Text = "Um9sbGluJyBpbiBteSA1LjAKV2l0aCBteSByYWctdG9wIGRvd24gc28gbXkgaGFpciBjYW4gYmxvdwpUaGUgZ2lybGllcyBvbiBzdGFuZGJ5IHdhdmluZyBqdXN0IHRvIHNheSBoaQpEaWQgeW91IHN0b3A/IE5vLCBJIGp1c3QgZHJvdmUgYnkK";
 
             // Base64 decode the text
@@ -85,14 +85,8 @@ namespace CryptoPals.Sets
             // Encrypt the bytes with the key
             byte[] encryptedBytes = challenge7.AES_ECB(true, appendedBytes, key);
 
-            // Decrypt the Base64 text
-            string knownString = DecryptUnknownString(encryptedBytes, key, base64Text);
-
-            // Convert to bytes
-            byte[] knownBytes = Convert.FromBase64String(knownString);
-
-            // Now that we uncovered the Base64 text after being encrypted, let's see what it says
-            return Encoding.ASCII.GetString(knownBytes);
+            // Decrypt the entire text and find the unknown string, just output the last 500 characters of the data
+            return DecryptUnknownString(encryptedBytes, key).Substring(encryptedBytes.Length - 500, 500);
         }
 
         private int DetermineEncryptorBlockSize(char character, byte[] key)
@@ -125,7 +119,7 @@ namespace CryptoPals.Sets
             return blockSize;
         }
 
-        private string DecryptUnknownString(byte[] bytes, byte[] key, string unknownString)
+        private string DecryptUnknownString(byte[] bytes, byte[] key)
         {
             // The character we are going to use for encryption
             char character = 'A';
@@ -141,7 +135,7 @@ namespace CryptoPals.Sets
             if (isUsingECB)
             {
                 // Output the, now known, string
-                output =  GetUnknownString(blockSize, character, key, unknownString);
+                output =  GetUnknownString(bytes, blockSize, character, key);
             }
 
             return output;
@@ -153,7 +147,7 @@ namespace CryptoPals.Sets
             return $"{"".PadRight(blockSize - 1, character)}{lastCharacter}";
         }
 
-        private string GetUnknownString(int blockSize, char character, byte[] key, string unknownString)
+        private string GetUnknownString(byte[] bytes, int blockSize, char character, byte[] key)
         {
             // Dictionary used to hold all possible last byte combinations for the identical strings ("AAAAAAAA", "AAAAAAAB", "AAAAAAAC" etc.)
             Dictionary<string, string> combinations = new Dictionary<string, string>();
@@ -185,10 +179,10 @@ namespace CryptoPals.Sets
 
             // Match the output of the short block to the dictionary key to get each character of the unknown string
             StringBuilder stringBuilder = new StringBuilder();
-            for (int i = 0; i < unknownString.Length; i++)
+            for (int i = 0; i < bytes.Length; i++)
             {
                 // Take the unknown character and use it as the last byte in a short block
-                string blockText = BuildShortBlock(unknownString[i], character, blockSize);
+                string blockText = BuildShortBlock(Convert.ToChar(bytes[i]), character, blockSize);
 
                 // Convert it to bytes
                 byte[] blockBytes = Encoding.ASCII.GetBytes(blockText);
@@ -202,8 +196,11 @@ namespace CryptoPals.Sets
                 // Get the match from the dictionary
                 string match = combinations[encryptText];
 
+                // Get the last character of the match
+                char lastCharacter = Convert.ToChar(match.Substring(match.Length - 1, 1));
+
                 // Append the final character of the match to the string builder for outputting
-                stringBuilder.Append(match.Substring(match.Length - 1, 1));
+                stringBuilder.Append(lastCharacter);
             }
 
             return stringBuilder.ToString();
