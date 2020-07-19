@@ -2,7 +2,6 @@
 using CryptoPals.Interfaces;
 using System;
 using System.Linq;
-using System.Text;
 
 namespace CryptoPals.Sets
 {
