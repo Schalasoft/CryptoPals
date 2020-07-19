@@ -160,7 +160,7 @@ namespace CryptoPals.Sets
         /// <returns>The formatted output</returns>
         private string FormatOutput(EncryptionTypeEnum type)
         {
-            return $"Input has been encrypted with: oracle({type.ToString()}) actual({actualEncryption.ToString()}) {Environment.NewLine}";
+            return $"{type.ToString()} / {actualEncryption.ToString()} (Oracle / Actual)";
         }
 
         /// <summary>
