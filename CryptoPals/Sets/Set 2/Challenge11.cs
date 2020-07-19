@@ -2,6 +2,7 @@
 using CryptoPals.Interfaces;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Text;
 
 namespace CryptoPals.Sets
@@ -50,11 +51,21 @@ namespace CryptoPals.Sets
             byte[] bytes = Encoding.ASCII.GetBytes(input);
 
             // Encrypt data
-            int keyLength = 16;
-            byte[] encryptedBytes = EncryptWithUnknownKey(bytes, keyLength);
+            // CDG DEBUG, check for accuracy on many encryptions
+            // Due to the random bytes added, passing in the keySize does not return expected results
+            // Should try ranges of key sizes
+            int keySize = 16;
+            byte[] encryptedBytes = new byte[0];
+            List<string> outputs = new List<string>();
+            for (int i = 0; i < 50; i++)
+            {
+                bytes = GenerateRandomASCIIBytes(100);
+                encryptedBytes = EncryptWithUnknownKey(bytes, keySize);
+                outputs.Add(FormatOutput(DetectEncryptionType(encryptedBytes, keySize)));
+            }
 
             // Detect the encryption type used and format the output
-            return FormatOutput(DetectEncryptionType(encryptedBytes, keyLength));
+            return FormatOutput(DetectEncryptionType(encryptedBytes, keySize));
         }
 
         /// <summary>
