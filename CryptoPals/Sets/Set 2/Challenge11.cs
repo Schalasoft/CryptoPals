@@ -35,8 +35,6 @@ namespace CryptoPals.Sets
         private readonly Random random = new Random();
 
         // Variables to determine if the oracle is correct in its ECB/CBC detection
-        // CDG TODO change this from a global, it is bad practice
-        EncryptionTypeEnum actualEncryption;
 
         // Reuse previous challenge functionality
         IChallenge7 challenge7   = (IChallenge7)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge7);
@@ -60,10 +58,10 @@ namespace CryptoPals.Sets
                 byte[] bytes = Encoding.ASCII.GetBytes(input);
 
                 // Encrypt data
-                byte[] encryptedBytes = EncryptWithUnknownKey(bytes, keySize);
+                Tuple<byte[], EncryptionTypeEnum> encryptionResult = EncryptWithUnknownKey(bytes, keySize);
 
                 // Detect the encryption type used and format the output
-                return FormatOutput(DetectEncryptionType(encryptedBytes));
+                return FormatOutput(DetectEncryptionType(encryptionResult.Item1), encryptionResult.Item2);
             }
         }
 
@@ -77,7 +75,7 @@ namespace CryptoPals.Sets
             // CDG DEBUG, check for accuracy on many encryptions
             // Due to the random bytes added, passing in the keySize does not return expected results
             // Should try ranges of key sizes
-            byte[] encryptedBytes = new byte[0];
+            Tuple<byte[], EncryptionTypeEnum> encryptionResult;
             List<string> outputs = new List<string>();
             int totalCount = 50; // Total number of tests
             bool[] correct = new bool[totalCount];
@@ -85,10 +83,10 @@ namespace CryptoPals.Sets
             for (int i = 0; i < totalCount; i++)
             {
                 bytes = GenerateRandomASCIIBytes(100);
-                encryptedBytes = EncryptWithUnknownKey(bytes, keySize);
-                EncryptionTypeEnum oracleType = DetectEncryptionType(encryptedBytes);
-                outputs.Add($"{ oracleType.ToString()} / { actualEncryption.ToString()} (Oracle / Actual)");
-                correct[i] = oracleType.Equals(actualEncryption);
+                encryptionResult = EncryptWithUnknownKey(bytes, keySize);
+                EncryptionTypeEnum oracleType = DetectEncryptionType(encryptionResult.Item1);
+                outputs.Add($"{oracleType} / {encryptionResult.Item2} (Oracle / Actual)");
+                correct[i] = oracleType.Equals(encryptionResult.Item2);
             }
 
             int correctCount = correct.Where(x => x.Equals(true)).Count();
@@ -104,21 +102,20 @@ namespace CryptoPals.Sets
         /// <returns>The encryption type used as an enumeration</returns>
         private EncryptionTypeEnum DetectEncryptionType(byte[] bytes)
         {
-            // The amount of block sizes to try
+            // The amount of block sizes to try (will start at 2 so this trys 2 to 52)
             int blockSizeAttempts = 50;
             return challenge8.IsECBEncrypted(bytes, blockSizeAttempts) ? EncryptionTypeEnum.ECB : EncryptionTypeEnum.CBC; ;
         }
 
         /// <summary>
-        /// Encrypt bytes using ECB and CBC randomly for each block
+        /// Encrypt bytes using ECB and CBC randomly
         /// </summary>
         /// <param name="bytes">The bytes to encrypt</param>
-        /// <param name="blockLength">The length of each block to encrypt</param>
         /// <param name="key">The key used to encrypt</param>
-        /// <returns>A byte array containing the encrypted bytes (where each block has a 50% chance of being ECB or CBC encrypted)</returns>
-        private byte[] EncryptBytesRandomly(byte[] bytes, int blockLength, byte[] key)
+        /// <returns>A tuple containing the encrypted bytes and the encryption type used (ECB or CBC)</returns>
+        private Tuple<byte[], EncryptionTypeEnum> EncryptBytesRandomly(byte[] bytes, byte[] key)
         {
-            // Encrypt all blocks with ECB or CBC randomly
+            // Encrypt with ECB or CBC randomly
             byte[] encryptedBytes = new byte[bytes.Length];
             EncryptionTypeEnum encryptionType = (EncryptionTypeEnum)random.Next(1, 3);
 
@@ -131,25 +128,22 @@ namespace CryptoPals.Sets
             else if (encryptionType.Equals(EncryptionTypeEnum.CBC))
             {
                 // Create an initialization vector (use random IV)
-                byte[] iv = GenerateRandomASCIIBytes(blockLength);
+                byte[] iv = GenerateRandomASCIIBytes(key.Length);
 
                 // Encrypt using CBC
                 encryptedBytes = challenge10.AES_CBC(true, bytes, key, iv);
             }
 
-            // Record which encryption type we used for this block
-            actualEncryption = encryptionType;
-
-            return encryptedBytes;
+            return new Tuple<byte[], EncryptionTypeEnum>(encryptedBytes, encryptionType);
         }
 
         /// <summary>
-        /// Encrypts data under a randomly generated key, randomly using ECB or CBC for each block
+        /// Encrypts data under a randomly generated key, randomly using ECB or CBC
         /// </summary>
         /// <param name="bytes">The bytes to encrypt</param>
         /// <param name="keyLength">The length of the key to populate with random bytes (0-256)</param>
-        /// <returns>The bytes encrypted with an unknown key, where each block is ECB or CBC encrypted</returns>
-        private byte[] EncryptWithUnknownKey(byte[] bytes, int keyLength)
+        /// <returns>The bytes encrypted with an unknown key (ECB or CBC)</returns>
+        private Tuple<byte[], EncryptionTypeEnum> EncryptWithUnknownKey(byte[] bytes, int keyLength)
         {
             // Insert 5-10 random bytes before and after the bytes
             byte[] bytesWithInserts = InsertRandomBytes(bytes);
@@ -157,26 +151,25 @@ namespace CryptoPals.Sets
             // Pad the constructed byte array if it is not divisible by the key length
             if (bytesWithInserts.Length % keyLength != 0)
                 bytesWithInserts = challenge9.PadBytes(bytesWithInserts, keyLength);
-            // TODO CDG we might not want to be using the key length to pad
-            // Same for EncryptBytesRandomly
 
             // Create a random key
             byte[] key = GenerateRandomASCIIBytes(keyLength);
 
-            // Encrypt the data where each block has been randomly encrypted with ECB or CBC
-            return EncryptBytesRandomly(bytesWithInserts, keyLength, key);
+            // Encrypt the data with ECB or CBC
+            return EncryptBytesRandomly(bytesWithInserts, key);
         }
 
         /// <summary>
         /// Format the output to display if the oracle was correct, the oracles determination, and the actual encryption used on the input bytes
         /// </summary>
-        /// <param name="type">An enum containing the oracles determination of the encryption type used</param>
+        /// <param name="expected">Enum of the oracles expected determination of the encryption type used</param>
+        /// <param name="actual">Enum of the actual encryption type used</param>
         /// <returns>The formatted output</returns>
-        private string FormatOutput(EncryptionTypeEnum type)
+        private string FormatOutput(EncryptionTypeEnum expected, EncryptionTypeEnum actual)
         {
-            return $"{(type.Equals(actualEncryption) ? "Correct" : "Incorrect")}" +
+            return $"{(expected.Equals(actual) ? "Correct" : "Incorrect")}" +
                 Environment.NewLine +
-                $"{type.ToString()} / {actualEncryption.ToString()} (Oracle / Actual)";
+                $"{expected} / {actual} (Oracle / Actual)";
         }
 
         /// <summary>
