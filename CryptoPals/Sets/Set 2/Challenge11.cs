@@ -48,18 +48,44 @@ namespace CryptoPals.Sets
         /// <inheritdoc />
         public string Solve(string input)
         {
-            // Convert input string to bytes
-            byte[] bytes = Encoding.ASCII.GetBytes(input);
+            // Debug method to text many random byte arrays instead of just the one input string
+            bool debug = true;
+            int keySize = 16;
+            if (debug)
+            {
+                return SolveDebug(keySize);
+            }
+            else
+            {
+                // Convert input string to bytes
+                byte[] bytes = Encoding.ASCII.GetBytes(input);
 
-            // Encrypt data
+                // Encrypt data
+                byte[] encryptedBytes = EncryptWithUnknownKey(bytes, keySize);
+
+                // Detect encryption
+                EncryptionTypeEnum oracleType = DetectEncryptionType(encryptedBytes);
+
+                // Detect the encryption type used and format the output
+                return FormatOutput(DetectEncryptionType(encryptedBytes));
+            }
+        }
+
+        /// <summary>
+        /// Debug method used for testing various random byte arrays using the Oracle
+        /// </summary>
+        /// <param name="keySize">The size of the key to use for encryption</param>
+        /// <returns>A formatted string containing the number of correct answers vs the total, and each determination vs the actual</returns>
+        private string SolveDebug(int keySize)
+        {
             // CDG DEBUG, check for accuracy on many encryptions
             // Due to the random bytes added, passing in the keySize does not return expected results
             // Should try ranges of key sizes
-            int keySize = 16;
             byte[] encryptedBytes = new byte[0];
             List<string> outputs = new List<string>();
             int totalCount = 50; // Total number of tests
             bool[] correct = new bool[totalCount];
+            byte[] bytes = new byte[0];
             for (int i = 0; i < totalCount; i++)
             {
                 bytes = GenerateRandomASCIIBytes(100);
@@ -73,9 +99,6 @@ namespace CryptoPals.Sets
 
             // CDG DEBUG
             return $"Correct: {correctCount}/{totalCount}{Environment.NewLine}{string.Join(Environment.NewLine, outputs)}";
-
-            // Detect the encryption type used and format the output
-            //return FormatOutput(DetectEncryptionType(encryptedBytes));
         }
 
         /// <summary>
