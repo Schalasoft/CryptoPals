@@ -9,8 +9,7 @@
         /// Detects if the bytes have been ECB encrypted
         /// </summary>
         /// <param name="bytes">The bytes to check</param>
-        /// <param name="blockSizeAttempts">The amount of different block sizes to try</param>
         /// <returns>True if the bytes have been ECB encrypted</returns>
-        public bool IsECBEncrypted(byte[] bytes, int blockSizeAttempts);
+        public bool IsECBEncrypted(byte[] bytes);
     }
 }

@@ -82,9 +82,7 @@ namespace CryptoPals.Sets
         /// <returns>The encryption type used as an enumeration</returns>
         private EncryptionTypeEnum DetectEncryptionType(byte[] bytes)
         {
-            // The amount of block sizes to try (will start at 2 so this trys 2 to 52)
-            int blockSizeAttempts = 50;
-            return challenge8.IsECBEncrypted(bytes, blockSizeAttempts) ? EncryptionTypeEnum.ECB : EncryptionTypeEnum.CBC; ;
+            return challenge8.IsECBEncrypted(bytes) ? EncryptionTypeEnum.ECB : EncryptionTypeEnum.CBC; ;
         }
 
         /// <summary>

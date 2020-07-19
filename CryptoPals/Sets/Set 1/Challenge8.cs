@@ -100,14 +100,16 @@ namespace CryptoPals.Sets
             return repeatedBlockCounts;
         }
 
-        ///<inheritdoc cref="IChallenge8.IsECBEncrypted(byte[], int)"/>
-        public bool IsECBEncrypted(byte[] bytes, int blockSizeAttempts)
+        ///<inheritdoc cref="IChallenge8.IsECBEncrypted(byte[])"/>
+        public bool IsECBEncrypted(byte[] bytes)
         {
             // Try multiple block sizes
+            // The amount of block sizes to try
+            int blockSizeAttempts = 20;
             for (int i = 0; i < blockSizeAttempts; i++)
             {
-                // Start with a block size of 2, then try increasing block sizes
-                int blockSize = 2 + i;
+                // Start with a block size of 4, then try increasing block sizes  (will start at 4 so this trys 4 to 24)
+                int blockSize = 4 + i;
 
                 // If we find any repeated blocks, assume it is ECB
                 if (GetRepeatedBlockCount(bytes, blockSize) > 0)
