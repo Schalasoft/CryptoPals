@@ -63,6 +63,24 @@ namespace CryptoPals.Sets
         }
 
         /// <summary>
+        /// Get the amount of blocks that have been repeated in the provided bytes, based on the provided block size
+        /// </summary>
+        /// <param name="bytes">The bytes to get the repeated block count of</param>
+        /// <param name="blockSize">The size of the blocks to check</param>
+        /// <returns>An integer representing the repeated block count for the input bytes</returns>
+        private int GetRepeatedBlockCount(byte[] bytes, int blockSize)
+        {
+            // Break into blocks (size of 16 as the challenge hinted at this number)
+            byte[][] blocks = challenge6.CreateBlocks(bytes, blockSize);
+
+            // Get the number of distinct blocks, due to being a 2d array we use LINQ select to effectively flatten the arrays for use with Distinct
+            int distinctBlocks = blocks.Select(x => string.Join(",", x)).Distinct().ToArray().Length;
+
+            // Return the amount of repeated blocks we find by subtracting the amount of blocks from the number of distinct blocks
+            return blocks.Length - distinctBlocks;
+        }
+
+        /// <summary>
         /// Get the repeated block count for each line
         /// </summary>
         /// <param name="lines">The lines to get repeated counts of</param>
@@ -81,24 +99,6 @@ namespace CryptoPals.Sets
             }
 
             return repeatedBlockCounts;
-        }
-
-        /// <summary>
-        /// Get the amount of blocks that have been repeated in the provided bytes, based on the provided block size
-        /// </summary>
-        /// <param name="bytes">The bytes to get the repeated block count of</param>
-        /// <param name="blockSize">The size of the blocks to check</param>
-        /// <returns>An integer representing the repeated block count for the input bytes</returns>
-        private int GetRepeatedBlockCount(byte[] bytes, int blockSize)
-        {
-            // Break into blocks (size of 16 as the challenge hinted at this number)
-            byte[][] blocks = challenge6.CreateBlocks(bytes, blockSize);
-
-            // Get the number of distinct blocks, due to being a 2d array we use LINQ select to effectively flatten the arrays for use with Distinct
-            int distinctBlocks = blocks.Select(x => string.Join(",", x)).Distinct().ToArray().Length;
-
-            // Return the amount of repeated blocks we find by subtracting the amount of blocks from the number of distinct blocks
-            return blocks.Length - distinctBlocks;
         }
 
         ///<inheritdoc cref="IChallenge8.IsECBEncrypted(byte[])"/>
