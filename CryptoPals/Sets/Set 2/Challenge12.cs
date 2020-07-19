@@ -80,11 +80,14 @@ namespace CryptoPals.Sets
             // Append additional bytes after the input bytes
             byte[] appendedBytes = challenge11.InsertBytes(bytes, base64Bytes, false);
 
-            // Encrypt the bytes with the key
+            // Encrypt the bytes with the key (I'm not really sure why we're appending the bytes here when we only use our plaintext to determine the block size and generate the dictionary)
             byte[] encryptedBytes = challenge7.AES_ECB(true, appendedBytes, key);
 
+            // Encrypt the unknown string for decrypting
+            byte[] encryptedUnknownBytes = challenge7.AES_ECB(true, base64Bytes, key);
+
             // Decrypt the entire text and find the unknown string, just output the last 500 characters of the data
-            return DecryptUnknownString(encryptedBytes, key);//.Substring(encryptedBytes.Length - 500, 500); // cdg todo
+            return DecryptUnknownString(encryptedBytes, encryptedUnknownBytes, key);//.Substring(encryptedBytes.Length - 500, 500); // cdg todo
         }
 
         private Dictionary<string, string> BuildCombinationsDictionary(int blockSize, char character, byte[] key)
@@ -168,7 +171,7 @@ namespace CryptoPals.Sets
             return blockSize;
         }
 
-        private string DecryptUnknownString(byte[] bytes, byte[] key)
+        private string DecryptUnknownString(byte[] bytes, byte[] unknownBytes, byte[] key)
         {
             // The character we are going to use for encryption
             char character = 'A';
@@ -184,13 +187,13 @@ namespace CryptoPals.Sets
             if (isUsingECB)
             {
                 // Output the, now known, string
-                output = GetUnknownString(bytes, blockSize, character, key);
+                output = GetUnknownString(bytes, unknownBytes, blockSize, character, key);
             }
 
             return output;
         }
 
-        private string GetUnknownString(byte[] bytes, int blockSize, char character, byte[] key)
+        private string GetUnknownString(byte[] bytes, byte[] unknownBytes, int blockSize, char character, byte[] key)
         {
             // Build dictionary used to hold all possible last byte combinations for the identical strings ("AAAAAAAA", "AAAAAAAB", "AAAAAAAC" etc.)
             Dictionary<string, string> combinations = BuildCombinationsDictionary(blockSize, character, key);
