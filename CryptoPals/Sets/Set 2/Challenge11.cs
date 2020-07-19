@@ -61,22 +61,26 @@ namespace CryptoPals.Sets
             {
                 bytes = GenerateRandomASCIIBytes(100);
                 encryptedBytes = EncryptWithUnknownKey(bytes, keySize);
-                outputs.Add(FormatOutput(DetectEncryptionType(encryptedBytes, keySize)));
+                outputs.Add(FormatOutput(DetectEncryptionType(encryptedBytes)));
             }
 
+            // CDG DEBUG
+            return string.Join(Environment.NewLine, outputs);
+
             // Detect the encryption type used and format the output
-            return FormatOutput(DetectEncryptionType(encryptedBytes, keySize));
+            //return FormatOutput(DetectEncryptionType(encryptedBytes));
         }
 
         /// <summary>
         /// Return the type of encryption used on bytes
         /// </summary>
         /// <param name="bytes">The bytes to detect ECB/CBC on</param>
-        /// <param name="blockSize">The size of the block used for detection of repeated blocks</param>
         /// <returns>The encryption type used as an enumeration</returns>
-        private EncryptionTypeEnum DetectEncryptionType(byte[] bytes, int blockSize)
+        private EncryptionTypeEnum DetectEncryptionType(byte[] bytes)
         {
-            return challenge8.IsECBEncrypted(bytes, blockSize) ? EncryptionTypeEnum.ECB : EncryptionTypeEnum.CBC; ;
+            // The amount of block sizes to try
+            int blockSizeAttempts = 50;
+            return challenge8.IsECBEncrypted(bytes, blockSizeAttempts) ? EncryptionTypeEnum.ECB : EncryptionTypeEnum.CBC; ;
         }
 
         /// <summary>
