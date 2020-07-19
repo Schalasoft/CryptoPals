@@ -45,51 +45,30 @@ namespace CryptoPals.Sets
         /// <inheritdoc />
         public string Solve(string input)
         {
-            // Debug method to text many random byte arrays instead of just the one input string
-            bool debug = true;
-            int keySize = 16;
-            if (debug)
-            {
-                return SolveDebug(keySize);
-            }
-            else
-            {
-                // Convert input string to bytes
-                byte[] bytes = Encoding.ASCII.GetBytes(input);
+            // Convert input string to bytes
+            byte[] bytes = Encoding.ASCII.GetBytes(input);
 
-                // Encrypt data
+            // Run Oracle against the input data multiple times (with different random byte keys)
+            int testCount = 50;
+            for (int i = 0; i < testCount; i++)
+            {
+                // Encrypt data using a random key
+                int keySize = 16;
                 Tuple<byte[], EncryptionTypeEnum> encryptionResult = EncryptWithUnknownKey(bytes, keySize);
 
-                // Detect the encryption type used and format the output
-                return FormatOutput(DetectEncryptionType(encryptionResult.Item1), encryptionResult.Item2);
-            }
-        }
+                // Detect the Oracle to determine which encryption type was used
+                EncryptionTypeEnum oracleEncryption = DetectEncryptionType(encryptionResult.Item1);
+                
+                // Get the actual encryption type that was used
+                EncryptionTypeEnum actualEncryption = encryptionResult.Item2;
 
-        /// <summary>
-        /// Debug method used for testing various random byte arrays using the Oracle
-        /// </summary>
-        /// <param name="keySize">The size of the key to use for encryption</param>
-        /// <returns>A formatted string containing the number of correct answers vs the total, and each determination vs the actual</returns>
-        private string SolveDebug(int keySize)
-        {
-            Tuple<byte[], EncryptionTypeEnum> encryptionResult;
-            List<string> outputs = new List<string>();
-            int totalCount = 50; // Total number of tests
-            bool[] correct = new bool[totalCount];
-            byte[] bytes = new byte[0];
-            for (int i = 0; i < totalCount; i++)
-            {
-                bytes = GenerateRandomASCIIBytes(100);
-                encryptionResult = EncryptWithUnknownKey(bytes, keySize);
-                EncryptionTypeEnum oracleType = DetectEncryptionType(encryptionResult.Item1);
-                outputs.Add($"{oracleType} / {encryptionResult.Item2} (Oracle / Actual)");
-                correct[i] = oracleType.Equals(encryptionResult.Item2);
+                // If the determination does not match, the test failed
+                if (oracleEncryption.Equals(actualEncryption))
+                    return "A test failed";
             }
 
-            int correctCount = correct.Where(x => x.Equals(true)).Count();
-
-            // CDG DEBUG
-            return $"Correct: {correctCount}/{totalCount}{Environment.NewLine}{string.Join(Environment.NewLine, outputs)}";
+            // If no tests failed, output that all N tests passed
+            return "All {testCount} tests passed.";
         }
 
         /// <summary>
@@ -154,19 +133,6 @@ namespace CryptoPals.Sets
 
             // Encrypt the data with ECB or CBC
             return EncryptBytesRandomly(bytesWithInserts, key);
-        }
-
-        /// <summary>
-        /// Format the output to display if the oracle was correct, the oracles determination, and the actual encryption used on the input bytes
-        /// </summary>
-        /// <param name="expected">Enum of the oracles expected determination of the encryption type used</param>
-        /// <param name="actual">Enum of the actual encryption type used</param>
-        /// <returns>The formatted output</returns>
-        private string FormatOutput(EncryptionTypeEnum expected, EncryptionTypeEnum actual)
-        {
-            return $"{(expected.Equals(actual) ? "Correct" : "Incorrect")}" +
-                Environment.NewLine +
-                $"{expected} / {actual} (Oracle / Actual)";
         }
 
         /// <summary>
