@@ -1,7 +1,6 @@
 ﻿using CryptoPals.Enumerations;
 using CryptoPals.Interfaces;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -36,10 +35,10 @@ namespace CryptoPals.Sets
         private readonly Random random = new Random();
 
         // Variables to determine if the oracle is correct in its ECB/CBC detection
+        // CDG TODO change this from a global, it is bad practice
         EncryptionTypeEnum actualEncryption;
 
         // Reuse previous challenge functionality
-        IChallenge6 challenge6   = (IChallenge6)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge6);
         IChallenge7 challenge7   = (IChallenge7)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge7);
         IChallenge8 challenge8   = (IChallenge8)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge8);
         IChallenge9 challenge9   = (IChallenge9)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge9);
@@ -62,9 +61,6 @@ namespace CryptoPals.Sets
 
                 // Encrypt data
                 byte[] encryptedBytes = EncryptWithUnknownKey(bytes, keySize);
-
-                // Detect encryption
-                EncryptionTypeEnum oracleType = DetectEncryptionType(encryptedBytes);
 
                 // Detect the encryption type used and format the output
                 return FormatOutput(DetectEncryptionType(encryptedBytes));
@@ -91,7 +87,7 @@ namespace CryptoPals.Sets
                 bytes = GenerateRandomASCIIBytes(100);
                 encryptedBytes = EncryptWithUnknownKey(bytes, keySize);
                 EncryptionTypeEnum oracleType = DetectEncryptionType(encryptedBytes);
-                outputs.Add(FormatOutput(oracleType));
+                outputs.Add($"{ oracleType.ToString()} / { actualEncryption.ToString()} (Oracle / Actual)");
                 correct[i] = oracleType.Equals(actualEncryption);
             }
 
@@ -172,13 +168,15 @@ namespace CryptoPals.Sets
         }
 
         /// <summary>
-        /// Format the output to display the  the oracles determination, and the actual encryption used on the input bytes
+        /// Format the output to display if the oracle was correct, the oracles determination, and the actual encryption used on the input bytes
         /// </summary>
         /// <param name="type">An enum containing the oracles determination of the encryption type used</param>
         /// <returns>The formatted output</returns>
         private string FormatOutput(EncryptionTypeEnum type)
         {
-            return $"{type.ToString()} / {actualEncryption.ToString()} (Oracle / Actual)";
+            return $"{(type.Equals(actualEncryption) ? "Correct" : "Incorrect")}" +
+                Environment.NewLine +
+                $"{type.ToString()} / {actualEncryption.ToString()} (Oracle / Actual)";
         }
 
         /// <summary>
