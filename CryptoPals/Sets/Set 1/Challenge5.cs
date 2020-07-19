@@ -33,7 +33,7 @@ namespace CryptoPals.Sets
         public string Solve(string input)
         {
             // Split the input to get the plaintext to encrypt and the cycling key
-            string[] split = challenge4.SplitTextIntoLines(input, Constants.Separator.ToString());
+            string[] split = challenge4.SplitTextIntoLines(input, Constants.Separator);
 
             byte[] inputBytes = Encoding.ASCII.GetBytes(split[0]);
             byte[] keyBytes   = Encoding.ASCII.GetBytes(split[1]);

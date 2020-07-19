@@ -2,6 +2,7 @@
 using CryptoPals.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 namespace CryptoPals.Sets
 {
@@ -143,7 +144,11 @@ namespace CryptoPals.Sets
         ///<inheritdoc cref="IChallenge4"/>
         public string[] SplitTextIntoLines(string text, string separator = Constants.Separator)
         {
-            return text.Split(Environment.NewLine);
+            // Unescape separator incase it includes slashes
+            separator = Regex.Unescape(separator);
+
+            // Split around separator
+            return text.Split(separator);
         }
     }
 }
