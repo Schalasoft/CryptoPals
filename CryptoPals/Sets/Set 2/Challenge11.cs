@@ -3,6 +3,7 @@ using CryptoPals.Interfaces;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace CryptoPals.Sets
@@ -57,15 +58,21 @@ namespace CryptoPals.Sets
             int keySize = 16;
             byte[] encryptedBytes = new byte[0];
             List<string> outputs = new List<string>();
-            for (int i = 0; i < 50; i++)
+            int totalCount = 50; // Total number of tests
+            bool[] correct = new bool[totalCount];
+            for (int i = 0; i < totalCount; i++)
             {
                 bytes = GenerateRandomASCIIBytes(100);
                 encryptedBytes = EncryptWithUnknownKey(bytes, keySize);
-                outputs.Add(FormatOutput(DetectEncryptionType(encryptedBytes)));
+                EncryptionTypeEnum oracleType = DetectEncryptionType(encryptedBytes);
+                outputs.Add(FormatOutput(oracleType));
+                correct[i] = oracleType.Equals(actualEncryption);
             }
 
+            int correctCount = correct.Where(x => x.Equals(true)).Count();
+
             // CDG DEBUG
-            return string.Join(Environment.NewLine, outputs);
+            return $"Correct: {correctCount}/{totalCount}{Environment.NewLine}{string.Join(Environment.NewLine, outputs)}";
 
             // Detect the encryption type used and format the output
             //return FormatOutput(DetectEncryptionType(encryptedBytes));
