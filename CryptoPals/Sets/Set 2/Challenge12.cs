@@ -84,7 +84,7 @@ namespace CryptoPals.Sets
             byte[] encryptedBytes = challenge7.AES_ECB(true, appendedBytes, key);
 
             // Decrypt the Base64 text
-            return DecryptUnknownString(bytes, key);
+            return DecryptUnknownString(encryptedBytes, key);
         }
 
         private string DecryptUnknownString(byte[] bytes, byte[] key)
@@ -93,6 +93,7 @@ namespace CryptoPals.Sets
             char character = 'A';
 
             // Feed identical bytes to encryptor
+            StringBuilder stringBuilder = new StringBuilder();
             for (int i = 1; i <= 16; i++)
             {
                 // Create a string of identical characters of the specified length
@@ -132,10 +133,10 @@ namespace CryptoPals.Sets
                 string shortEncryptText = Encoding.ASCII.GetString(shortEncrypt);
 
                 // Match the output of the short block to the dictionary key to get the first character of the unknown string
-                char c = lastByteCombinations[shortEncryptText];
+                stringBuilder.Append(lastByteCombinations[shortEncryptText]);
             }
 
-            return "";
+            return stringBuilder.ToString();
         }
 
 
