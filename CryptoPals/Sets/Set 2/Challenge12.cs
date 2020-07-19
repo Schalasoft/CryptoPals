@@ -57,12 +57,9 @@ namespace CryptoPals.Sets
         about once a year.
         */
 
-        // CDG TODO Pretty sure I've done this task incorrectly, will need to look at it
-
         // Reuse previous challenge functionality
         IChallenge7 challenge7   = (IChallenge7)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge7);
         IChallenge8 challenge8   = (IChallenge8)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge8);
-        IChallenge9 challenge9   = (IChallenge9)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge9);
         IChallenge11 challenge11 = (IChallenge11)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge11);
 
         /// <inheritdoc />
@@ -87,7 +84,7 @@ namespace CryptoPals.Sets
             byte[] encryptedBytes = challenge7.AES_ECB(true, appendedBytes, key);
 
             // Decrypt the entire text and find the unknown string, just output the last 500 characters of the data
-            return DecryptUnknownString(encryptedBytes, key).Substring(encryptedBytes.Length - 500, 500);
+            return DecryptUnknownString(encryptedBytes, key);//.Substring(encryptedBytes.Length - 500, 500); // cdg todo
         }
 
         private Dictionary<string, string> BuildCombinationsDictionary(int blockSize, char character, byte[] key)
@@ -106,7 +103,7 @@ namespace CryptoPals.Sets
 
                 // Add it to the dictionary (add bytes as a string with each value separated with a separator
                 // This is because checking a byte[] checks against the top level of the array 
-                // Could use LINQ but this works // 64 and 128 encode to the same byte value
+                // Could use LINQ but this works nicely
                 combinations.Add(String.Join(Constants.Separator, shortEncrypt), blockText);
             }
 
@@ -187,7 +184,7 @@ namespace CryptoPals.Sets
             if (isUsingECB)
             {
                 // Output the, now known, string
-                output =  GetUnknownString(bytes, blockSize, character, key);
+                output = GetUnknownString(bytes, blockSize, character, key);
             }
 
             return output;
@@ -211,8 +208,8 @@ namespace CryptoPals.Sets
                 // Encrypt it
                 byte[] shortEncrypt = challenge7.AES_ECB(true, blockBytes, key);
 
-                // Get the match from the dictionary
-                string match = combinations[String.Join(Constants.Separator, shortEncrypt)];
+                // Get the plaintext from the match dictionary
+                string match = combinations.FirstOrDefault(x => x.Key.Equals(String.Join(Constants.Separator, shortEncrypt))).Value;
 
                 // Get the last character of the match
                 char lastCharacter = Convert.ToChar(match.Substring(match.Length - 1, 1));
