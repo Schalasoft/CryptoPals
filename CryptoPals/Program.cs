@@ -64,7 +64,7 @@ namespace CryptoPals
 
                 // Use previous challenge input file if this challenge is specified to
                 int fileIndex = i;
-                if (!challengesToUsePreviousInputs.Contains(i))
+                if (challengesToUsePreviousInputs.Contains(i))
                     fileIndex = fileIndex - 1;
 
                 // Construct challenge input filename

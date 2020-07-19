@@ -71,7 +71,7 @@ namespace CryptoPals.Sets
             byte[] base64Bytes = Convert.FromBase64String(base64Text);
 
             // Generate a random key
-            byte[] key = challenge11.GenerateRandomASCIIBytes(128);
+            byte[] key = challenge11.GenerateRandomASCIIBytes(16);
 
             // Encrypt the bytes with the key
             byte[] encryptedBytes = ECB_EncryptWithKnownKey(bytes, key, base64Bytes);
@@ -79,6 +79,13 @@ namespace CryptoPals.Sets
             return "";
         }
 
+        /// <summary>
+        /// Encrypt bytes appended with additional bytes using a specific key
+        /// </summary>
+        /// <param name="bytes">The original bytes</param>
+        /// <param name="key">The key used for encryption</param>
+        /// <param name="additionalBytes">The bytes to append to the original bytes</param>
+        /// <returns>The encrypted bytes (after appending the additional bytes)</returns>
         private byte[] ECB_EncryptWithKnownKey(byte[] bytes, byte[] key, byte[] additionalBytes)
         {
             // Append additional bytes after the input bytes
