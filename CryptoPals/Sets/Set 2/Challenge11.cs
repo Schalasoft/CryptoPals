@@ -95,36 +95,24 @@ namespace CryptoPals.Sets
             // Encrypt all blocks with ECB or CBC randomly
             byte[] encryptedBytes = new byte[bytes.Length];
             EncryptionTypeEnum encryptionType = (EncryptionTypeEnum)random.Next(1, 3);
-            for (int i = 0; i < encryptedBytes.Length / blockLength; i++)
+
+            // Encrypt
+            if (encryptionType.Equals(EncryptionTypeEnum.ECB))
             {
-                // Get the unencrypted block
-                byte[] unencryptedBlock = (byte[])new ArrayList(bytes).GetRange(i * blockLength, blockLength).ToArray(typeof(byte));
-
-                // Encrypt the block
-                byte[] encryptedBlock = unencryptedBlock;
-                if (encryptionType.Equals(EncryptionTypeEnum.ECB))
-                {
-                    // Encrypt using ECB
-                    encryptedBlock = challenge7.AES_ECB(true, unencryptedBlock, key);
-                }
-                else if (encryptionType.Equals(EncryptionTypeEnum.CBC))
-                {
-                    // Create an initialization vector (use random IV)
-                    byte[] iv = GenerateRandomASCIIBytes(blockLength);
-
-                    // Encrypt using CBC
-                    encryptedBlock = challenge10.AES_CBC(true, unencryptedBlock, key, iv);
-                }
-
-                // Record which encryption type we used for this block
-                actualEncryption = encryptionType;
-
-                // Add the encrypted block to the encrytedBytes array for returning
-                for (int j = 0; j < encryptedBlock.Length; j++)
-                {
-                    encryptedBytes[j + (i * blockLength)] = encryptedBlock[j];
-                }
+                // Encrypt using ECB
+                encryptedBytes = challenge7.AES_ECB(true, bytes, key);
             }
+            else if (encryptionType.Equals(EncryptionTypeEnum.CBC))
+            {
+                // Create an initialization vector (use random IV)
+                byte[] iv = GenerateRandomASCIIBytes(blockLength);
+
+                // Encrypt using CBC
+                encryptedBytes = challenge10.AES_CBC(true, bytes, key, iv);
+            }
+
+            // Record which encryption type we used for this block
+            actualEncryption = encryptionType;
 
             return encryptedBytes;
         }
