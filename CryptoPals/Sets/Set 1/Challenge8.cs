@@ -2,6 +2,7 @@
 using CryptoPals.Interfaces;
 using System;
 using System.Linq;
+using System.Text;
 
 namespace CryptoPals.Sets
 {
@@ -30,25 +31,16 @@ namespace CryptoPals.Sets
             // Split hex encoded input into lines
             string[] lines = challenge4.SplitTextIntoLines(input, Environment.NewLine);
 
-            // Go through each line
-            int[] repeatedBlockCounts = new int[lines.Length];
-            int size = 16;
+            // Go through each line and get the repeated block count
+            int[] repeatedBlockCounts = new int[0];
+            int blockSize = 16;
             for (int i = 0; i < lines.Length; i++)
             {
-                // Get the hex line as bytes
+                // Convert hex encoded input lines to bytes
                 byte[] bytes = challenge1.HexStringToBytes(lines[i]);
 
-                // Break into blocks (size of 16 as the challenge hinted at this number)
-                byte[][] blocks = challenge6.CreateBlocks(bytes, size);
-
-                // Get the number of distinct blocks, due to being a 2d array we use LINQ select to effectively flatten the arrays for use with Distinct
-                int distinctBlocks = blocks.Select(x => string.Join(",", x)).Distinct().ToArray().Length;
-
-                // Get the amount of repeated blocks we find by subtracting the amount of blocks from the number of distinct blocks
-                int repeatedBlockCount = blocks.Length - distinctBlocks;
-
-                // Add the amount of repeated blocks for this line to an array (to identify the line index with the most repetitions)
-                repeatedBlockCounts[i] = repeatedBlockCount;
+                // Go through each line and get the repeated block count
+                repeatedBlockCounts = GetRepeatedBlockCounts(bytes, blockSize);
             }
 
             // Get the AES encrypted line by getting the index of the line with the most repeated block
@@ -70,12 +62,54 @@ namespace CryptoPals.Sets
             return $"Index  : {lineIndex}{Environment.NewLine}Dupes  : {repetitions}{Environment.NewLine}{line}";
         }
 
-        ///<inheritdoc cref="IChallenge8.IsECBEncrypted(byte[])"/>
-        public bool IsECBEncrypted(byte[] bytes)
+        /// <summary>
+        /// Get the repeated block count for each line
+        /// </summary>
+        /// <param name="lines">The lines to get repeated counts of</param>
+        /// <param name="blockSize">The size of the block to use</param>
+        /// <returns>An int array containing the repeated block count for each line</returns>
+        private int[] GetRepeatedBlockCounts(byte[] bytes, int blockSize)
         {
-            // CDG TODO
+            int[] repeatedBlockCounts = new int[bytes.Length];
+            for (int i = 0; i < bytes.Length; i++)
+            {
+                // Get the repeated block count for the line
+                int repeatedBlockCount = GetRepeatedBlockCount(bytes, blockSize);
 
-            return true;
+                // Add the amount of repeated blocks for this line to an array (to identify the line index with the most repetitions)
+                repeatedBlockCounts[i] = repeatedBlockCount;
+            }
+
+            return repeatedBlockCounts;
+        }
+
+        /// <summary>
+        /// Get the amount of blocks that have been repeated in the provided bytes, based on the provided block size
+        /// </summary>
+        /// <param name="bytes">The bytes to get the repeated block count of</param>
+        /// <param name="blockSize">The size of the blocks to check</param>
+        /// <returns>An integer representing the repeated block count for the input bytes</returns>
+        private int GetRepeatedBlockCount(byte[] bytes, int blockSize)
+        {
+            // Break into blocks (size of 16 as the challenge hinted at this number)
+            byte[][] blocks = challenge6.CreateBlocks(bytes, blockSize);
+
+            // Get the number of distinct blocks, due to being a 2d array we use LINQ select to effectively flatten the arrays for use with Distinct
+            int distinctBlocks = blocks.Select(x => string.Join(",", x)).Distinct().ToArray().Length;
+
+            // Return the amount of repeated blocks we find by subtracting the amount of blocks from the number of distinct blocks
+            return blocks.Length - distinctBlocks;
+        }
+
+        ///<inheritdoc cref="IChallenge8.IsECBEncrypted(byte[])"/>
+        public bool IsECBEncrypted(byte[] bytes, int blockSize)
+        {
+            // Determine if ECB has been used to encrypt the bytes
+            // If we find any repeated blocks, assume it is ECB
+            if (GetRepeatedBlockCount(bytes, blockSize) > 0)
+                return true;
+            else
+                return false;
         }
     }
 }

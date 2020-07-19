@@ -34,7 +34,7 @@ namespace CryptoPals.Sets
         private readonly Random random = new Random();
 
         // Variables to determine if the oracle is correct in its ECB/CBC detection
-        EncryptionTypeEnum[] actualEncryption;
+        EncryptionTypeEnum actualEncryption;
 
         // Reuse previous challenge functionality
         IChallenge6 challenge6   = (IChallenge6)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge6);
@@ -53,49 +53,19 @@ namespace CryptoPals.Sets
             int keyLength = 16;
             byte[] encryptedBytes = EncryptWithUnknownKey(bytes, keyLength);
 
-            // Detect the encrypt types used
-            EncryptionTypeEnum[] types = DetectEncryptionTypes(encryptedBytes, keyLength);
-
-            // Get the formatted output
-            return FormatOutput(types);
+            // Detect the encryption type used and format the output
+            return FormatOutput(DetectEncryptionType(encryptedBytes, keyLength));
         }
 
         /// <summary>
-        /// Detect the encryption types used in each block (size of input length) of the input bytes
+        /// Return the type of encryption used on bytes
         /// </summary>
-        /// <param name="bytes">The bytes to check</param>
-        /// <param name="blockLength">The length of each block to check the encryption type of</param>
-        /// <returns>An array of EncryptionTypeEnum relating to the encryption type of each block (ECB or CBC)</returns>
-        private EncryptionTypeEnum[] DetectEncryptionTypes(byte[] bytes, int blockLength)
+        /// <param name="bytes">The bytes to detect ECB/CBC on</param>
+        /// <param name="blockSize">The size of the block used for detection of repeated blocks</param>
+        /// <returns>The encryption type used as an enumeration</returns>
+        private EncryptionTypeEnum DetectEncryptionType(byte[] bytes, int blockSize)
         {
-            // Break encrypted bytes into blocks the size of the key
-            byte[][] blocks = challenge6.CreateBlocks(bytes, blockLength);
-
-            // Determine encryption type that has been used on each block
-            EncryptionTypeEnum[] types = new EncryptionTypeEnum[blocks.Length];
-            for (int i = 0; i < blocks.Length; i++)
-            {
-                // Determine the block encryption type and return it as an enum
-                types[i] = DetectBlockEncryptionType(blocks[i]);
-            }
-
-            return types;
-        }
-
-        /// <summary>
-        /// Detects the encryption type for a block of bytes
-        /// </summary>
-        /// <param name="block">The block to check</param>
-        /// <returns>The encryption type of the block (ECB/CBC)</returns>
-        private EncryptionTypeEnum DetectBlockEncryptionType(byte[] block)
-        {
-            // Determine encryption type being used
-            EncryptionTypeEnum type = 0;
-
-            // CDG TODO
-            bool ecb = challenge8.IsECBEncrypted(block);
-
-            return type;
+            return challenge8.IsECBEncrypted(bytes, blockSize) ? EncryptionTypeEnum.ECB : EncryptionTypeEnum.CBC; ;
         }
 
         /// <summary>
@@ -107,11 +77,9 @@ namespace CryptoPals.Sets
         /// <returns>A byte array containing the encrypted bytes (where each block has a 50% chance of being ECB or CBC encrypted)</returns>
         private byte[] EncryptBytesRandomly(byte[] bytes, int blockLength, byte[] key)
         {
-            // Array used to record the encryption type that was used per block for validation
-            actualEncryption = new EncryptionTypeEnum[bytes.Length / blockLength];
-
-            // Encrypt blocks with ECB or CBC randomly
+            // Encrypt all blocks with ECB or CBC randomly
             byte[] encryptedBytes = new byte[bytes.Length];
+            EncryptionTypeEnum encryptionType = (EncryptionTypeEnum)random.Next(1, 3);
             for (int i = 0; i < encryptedBytes.Length / blockLength; i++)
             {
                 // Get the unencrypted block
@@ -119,7 +87,6 @@ namespace CryptoPals.Sets
 
                 // Encrypt the block
                 byte[] encryptedBlock = unencryptedBlock;
-                EncryptionTypeEnum encryptionType = (EncryptionTypeEnum)random.Next(1, 3);
                 if (encryptionType.Equals(EncryptionTypeEnum.ECB))
                 {
                     // Encrypt using ECB
@@ -135,7 +102,7 @@ namespace CryptoPals.Sets
                 }
 
                 // Record which encryption type we used for this block
-                actualEncryption[i] = encryptionType;
+                actualEncryption = encryptionType;
 
                 // Add the encrypted block to the encrytedBytes array for returning
                 for (int j = 0; j < encryptedBlock.Length; j++)
@@ -172,21 +139,13 @@ namespace CryptoPals.Sets
         }
 
         /// <summary>
-        /// Format the output to display the block number, the oracles determination, and the actual encryption used on the block
+        /// Format the output to display the  the oracles determination, and the actual encryption used on the input bytes
         /// </summary>
-        /// <param name="types">An enum array containing the oracles determination of the encryption type used for each block</param>
+        /// <param name="type">An enum containing the oracles determination of the encryption type used</param>
         /// <returns>The formatted output</returns>
-        private string FormatOutput(EncryptionTypeEnum[] types)
+        private string FormatOutput(EncryptionTypeEnum type)
         {
-            // Build the output string from the types array
-            StringBuilder stringBuilder = new StringBuilder();
-            for (int i = 0; i < types.Length; i++)
-            {
-                // Whitespace padding for output uniformity: will work up until 2 digit indexes (blocks in the 3 digits will be truncated from the output anyway)
-                stringBuilder.Append($"Block {i,2} has been encrypted with: oracle({types[i].ToString()}) actual({actualEncryption[i].ToString()}) {Environment.NewLine}");
-            }
-
-            return stringBuilder.ToString();
+            return $"Input has been encrypted with: oracle({type.ToString()}) actual({actualEncryption.ToString()}) {Environment.NewLine}";
         }
 
         /// <summary>
