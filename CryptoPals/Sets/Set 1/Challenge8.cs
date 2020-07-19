@@ -104,7 +104,6 @@ namespace CryptoPals.Sets
         public bool IsECBEncrypted(byte[] bytes, int blockSizeAttempts)
         {
             // Try multiple block sizes
-            bool[] containsRepeatedBlocks = new bool[blockSizeAttempts];
             for (int i = 0; i < blockSizeAttempts; i++)
             {
                 // Start with a block size of 2, then try increasing block sizes
