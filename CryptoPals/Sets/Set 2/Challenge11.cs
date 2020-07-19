@@ -1,5 +1,6 @@
 ﻿using CryptoPals.Enumerations;
 using CryptoPals.Interfaces;
+using Org.BouncyCastle.Crypto;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -49,8 +50,9 @@ namespace CryptoPals.Sets
             byte[] bytes = Encoding.ASCII.GetBytes(input);
 
             // Run Oracle against the input data multiple times (with different random byte keys)
-            int testCount = 50;
-            for (int i = 0; i < testCount; i++)
+            int totalTests = 50;
+            int testFailCount = 0;
+            for (int i = 0; i < totalTests; i++)
             {
                 // Encrypt data using a random key
                 int keySize = 16;
@@ -62,13 +64,15 @@ namespace CryptoPals.Sets
                 // Get the actual encryption type that was used
                 EncryptionTypeEnum actualEncryption = encryptionResult.Item2;
 
-                // If the determination does not match, the test failed
-                if (oracleEncryption.Equals(actualEncryption))
-                    return "A test failed";
+                // If the determination does not match, the test failed so increment the count
+                if (!oracleEncryption.Equals(actualEncryption))
+                {
+                    testFailCount++;
+                }
             }
 
-            // If no tests failed, output that all N tests passed
-            return "All {testCount} tests passed.";
+            // Format the result of the tests and return it
+            return FormatOutput(totalTests, testFailCount);
         }
 
         /// <summary>
@@ -133,6 +137,29 @@ namespace CryptoPals.Sets
 
             // Encrypt the data with ECB or CBC
             return EncryptBytesRandomly(bytesWithInserts, key);
+        }
+
+        /// <summary>
+        /// Format the output to succinctly display that all tests passed, or if any failed, how many
+        /// </summary>
+        /// <param name="totalTests">The total number of tests ran</param>
+        /// <param name="testFailCount">The number of tests that failed</param>
+        /// <returns>Formatted string with the total number of passed tests if all passed, or if any failed, then how many passed of all the tests run</returns>
+        private string FormatOutput(int totalTests, int testFailCount)
+        {
+            string output = "";
+            if (testFailCount == 0)
+            {
+                // If no tests failed, output that all N tests passed
+                output = $"All {totalTests} tests passed.";
+            }
+            else
+            {
+                // If any test failed, output the number of passed tests vs the total
+                output = $"{totalTests - testFailCount} tests passed of {totalTests}";
+            }
+
+            return output;
         }
 
         /// <summary>
