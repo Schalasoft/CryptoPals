@@ -50,9 +50,9 @@ namespace CryptoPals
         {
             // Initialize the Challenge Manager used to hold the instance of each challenge
             // DEBUG Should start at 1 and end at the last challenge but for speed we only run the current challenge
-            int currentChallenge = 11;
+            int currentChallenge = 1;
             int startChallenge = currentChallenge;
-            int challengeCount = currentChallenge;
+            int challengeCount = 57;
             InitializeChallengeManager(challengeCount);
 
             string input = "";
@@ -67,6 +67,10 @@ namespace CryptoPals
                 // Read the challenge input file, unless it is a challenge without an input
                 if(!challengesWithoutInputs.Contains(i))
                     input = FileHandling.ReadFile(fileName);
+
+                // If the input file does not exist, or is empty, bomb out
+                if (input.Length == 0)
+                    return;
 
                 // Perform any additional preparation operations for specific challenges
                 switch (i)

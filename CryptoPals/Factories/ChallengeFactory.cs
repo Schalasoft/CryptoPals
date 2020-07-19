@@ -55,7 +55,7 @@ namespace CryptoPals.Factories
                 
                 case ChallengeEnum.Challenge11:
                     return new Challenge11();
-                /*
+                
                 case ChallengeEnum.Challenge12:
                     return new Challenge12();
                 /*
@@ -195,7 +195,7 @@ namespace CryptoPals.Factories
                     return new Challenge57();
                 */
                 default:
-                    throw new ArgumentException("Invalid Challenge Enumeration provided");
+                    return null;
             }
     }
 }

@@ -16,13 +16,20 @@ namespace CryptoPals
         /// <returns>The plaintext from the file, with additional escape characters unescaped (as this causes issues with encryption/decryption)</returns>
         public static string ReadFile(string fileName, string dir = "..\\..\\..\\Data\\")
         {
-            // Read entire file
-            string text = File.ReadAllText($"{dir}{fileName}");
-            
-            // Remove escape characters from string (we want '\n' instead of '\\n' or it will mess up the bytes) 
-            text = Regex.Unescape(text);
+            // Construct the file path
+            string filePath = $"{dir}{fileName}";
 
-            return text;
+            string output = "";
+            if (File.Exists(filePath))
+            {
+                // Read entire file
+                output = File.ReadAllText(filePath);
+
+                // Remove escape characters from string (we want '\n' instead of '\\n' or it will mess up the bytes) 
+                output = Regex.Unescape(output);
+            }
+
+            return output;
         }
     }
 }
