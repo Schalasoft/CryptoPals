@@ -1,5 +1,6 @@
 ﻿using CryptoPals.Interfaces;
 using Org.BouncyCastle.Crypto;
+using Org.BouncyCastle.Crypto.Paddings;
 using Org.BouncyCastle.Crypto.Parameters;
 using Org.BouncyCastle.Security;
 using System;
@@ -42,16 +43,14 @@ namespace CryptoPals.Sets
         }
 
         ///<inheritdoc cref="IChallenge7.AES_ECB(bool, byte[], byte[])"/>
-        public byte[] AES_ECB(bool encrypt, byte[] data, byte[] key)
+        public byte[] AES_ECB(bool encrypt, byte[] bytes, byte[] key)
         {
-            // TODO decrypt
-
-            // Setup the decryption cipher
+            // Setup the encryption/decryption cipher
             IBufferedCipher cipher = CipherUtilities.GetCipher("AES/ECB/NoPadding");
             cipher.Init(encrypt, new KeyParameter(key));
-            
-            // Decrypt
-            return cipher.ProcessBytes(data);
+
+            // Encrypt/Decrypt
+            return cipher.ProcessBytes(bytes);
         }
     }
 }
