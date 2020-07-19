@@ -3,6 +3,7 @@ using CryptoPals.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Linq;
 
 namespace CryptoPals.Sets
 {
@@ -89,31 +90,82 @@ namespace CryptoPals.Sets
             return DecryptUnknownString(encryptedBytes, key).Substring(encryptedBytes.Length - 500, 500);
         }
 
+        private Dictionary<string, string> BuildCombinationsDictionary(int blockSize, char character, byte[] key)
+        {
+            Dictionary<string, string> combinations = new Dictionary<string, string>();
+            for (int i = 0; i < 128; i++)
+            {
+                // Create a block with all the same character, except the last byte which will be unique
+                string blockText = BuildShortBlock(Convert.ToChar(i), blockSize, character);
+
+                // Convert the short block to bytes
+                byte[] blockBytes = Encoding.ASCII.GetBytes(blockText);
+
+                // Encrypt the short block
+                byte[] shortEncrypt = challenge7.AES_ECB(true, blockBytes, key);
+
+                // Add it to the dictionary (add bytes as a string with each value separated with a separator
+                // This is because checking a byte[] checks against the top level of the array 
+                // Could use LINQ but this works // 64 and 128 encode to the same byte value
+                combinations.Add(String.Join(Constants.Separator, shortEncrypt), blockText);
+            }
+
+            return combinations;
+        }
+
+        private string BuildShortBlock(char lastCharacter, int blockSize, char character)
+        {
+            // Create a block exactly 1 byte short of the block size and add the last unique character
+            return $"{"".PadRight(blockSize - 1, character)}{lastCharacter}";
+        }
+
+
         private int DetermineEncryptorBlockSize(char character, byte[] key)
         {
             // Feed identical bytes to encryptor
             int blockSize = 0;
-            for (int i = 3; i <= 60; i++) // Start at 3 because it will always match 2 if we use that
+            int rightShiftCount = 0;
+
+            // Keep trying until we get a block size, or we've tried shifting the bytes by 10
+            while (blockSize == 0 || rightShiftCount < 10)
             {
-                // Create a string of identical characters of the specified length
-                string text = "".PadRight(i, character);
-
-                // Convert text to bytes
-                byte[] checkBytes = Encoding.ASCII.GetBytes(text);
-
-                // Pad the bytes up to at least 16 bytes or else the encryption will fail
-                byte paddingByte = 0; // Pad it with a zero
-                checkBytes = challenge9.PadBytes(checkBytes, 16, paddingByte);
-
-                // Encrypt the text
-                byte[] encryptedBytes = challenge7.AES_ECB(true, checkBytes, key);
-
-                // If we find repeated blocks then this loops iterator is the block size
-                if(challenge8.GetRepeatedBlockCount(encryptedBytes, i / 2) > 0) // Block size should be half the text size for check
+                // Try various block sizes
+                for (int i = 4; i <= 128; i++)
                 {
-                    blockSize = i / 2;
-                    break;
+                    // Create a string of identical characters of the specified length
+                    string text = "".PadRight(i, character);
+
+                    // Convert text to bytes
+                    byte[] checkBytes = Encoding.ASCII.GetBytes(text);
+
+                    // Pad the bytes with random bytes up to at least 16 bytes or else the encryption will fail
+                    if(checkBytes.Length < 16)
+                        checkBytes = challenge11.InsertBytes(checkBytes, challenge11.GenerateRandomASCIIBytes(16 - checkBytes.Length), true);
+
+                    // Encrypt the text
+                    byte[] encryptedBytes = challenge7.AES_ECB(true, checkBytes, key);
+
+                    // Right shift the bytes incase the bytes that were randomly added throw off the check
+                    // We use random bytes but unique bytes would be a more ideal solution
+                    if(rightShiftCount > 0) 
+                        encryptedBytes = challenge11.InsertBytes(encryptedBytes, challenge11.GenerateRandomASCIIBytes(rightShiftCount), true);
+
+                    // If we find repeated blocks then this loops iterator is the block size
+                    int currentBlockSize = i / 2; // Block size should be half the text/byte size for check
+                    if (challenge8.GetRepeatedBlockCount(encryptedBytes, currentBlockSize) > 0)
+                    {
+                        // Update the block size and set the flag to look for another larger block size
+                        blockSize = currentBlockSize;
+                        break;
+                    }
                 }
+
+                // If we found a block size, break out of the while loop
+                if (blockSize > 1)
+                    break;
+
+                // Increment the right shift count as we found nothing on our first attempt at all block sizes
+                rightShiftCount++;
             }
 
             return blockSize;
@@ -141,48 +193,17 @@ namespace CryptoPals.Sets
             return output;
         }
 
-        private string BuildShortBlock(char lastCharacter, char character, int blockSize)
-        {
-            // Create a block exactly 1 byte short of the block size and add the last unique character
-            return $"{"".PadRight(blockSize - 1, character)}{lastCharacter}";
-        }
-
         private string GetUnknownString(byte[] bytes, int blockSize, char character, byte[] key)
         {
-            // Dictionary used to hold all possible last byte combinations for the identical strings ("AAAAAAAA", "AAAAAAAB", "AAAAAAAC" etc.)
-            Dictionary<string, string> combinations = new Dictionary<string, string>();
-            for (int i = 0; i <= 256; i++)
-            {
-                // Create a block with all the same character, except the last byte which will be unique
-                string blockText = BuildShortBlock(Convert.ToChar(i), character, blockSize);
-
-                // Convert the short block to bytes
-                byte[] blockBytes = Encoding.ASCII.GetBytes(blockText);
-
-                // Encrypt the short block
-                byte[] shortEncrypt = challenge7.AES_ECB(true, blockBytes, key);
-                // cdg todo sometimes the block size comes back as 1, and not 16 as expected
-
-                // Convert the encryption to a string for matching against the dictionary
-                string encryptText = Encoding.ASCII.GetString(shortEncrypt);
-
-                // Add it to the dictionary
-                try // cdg todo lazy try/catch, need to look at why the keys are not unique when it should be 256 unique ascii (characters that turn into question marks maybe?)
-                {
-                    combinations.Add(encryptText, blockText);
-                }
-                catch(Exception e)
-                {
-
-                }
-            }
+            // Build dictionary used to hold all possible last byte combinations for the identical strings ("AAAAAAAA", "AAAAAAAB", "AAAAAAAC" etc.)
+            Dictionary<string, string> combinations = BuildCombinationsDictionary(blockSize, character, key);
 
             // Match the output of the short block to the dictionary key to get each character of the unknown string
             StringBuilder stringBuilder = new StringBuilder();
             for (int i = 0; i < bytes.Length; i++)
             {
                 // Take the unknown character and use it as the last byte in a short block
-                string blockText = BuildShortBlock(Convert.ToChar(bytes[i]), character, blockSize);
+                string blockText = BuildShortBlock(Convert.ToChar(bytes[i]), blockSize, character);
 
                 // Convert it to bytes
                 byte[] blockBytes = Encoding.ASCII.GetBytes(blockText);
@@ -190,11 +211,8 @@ namespace CryptoPals.Sets
                 // Encrypt it
                 byte[] shortEncrypt = challenge7.AES_ECB(true, blockBytes, key);
 
-                // Convert the encryption to a string for matching against the dictionary
-                string encryptText = Encoding.ASCII.GetString(shortEncrypt);
-
                 // Get the match from the dictionary
-                string match = combinations[encryptText];
+                string match = combinations[String.Join(Constants.Separator, shortEncrypt)];
 
                 // Get the last character of the match
                 char lastCharacter = Convert.ToChar(match.Substring(match.Length - 1, 1));
