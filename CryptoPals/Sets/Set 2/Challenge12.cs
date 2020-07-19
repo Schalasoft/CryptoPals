@@ -1,4 +1,7 @@
-﻿using CryptoPals.Interfaces;
+﻿using CryptoPals.Enumerations;
+using CryptoPals.Interfaces;
+using System;
+using System.Text;
 
 namespace CryptoPals.Sets
 {
@@ -51,10 +54,46 @@ namespace CryptoPals.Sets
         about once a year.
         */
 
+        // Reuse previous challenge functionality
+        IChallenge11 challenge11 = (IChallenge11)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge11);
+
+
         /// <inheritdoc />
         public string Solve(string input)
         {
+            // Convert input to bytes
+            byte[] bytes = Encoding.ASCII.GetBytes(input);
+
+            // Generate a random key
+            byte[] key = challenge11.GenerateRandomASCIIBytes(128);
+            byte[] encryptedBytes = ECB_EncryptWithKnownKey(bytes, key);
+
             return "";
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="bytes"></param>
+        /// <param name="key"></param>
+        /// <returns></returns>
+        private byte[] ECB_EncryptWithKnownKey(byte[] bytes, byte[] key)
+        {
+            // The text to append before the input bytes
+            string base64Text = "Um9sbGluJyBpbiBteSA1LjAKV2l0aCBteSByYWctdG9wIGRvd24gc28gbXkgaGFpciBjYW4gYmxvdwpUaGUgZ2lybGllcyBvbiBzdGFuZGJ5IHdhdmluZyBqdXN0IHRvIHNheSBoaQpEaWQgeW91IHN0b3A / IE5vLCBJIGp1c3QgZHJvdmUgYnkK";
+
+            // Base64 decode the text
+            byte[] base64Bytes = Convert.FromBase64String(base64Text);
+
+            // Append Base64 bytes after the input bytes
+            byte[] bytesWithInserts = challenge11.InsertBytes(bytes, base64Bytes, false);
+
+            // Encrypt
+            IChallenge7 challenge7 = (IChallenge7)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge7);
+
+            challenge7.AES_ECB(true, bytes, key);
+
+            return new byte[0];
         }
     }
 }

@@ -24,6 +24,7 @@ namespace CryptoPals
     {
         // Used to identify challenges that do not require input files
         private static List<int> challengesWithoutInputs = new List<int>() { };
+        private static List<int> challengesToUsePreviousInputs = new List<int>() { 12 };
 
         /// <summary>
         /// Main entry point
@@ -61,8 +62,13 @@ namespace CryptoPals
                 // Alias for input when it is too long for outputting to the console
                 string inputAlias = "";
 
+                // Use previous challenge input file if this challenge is specified to
+                int fileIndex = i;
+                if (!challengesToUsePreviousInputs.Contains(i))
+                    fileIndex = fileIndex - 1;
+
                 // Construct challenge input filename
-                string fileName = $"Challenge{i}.txt";
+                string fileName = $"Challenge{fileIndex}.txt";
 
                 // Read the challenge input file, unless it is a challenge without an input
                 if(!challengesWithoutInputs.Contains(i))
