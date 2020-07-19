@@ -110,15 +110,12 @@ namespace CryptoPals.Sets
                 // Start with a block size of 2, then try increasing block sizes
                 int blockSize = 2 + i;
 
-                // Store whether or not this block size had any repeated blocks
-                containsRepeatedBlocks[i] = GetRepeatedBlockCount(bytes, blockSize) > 0;
+                // If we find any repeated blocks, assume it is ECB
+                if (GetRepeatedBlockCount(bytes, blockSize) > 0)
+                    return true;
             }
-
-            // If we find any repeated blocks, assume it is ECB
-            if (containsRepeatedBlocks.Any(x => x.Equals(true)))
-                return true;
-            else
-                return false;
+            
+            return false;
         }
     }
 }
