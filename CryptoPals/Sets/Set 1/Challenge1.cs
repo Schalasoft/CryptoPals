@@ -71,7 +71,7 @@ namespace CryptoPals.Sets
 
             for (int i = 0; i < hex.Length; i += 2)
             {
-                bytes[i / 2] = HexToByte(hex);
+                bytes[i / 2] = HexToByte(hex.Substring(i, 2));
             }
 
             return bytes;
