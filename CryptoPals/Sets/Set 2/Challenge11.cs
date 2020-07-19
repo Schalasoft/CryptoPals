@@ -72,9 +72,6 @@ namespace CryptoPals.Sets
         /// <returns>A formatted string containing the number of correct answers vs the total, and each determination vs the actual</returns>
         private string SolveDebug(int keySize)
         {
-            // CDG DEBUG, check for accuracy on many encryptions
-            // Due to the random bytes added, passing in the keySize does not return expected results
-            // Should try ranges of key sizes
             Tuple<byte[], EncryptionTypeEnum> encryptionResult;
             List<string> outputs = new List<string>();
             int totalCount = 50; // Total number of tests
