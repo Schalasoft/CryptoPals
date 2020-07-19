@@ -60,6 +60,7 @@ namespace CryptoPals.Sets
         // Reuse previous challenge functionality
         IChallenge7 challenge7   = (IChallenge7)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge7);
         IChallenge8 challenge8   = (IChallenge8)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge8);
+        IChallenge9 challenge9   = (IChallenge9)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge9); // cdg debug
         IChallenge11 challenge11 = (IChallenge11)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge11);
 
         /// <inheritdoc />
@@ -75,7 +76,8 @@ namespace CryptoPals.Sets
             byte[] base64Bytes = Convert.FromBase64String(base64Text);
 
             // Generate a random key
-            byte[] key = challenge11.GenerateRandomASCIIBytes(16);
+            //byte[] key = challenge11.GenerateRandomASCIIBytes(16);
+            byte[] key = challenge9.PadBytes(new byte[0], 16, 1); // CDG DEBUG
 
             // Append additional bytes after the input bytes
             byte[] appendedBytes = challenge11.InsertBytes(bytes, base64Bytes, false);
@@ -93,7 +95,7 @@ namespace CryptoPals.Sets
         private Dictionary<string, string> BuildCombinationsDictionary(int blockSize, char character, byte[] key)
         {
             Dictionary<string, string> combinations = new Dictionary<string, string>();
-            for (int i = 0; i < 128; i++)
+            for (int i = 0; i <= 256; i++)
             {
                 // Create a block with all the same character, except the last byte which will be unique
                 string blockText = BuildShortBlock(Convert.ToChar(i), blockSize, character);
@@ -107,7 +109,9 @@ namespace CryptoPals.Sets
                 // Add it to the dictionary (add bytes as a string with each value separated with a separator
                 // This is because checking a byte[] checks against the top level of the array 
                 // Could use LINQ but this works nicely
-                combinations.Add(String.Join(Constants.Separator, shortEncrypt), blockText);
+                string keyToAdd = String.Join(Constants.Separator, shortEncrypt);
+                if (!combinations.ContainsKey(keyToAdd)) // Check if the key already exists (some Extended ASCII values all map to 195?) cdg todo
+                    combinations.Add(keyToAdd, blockText);
             }
 
             return combinations;
@@ -211,7 +215,7 @@ namespace CryptoPals.Sets
                 // Encrypt it
                 byte[] shortEncrypt = challenge7.AES_ECB(true, blockBytes, key);
 
-                // Get the plaintext from the match dictionary
+                // Get the encrypted bytes from the match dictionary
                 string match = combinations.FirstOrDefault(x => x.Key.Equals(String.Join(Constants.Separator, shortEncrypt))).Value;
 
                 // Get the last character of the match
