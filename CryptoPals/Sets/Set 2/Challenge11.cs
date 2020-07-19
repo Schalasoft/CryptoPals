@@ -175,7 +175,7 @@ namespace CryptoPals.Sets
         }
 
         /// <inheritdoc cref="IChallenge11.InsertBytes(byte[], byte[], bool)"/>
-        private byte[] InsertBytes(byte[] bytesOriginal, byte[] bytesToInsert, bool insertBefore)
+        public byte[] InsertBytes(byte[] bytesOriginal, byte[] bytesToInsert, bool insertBefore)
         {
             byte[] bytesWithInserts = new byte[bytesToInsert.Length + bytesOriginal.Length];
 

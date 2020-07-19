@@ -55,8 +55,8 @@ namespace CryptoPals.Sets
         */
 
         // Reuse previous challenge functionality
+        IChallenge7 challenge7 = (IChallenge7)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge7);
         IChallenge11 challenge11 = (IChallenge11)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge11);
-
 
         /// <inheritdoc />
         public string Solve(string input)
@@ -64,36 +64,28 @@ namespace CryptoPals.Sets
             // Convert input to bytes
             byte[] bytes = Encoding.ASCII.GetBytes(input);
 
-            // Generate a random key
-            byte[] key = challenge11.GenerateRandomASCIIBytes(128);
-            byte[] encryptedBytes = ECB_EncryptWithKnownKey(bytes, key);
-
-            return "";
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="bytes"></param>
-        /// <param name="key"></param>
-        /// <returns></returns>
-        private byte[] ECB_EncryptWithKnownKey(byte[] bytes, byte[] key)
-        {
             // The text to append before the input bytes
-            string base64Text = "Um9sbGluJyBpbiBteSA1LjAKV2l0aCBteSByYWctdG9wIGRvd24gc28gbXkgaGFpciBjYW4gYmxvdwpUaGUgZ2lybGllcyBvbiBzdGFuZGJ5IHdhdmluZyBqdXN0IHRvIHNheSBoaQpEaWQgeW91IHN0b3A / IE5vLCBJIGp1c3QgZHJvdmUgYnkK";
+            string base64Text = "Um9sbGluJyBpbiBteSA1LjAKV2l0aCBteSByYWctdG9wIGRvd24gc28gbXkgaGFpciBjYW4gYmxvdwpUaGUgZ2lybGllcyBvbiBzdGFuZGJ5IHdhdmluZyBqdXN0IHRvIHNheSBoaQpEaWQgeW91IHN0b3A/IE5vLCBJIGp1c3QgZHJvdmUgYnkK";
 
             // Base64 decode the text
             byte[] base64Bytes = Convert.FromBase64String(base64Text);
 
-            // Append Base64 bytes after the input bytes
-            byte[] bytesWithInserts = challenge11.InsertBytes(bytes, base64Bytes, false);
+            // Generate a random key
+            byte[] key = challenge11.GenerateRandomASCIIBytes(128);
 
-            // Encrypt
-            IChallenge7 challenge7 = (IChallenge7)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge7);
+            // Encrypt the bytes with the key
+            byte[] encryptedBytes = ECB_EncryptWithKnownKey(bytes, key, base64Bytes);
 
-            challenge7.AES_ECB(true, bytes, key);
+            return "";
+        }
 
-            return new byte[0];
+        private byte[] ECB_EncryptWithKnownKey(byte[] bytes, byte[] key, byte[] additionalBytes)
+        {
+            // Append additional bytes after the input bytes
+            byte[] appendedBytes = challenge11.InsertBytes(bytes, additionalBytes, false);
+
+            // Return the encrypted bytes
+            return challenge7.AES_ECB(true, appendedBytes, key);
         }
     }
 }
