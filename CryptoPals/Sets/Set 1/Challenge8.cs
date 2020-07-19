@@ -68,7 +68,7 @@ namespace CryptoPals.Sets
         /// <param name="bytes">The bytes to get the repeated block count of</param>
         /// <param name="blockSize">The size of the blocks to check</param>
         /// <returns>An integer representing the repeated block count for the input bytes</returns>
-        private int GetRepeatedBlockCount(byte[] bytes, int blockSize)
+        private int GetRepeatedBlockCount(byte[] bytes, int blockSize = 0)
         {
             // Break into blocks (size of 16 as the challenge hinted at this number)
             byte[][] blocks = challenge6.CreateBlocks(bytes, blockSize);
@@ -101,12 +101,22 @@ namespace CryptoPals.Sets
             return repeatedBlockCounts;
         }
 
-        ///<inheritdoc cref="IChallenge8.IsECBEncrypted(byte[])"/>
-        public bool IsECBEncrypted(byte[] bytes, int blockSize)
+        ///<inheritdoc cref="IChallenge8.IsECBEncrypted(byte[], int)"/>
+        public bool IsECBEncrypted(byte[] bytes, int blockSizeAttempts)
         {
-            // Determine if ECB has been used to encrypt the bytes
+            // Try multiple block sizes
+            bool[] containsRepeatedBlocks = new bool[blockSizeAttempts];
+            for (int i = 0; i < blockSizeAttempts; i++)
+            {
+                // Start with a block size of 2, then try increasing block sizes
+                int blockSize = 2 + i;
+
+                // Store whether or not this block size had any repeated blocks
+                containsRepeatedBlocks[i] = GetRepeatedBlockCount(bytes, blockSize) > 0;
+            }
+
             // If we find any repeated blocks, assume it is ECB
-            if (GetRepeatedBlockCount(bytes, blockSize) > 0)
+            if (containsRepeatedBlocks.Any(x => x.Equals(true)))
                 return true;
             else
                 return false;
