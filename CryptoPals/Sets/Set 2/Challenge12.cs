@@ -84,17 +84,15 @@ namespace CryptoPals.Sets
             byte[] encryptedBytes = challenge7.AES_ECB(true, appendedBytes, key);
 
             // Decrypt the Base64 text
-            return DecryptUnknownString(encryptedBytes, key);
+            int stringLength = base64Text.Length;
+            return DecryptUnknownString(encryptedBytes, key, stringLength);
         }
 
-        private string DecryptUnknownString(byte[] bytes, byte[] key)
+        private int DetermineEncryptorBlockSize(char character, byte[] key)
         {
-            // The character we are going to use for encryption
-            char character = 'A';
-
             // Feed identical bytes to encryptor
-            StringBuilder stringBuilder = new StringBuilder();
-            for (int i = 1; i <= 16; i++)
+            int blockSize = 0;
+            for (int i = 3; i <= 60; i++) // Start at 3 because it will always match 2 if we use that
             {
                 // Create a string of identical characters of the specified length
                 string text = "".PadRight(i, character);
@@ -106,33 +104,52 @@ namespace CryptoPals.Sets
                 checkBytes = challenge9.PadBytes(checkBytes, 16);
 
                 // Encrypt the text
-                byte[] resultBytes = challenge7.AES_ECB(true, checkBytes, key);
+                byte[] encryptedBytes = challenge7.AES_ECB(true, checkBytes, key);
 
-                // Detect the block size of the cipher
-                int blockSize = 4;//todo
+                // If we find repeated blocks then this loops iterator is the block size
+                if(challenge8.GetRepeatedBlockCount(encryptedBytes, i / 2) > 0) // Block size should be half the text size for check
+                {
+                    blockSize = i / 2;
+                    break;
+                }
+            }
 
-                // Detect if the function is using ECB
-                bool isUsingECB = challenge8.IsECBEncrypted(resultBytes);
+            return blockSize;
+        }
 
-                // Create a block exactly 1 byte short of the block size
-                string shortBlockText = "".PadRight(blockSize - 1, character);
+        private string DecryptUnknownString(byte[] bytes, byte[] key, int stringLength)
+        {
+            // The character we are going to use for encryption
+            char character = 'A';
 
-                // Convert the short block to bytes
-                byte[] shortBlockBytes = Encoding.ASCII.GetBytes(shortBlockText);
+            // Detect the block size of the cipher
+            int blockSize = DetermineEncryptorBlockSize(character, key);
 
-                // Dictionary used to hold all possible last byte combinations for the identical strings ("AAAAAAAA", "AAAAAAAB", "AAAAAAAC" etc.)
-                Dictionary<string, char> lastByteCombinations = PopulateLastByteCombinationsDictionary(shortBlockText, character);
+            // Detect if the function is using ECB
+            bool isUsingECB = challenge8.IsECBEncrypted(bytes);
 
-                // Pad the bytes up to the appropriate size CDG TODO this might be a problem...
-                shortBlockBytes = challenge9.PadBytes(shortBlockBytes, 16);
+            // Create a block exactly 1 byte short of the block size
+            string shortBlockText = "".PadRight(blockSize - 1, character);
 
-                // Encrypt the short block
-                byte[] shortEncrypt = challenge7.AES_ECB(true, shortBlockBytes, key);
+            // Convert the short block to bytes
+            byte[] shortBlockBytes = Encoding.ASCII.GetBytes(shortBlockText);
 
-                // Convert the encryption to a string for matching against the dictionary
-                string shortEncryptText = Encoding.ASCII.GetString(shortEncrypt);
+            // Dictionary used to hold all possible last byte combinations for the identical strings ("AAAAAAAA", "AAAAAAAB", "AAAAAAAC" etc.)
+            Dictionary<string, char> lastByteCombinations = PopulateLastByteCombinationsDictionary(shortBlockText, character);
 
-                // Match the output of the short block to the dictionary key to get the first character of the unknown string
+            // Pad the bytes up to the appropriate size CDG TODO this might be a problem...
+            shortBlockBytes = challenge9.PadBytes(shortBlockBytes, 16);
+
+            // Encrypt the short block
+            byte[] shortEncrypt = challenge7.AES_ECB(true, shortBlockBytes, key);
+
+            // Convert the encryption to a string for matching against the dictionary
+            string shortEncryptText = Encoding.ASCII.GetString(shortEncrypt);
+
+            // Match the output of the short block to the dictionary key to get each character of the unknown string
+            StringBuilder stringBuilder = new StringBuilder();
+            for (int i = 0; i < stringLength; i++)
+            {
                 stringBuilder.Append(lastByteCombinations[shortEncryptText]);
             }
 
