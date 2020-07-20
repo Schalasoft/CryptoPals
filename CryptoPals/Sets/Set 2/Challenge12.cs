@@ -82,7 +82,7 @@ namespace CryptoPals.Sets
             // Append additional bytes after the input bytes
             byte[] appendedBytes = challenge11.InsertBytes(bytes, base64Bytes, false);
 
-            // Encrypt the bytes with the key (I'm not really sure why we're appending the bytes here when we only use our plaintext to determine the block size and generate the dictionary)
+            // Encrypt the bytes with the key
             byte[] encryptedBytes = challenge7.AES_ECB(true, appendedBytes, key);
 
             // Encrypt the unknown string for decrypting
@@ -92,29 +92,20 @@ namespace CryptoPals.Sets
             return DecryptUnknownString(encryptedBytes, encryptedUnknownBytes, key);//.Substring(encryptedBytes.Length - 500, 500); // cdg todo
         }
 
-        private Dictionary<string, string> BuildCombinationsDictionary(int blockSize, char character, byte[] key)
+        private byte[] BuildMappingTable(int blockSize, char character, byte[] key)
         {
-            Dictionary<string, string> combinations = new Dictionary<string, string>();
-            for (int i = 0; i <= 256; i++)
+            int size = 128;
+            byte[] mappings = new byte[size];
+            for (int i = 0; i < size; i++)
             {
-                // Create a block with all the same character, except the last byte which will be unique
-                string blockText = BuildShortBlock(Convert.ToChar(i), blockSize, character);
-
-                // Convert the short block to bytes
-                byte[] blockBytes = Encoding.ASCII.GetBytes(blockText);
-
                 // Encrypt the short block
-                byte[] shortEncrypt = challenge7.AES_ECB(true, blockBytes, key);
+                byte[] shortEncrypt = EncryptShortBlock(Convert.ToChar(i), blockSize, character, key);
 
-                // Add it to the dictionary (add bytes as a string with each value separated with a separator
-                // This is because checking a byte[] checks against the top level of the array 
-                // Could use LINQ but this works nicely
-                string keyToAdd = String.Join(Constants.Separator, shortEncrypt);
-                if (!combinations.ContainsKey(keyToAdd)) // Check if the key already exists (some Extended ASCII values all map to 195?) cdg todo
-                    combinations.Add(keyToAdd, blockText);
+                // Add it to the dictionary (the actual ASCII char as the key, and the encrypted char as the value)
+                mappings[i] = shortEncrypt[shortEncrypt.Length - 1];
             }
 
-            return combinations;
+            return mappings;
         }
 
         private string BuildShortBlock(char lastCharacter, int blockSize, char character)
@@ -197,31 +188,43 @@ namespace CryptoPals.Sets
             return output;
         }
 
+        private byte[] EncryptShortBlock(char lastCharacter, int blockSize, char character, byte[] key)
+        {
+            // Create a block with all the same character, except the last byte which will be unique
+            string blockText = BuildShortBlock(lastCharacter, blockSize, character);
+
+            // Convert the short block to bytes
+            byte[] blockBytes = Encoding.ASCII.GetBytes(blockText);
+
+            // Encrypt the short block
+            return challenge7.AES_ECB(true, blockBytes, key);
+        }
+
+        // cdg todo block size failed
+
         private string GetUnknownString(byte[] bytes, byte[] unknownBytes, int blockSize, char character, byte[] key)
         {
             // Build dictionary used to hold all possible last byte combinations for the identical strings ("AAAAAAAA", "AAAAAAAB", "AAAAAAAC" etc.)
-            Dictionary<string, string> combinations = BuildCombinationsDictionary(blockSize, character, key);
+            byte[] mappings = BuildMappingTable(blockSize, character, key);
 
             // Match the output of the short block to the dictionary key to get each character of the unknown string
             StringBuilder stringBuilder = new StringBuilder();
-            for (int i = 0; i < bytes.Length; i++)
+            for (int i = 0; i < unknownBytes.Length; i++)
             {
-                // Take the unknown character and use it as the last byte in a short block
-                string blockText = BuildShortBlock(Convert.ToChar(bytes[i]), blockSize, character);
+                // Encrypt a short block
+                byte[] shortEncrypt = EncryptShortBlock(Convert.ToChar(unknownBytes[i]), blockSize, character, key);
 
-                // Convert it to bytes
-                byte[] blockBytes = Encoding.ASCII.GetBytes(blockText);
+                // Get the last byte of the encryption
+                byte lastUnknownByte = shortEncrypt[shortEncrypt.Length - 1];
 
-                // Encrypt it
-                byte[] shortEncrypt = challenge7.AES_ECB(true, blockBytes, key);
+                // Get the match from the dictionary (taking the index to get the ASCII value)
+                byte actualByte = (byte)Array.FindIndex(mappings, x => x.Equals(lastUnknownByte));
 
-                // Get the encrypted bytes from the match dictionary
-                string match = combinations.FirstOrDefault(x => x.Key.Equals(String.Join(Constants.Separator, shortEncrypt))).Value;
-
-                // Get the last character of the match
-                char lastCharacter = Convert.ToChar(match.Substring(match.Length - 1, 1));
+                // Get the match key (the character index/ascii byte value)
+                char lastCharacter = Convert.ToChar(actualByte);
 
                 // Append the final character of the match to the string builder for outputting
+                // cdg todo we can't just check the first encrypted byte because it has to be at the 8th position
                 stringBuilder.Append(lastCharacter);
             }
 
