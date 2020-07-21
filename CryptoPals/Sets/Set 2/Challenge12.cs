@@ -202,15 +202,19 @@ namespace CryptoPals.Sets
         private string GetUnknownString(byte[] unknownBytes, int blockSize, char character, byte[] key)
         {
             string a = "YELLOW SUBMARINEYELLOW SUBMARINE";
-            ///unknownBytes = challenge7.AES_ECB(true, Encoding.ASCII.GetBytes(a), key);
+            //unknownBytes = challenge7.AES_ECB(true, Encoding.ASCII.GetBytes(a), key);
 
             // Match the output of the short block to the dictionary key to get each character of the unknown string
-            byte[] decryptedBytes = new byte[unknownBytes.Length];
+            StringBuilder stringBuilder = new StringBuilder();
             int removeAmount = 0;
             for (int i = 0; i < unknownBytes.Length; i++)
             {
                 // Get a reference to the current encrypted byte
                 byte encryptedByte = unknownBytes[i];
+
+                // cdg debug
+                if (i == 16)
+                    break;
 
                 // Encrypt the short block
                 byte[] target = EncryptShortBlock(Convert.ToChar(encryptedByte), blockSize - removeAmount, character, key);
@@ -222,13 +226,16 @@ namespace CryptoPals.Sets
                 KeyValuePair<byte[], string> match = mappings.FirstOrDefault(x => x.Key.SequenceEqual(target));
 
                 // Get the match key as a character (the final character of the plaintext in the match)
-                char decryptedCharacter = match.Value[match.Value.Length - 1];
+                char decryptedCharacter = match.Value[match.Value.Length - 1 - removeAmount];
+
+                // Add it to the string builder
+                stringBuilder.Append(decryptedCharacter);
 
                 // Increment the removal amount
                 removeAmount++;
             }
 
-            return Encoding.ASCII.GetString(decryptedBytes);
+            return stringBuilder.ToString();
         }
     }
 }
