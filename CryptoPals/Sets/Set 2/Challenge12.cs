@@ -66,8 +66,14 @@ namespace CryptoPals.Sets
         /// <inheritdoc />
         public string Solve(string input)
         {
+            // Generate a random key
+            int keySize = 16;
+            //byte[] key = challenge11.GenerateRandomASCIIBytes(keySize);
+            byte[] key = Encoding.ASCII.GetBytes("YELLOW SUBMARINE"); // cdg debug use same key
+
             // Convert input to bytes
             byte[] bytes = Encoding.ASCII.GetBytes(input);
+            bytes = challenge9.PadBytes(bytes, key.Length);
 
             // The text to append after the input bytes
             string base64Text = "Um9sbGluJyBpbiBteSA1LjAKV2l0aCBteSByYWctdG9wIGRvd24gc28gbXkgaGFpciBjYW4gYmxvdwpUaGUgZ2lybGllcyBvbiBzdGFuZGJ5IHdhdmluZyBqdXN0IHRvIHNheSBoaQpEaWQgeW91IHN0b3A/IE5vLCBJIGp1c3QgZHJvdmUgYnkK";
@@ -75,29 +81,17 @@ namespace CryptoPals.Sets
             // Base64 decode the text
             byte[] base64Bytes = Convert.FromBase64String(base64Text);
 
-            // Generate a random key
-            int keySize = 16;
-            //byte[] key = challenge11.GenerateRandomASCIIBytes(keySize);
-            byte[] key = Encoding.ASCII.GetBytes("YELLOW SUBMARINE"); // cdg debug use same key
-
-            // CDG DEBUG
-            // Pad the Base64 bytes as a multiple of the key size so we don't lose any data
+            // Pad the Base64 bytes as a multiple of the key size as the encryptor cuts off text if not a multiple of the block size (just use key size (16), as the block size is 128 bits by default)
             base64Bytes = challenge9.PadBytes(base64Bytes, key.Length);
 
             // Append additional bytes after the input bytes
             byte[] appendedBytes = challenge11.InsertBytes(bytes, base64Bytes, false);
 
-            // Pad the bytes as a multiple of the key size so we don't lose any data
-            appendedBytes = challenge9.PadBytes(appendedBytes, key.Length);
-
             // Encrypt the bytes with the key
             byte[] encryptedBytes = challenge7.AES_ECB(true, appendedBytes, key);
 
-            // Encrypt the unknown string for decrypting
-            byte[] encryptedUnknownBytes = challenge7.AES_ECB(true, base64Bytes, key);
-
-            // Decrypt the entire text and find the unknown string, just output the last 500 characters of the data
-            return DecryptUnknownString(encryptedBytes, encryptedUnknownBytes, key);//.Substring(encryptedBytes.Length - 500, 500); // cdg todo
+            // Decrypt the unknown text
+            return DecryptUnknownString(bytes, encryptedBytes, key);
         }
 
         private Dictionary<byte[], string> BuildMappingTable(int blockSize, char character, byte[] key)
@@ -162,7 +156,7 @@ namespace CryptoPals.Sets
             return blockSize;
         }
 
-        private string DecryptUnknownString(byte[] bytes, byte[] unknownBytes, byte[] key)
+        private string DecryptUnknownString(byte[] bytes, byte[] encryptedBytes, byte[] key)
         {
             // The character we are going to use for encryption
             char character = 'A';
@@ -174,12 +168,18 @@ namespace CryptoPals.Sets
             // We could just feed 2 blocks worth of identical data
             // to see if we get 2 blocks of identical encrypted
             // but might as well reuse the ECB encrypted bytes function
-            bool isUsingECB = challenge8.IsECBEncrypted(bytes);
+            bool isUsingECB = challenge8.IsECBEncrypted(encryptedBytes);
 
             // This will only work if the encryption is ECB
             string output = "";
             if (isUsingECB)
             {
+                // Find the unknown text bytes by finding out how long our string encrypts to
+                int knownBytesLength = challenge7.AES_ECB(true, bytes, key).Length;
+                int unknownBytesLength = encryptedBytes.Length - knownBytesLength;
+                byte[] unknownBytes = new byte[unknownBytesLength];
+                Array.Copy(encryptedBytes, knownBytesLength, unknownBytes, 0, unknownBytesLength);
+
                 // Output the, now known, string
                 output = GetUnknownString(unknownBytes, blockSize, character, key);
             }
@@ -215,8 +215,6 @@ namespace CryptoPals.Sets
                 // cdg debug
                 if (i == 16)
                     break;
-
-                // cdg todo compute when the secret text starts (encrypt out known text, pad it if it needs it, get the remaining bytes (the secret)
 
                 // Encrypt the short block
                 byte[] target = EncryptShortBlock(Convert.ToChar(encryptedByte), blockSize - removeAmount, character, key);
