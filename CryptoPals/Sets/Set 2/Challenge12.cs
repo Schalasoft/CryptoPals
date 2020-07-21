@@ -91,26 +91,35 @@ namespace CryptoPals.Sets
             return DecryptUnknownString(encryptedBytes, encryptedUnknownBytes, key);//.Substring(encryptedBytes.Length - 500, 500); // cdg todo
         }
 
-        private byte[] BuildMappingTable(int blockSize, char character, byte[] key)
+        private byte[] BuildMappingTable(int index, int blockSize, char character, byte[] key)
         {
-            int size = 128;
+            int size = 256;
             byte[] mappings = new byte[size];
             for (int i = 0; i < size; i++)
             {
                 // Encrypt the short block
-                byte[] shortEncrypt = EncryptShortBlock(Convert.ToChar(i), blockSize, character, key);
+                byte[] shortEncrypt = EncryptShortBlock(index, Convert.ToChar(i), blockSize, character, key);
 
                 // Add it to the dictionary (the actual ASCII char as the key, and the encrypted char as the value)
-                mappings[i] = shortEncrypt[shortEncrypt.Length - 1];
+                mappings[i] = shortEncrypt[index];
             }
 
             return mappings;
         }
 
-        private string BuildShortBlock(char lastCharacter, int blockSize, char character)
+        private string BuildShortBlock(int index, char unknownCharacter, int blockSize, char character)
         {
-            // Create a block exactly 1 byte short of the block size and add the last unique character
-            return $"{"".PadRight(blockSize - 1, character)}{lastCharacter}";
+            // Create a block exactly 1 byte short of the block size (filled with the same character) 
+            // Add the unknown character at the index
+            StringBuilder stringBuilder = new StringBuilder();
+            for(int i = 0; i < blockSize; i++)
+            {
+                if (i.Equals(index))
+                    stringBuilder.Append(unknownCharacter);
+                else
+                    stringBuilder.Append(character);
+            }
+            return stringBuilder.ToString();
         }
 
         // cdg todo sometimes block size failed
@@ -187,10 +196,10 @@ namespace CryptoPals.Sets
             return output;
         }
 
-        private byte[] EncryptShortBlock(char lastCharacter, int blockSize, char character, byte[] key)
+        private byte[] EncryptShortBlock(int index, char unknownCharacter, int blockSize, char character, byte[] key)
         {
             // Create a block with all the same character, except the last byte which will be unique
-            string blockText = BuildShortBlock(lastCharacter, blockSize, character);
+            string blockText = BuildShortBlock(index, unknownCharacter, blockSize, character);
 
             // Convert the short block to bytes
             byte[] blockBytes = Encoding.ASCII.GetBytes(blockText);
@@ -201,30 +210,33 @@ namespace CryptoPals.Sets
 
         private string GetUnknownString(byte[] unknownBytes, int blockSize, char character, byte[] key)
         {
-            // Build dictionary used to hold all possible last byte combinations for the identical strings ("AAAAAAAA", "AAAAAAAB", "AAAAAAAC" etc.)
-            byte[] mappings = BuildMappingTable(blockSize, character, key);
-
             // Match the output of the short block to the dictionary key to get each character of the unknown string
             StringBuilder stringBuilder = new StringBuilder();
             for (int i = 0; i < unknownBytes.Length; i++)
             {
                 // Get a reference to the current encrypted byte
-                byte currentByte = unknownBytes[i];
+                byte encryptedByte = unknownBytes[i];
 
-                // Encrypt a block with 1 missing character at the end
-                byte[] shortEncrypt = EncryptShortBlock(Convert.ToChar(currentByte), blockSize, character, key);
+                // The block index the unknown character will use in the short blocks
+                int blockIndex = i > blockSize - 1 ? i % blockSize : i;
 
-                // Get the last byte of the encryption
-                byte lastUnknownByte = shortEncrypt[shortEncrypt.Length - 1];
+                // Build dictionary used to hold all possible byte combinations for the identical strings ("AAAAAAAA", "AAAAAAAB", "AAAAAAAC" etc.)
+                byte[] mappings = BuildMappingTable(blockIndex, blockSize, character, key);
 
-                // Get the match from the dictionary (taking the index to get the ASCII value)
-                byte actualByte = (byte)Array.FindIndex(mappings, x => x.Equals(currentByte));
+                // Encrypt a block with 1 missing character, insert the encrypted character
+                byte[] shortEncrypt = EncryptShortBlock(blockIndex, Convert.ToChar(encryptedByte), blockSize, character, key);
 
-                // Get the match key (the character index/ascii byte value)
-                char lastCharacter = Convert.ToChar(actualByte);
+                // Get the match from the dictionary 
+                int matchIndex = Array.FindIndex(mappings, x => x.Equals(encryptedByte));
 
-                // Append the final character of the match to the string builder for outputting
-                stringBuilder.Append(lastCharacter);
+                if (matchIndex != -1)
+                {
+                    // Get the match key as a character (the index is the ASCII value)
+                    char decryptedCharacter = Convert.ToChar(matchIndex);
+
+                    // Append the final character of the match to the string builder for outputting
+                    stringBuilder.Append(decryptedCharacter);
+                }
             }
 
             return stringBuilder.ToString();
