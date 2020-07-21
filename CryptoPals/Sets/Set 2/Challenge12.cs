@@ -111,6 +111,7 @@ namespace CryptoPals.Sets
 
                 // Get the plaintext
                 string plainText = Encoding.ASCII.GetString(block);
+                plainText = plainText.PadRight(16, Convert.ToChar((byte)4));
 
                 // Encrypt the short block
                 byte[] encrypt = EncryptShortBlock(Convert.ToChar(i), blockSize, character, key);
@@ -191,37 +192,40 @@ namespace CryptoPals.Sets
             // Create a block with all the same character, except the last byte which will be unique
             byte[] blockBytes = BuildBlock(unknownCharacter, blockSize, character);
 
+            // Pad it up to at least 16 characters or we get null back
+            blockBytes = challenge9.PadBytes(blockBytes, 16);
+
             // Encrypt the short block
             return challenge7.AES_ECB(true, blockBytes, key);
         }
 
         private string GetUnknownString(byte[] unknownBytes, int blockSize, char character, byte[] key)
         {
+            string a = "YELLOW SUBMARINEYELLOW SUBMARINE";
+            ///unknownBytes = challenge7.AES_ECB(true, Encoding.ASCII.GetBytes(a), key);
+
             // Match the output of the short block to the dictionary key to get each character of the unknown string
             byte[] decryptedBytes = new byte[unknownBytes.Length];
+            int removeAmount = 0;
             for (int i = 0; i < unknownBytes.Length; i++)
             {
                 // Get a reference to the current encrypted byte
                 byte encryptedByte = unknownBytes[i];
 
-                // Build a block (1 byte short of the block size)
-                byte[] shortBlock = BuildBlock(character, blockSize - 1, character);
-
-                // Pad it cdg
-                shortBlock = challenge9.PadBytes(shortBlock, blockSize, 0);
-
                 // Encrypt the short block
-                // cdg todo a short block returns null in this encryptor.... what to do
-                byte[] target = challenge7.AES_ECB(true, shortBlock, key);
+                byte[] target = EncryptShortBlock(Convert.ToChar(encryptedByte), blockSize - removeAmount, character, key);
 
                 // Build dictionary used to hold all possible byte combinations for the missing byte ("AAAAAAAA", "AAAAAAAB", "AAAAAAAC" etc.)
-                Dictionary<byte[], string> mappings = BuildMappingTable(blockSize, character, key);
+                Dictionary<byte[], string> mappings = BuildMappingTable(blockSize - removeAmount, character, key);
 
                 // Get the match from the dictionary
                 KeyValuePair<byte[], string> match = mappings.FirstOrDefault(x => x.Key.SequenceEqual(target));
 
                 // Get the match key as a character (the final character of the plaintext in the match)
                 char decryptedCharacter = match.Value[match.Value.Length - 1];
+
+                // Increment the removal amount
+                removeAmount++;
             }
 
             return Encoding.ASCII.GetString(decryptedBytes);
