@@ -128,11 +128,10 @@ namespace CryptoPals.Sets
             return Encoding.ASCII.GetBytes($"{"".PadRight(blockSize - 1, character)}{lastCharacter}");
         }
 
-
         private int DetermineEncryptorBlockSize(char character)
         {
             // AES current maximum block size 128 bits(16 bytes)
-            int maxBlockSize = 16;
+            int maxBlockSize = 248;
 
             // Just use a 128 bit blank key
             byte[] key = new byte[16]; 
@@ -153,7 +152,10 @@ namespace CryptoPals.Sets
 
                 // If the size has changed, the block size is the difference between the two
                 if (encrypted.Length > initialEcrypt.Length)
+                {
                     blockSize = encrypted.Length - initialEcrypt.Length;
+                    break;
+                }
             }
 
             return blockSize;
@@ -195,7 +197,6 @@ namespace CryptoPals.Sets
 
         private string GetUnknownString(byte[] unknownBytes, int blockSize, char character, byte[] key)
         {
-            blockSize = 32;
             // Match the output of the short block to the dictionary key to get each character of the unknown string
             byte[] decryptedBytes = new byte[unknownBytes.Length];
             for (int i = 0; i < unknownBytes.Length; i++)
@@ -206,6 +207,9 @@ namespace CryptoPals.Sets
                 // Build a block (1 byte short of the block size)
                 // It is -2 for my function as I re-use it to add a final character
                 byte[] shortBlock = BuildBlock(character, blockSize - 2, character);
+
+                // Pad it cdg
+                shortBlock = challenge9.PadBytes(shortBlock, 16, 0);
 
                 // Encrypt the short block
                 // cdg todo a short block returns null in this encryptor.... what to do
