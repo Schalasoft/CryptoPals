@@ -193,7 +193,7 @@ namespace CryptoPals.Sets
             byte[] blockBytes = BuildBlock(unknownCharacter, blockSize, character);
 
             // Pad it up to at least 16 characters or we get null back
-            blockBytes = challenge9.PadBytes(blockBytes, 16);
+            blockBytes = challenge9.PadBytes(blockBytes, 16, (byte)character);
 
             // Encrypt the short block
             return challenge7.AES_ECB(true, blockBytes, key);
@@ -201,38 +201,39 @@ namespace CryptoPals.Sets
 
         private string GetUnknownString(byte[] unknownBytes, int blockSize, char character, byte[] key)
         {
+            // CDG DEBUG
             string a = "YELLOW SUBMARINEYELLOW SUBMARINE";
             unknownBytes = challenge7.AES_ECB(true, Encoding.ASCII.GetBytes(a), key);
 
             // Match the output of the short block to the dictionary key to get each character of the unknown string
             StringBuilder stringBuilder = new StringBuilder();
-            int removeAmount = 0;
+            int byteIndex = 0;
             for (int i = 0; i < unknownBytes.Length; i++)
             {
+                // Reset the remove amount
+                if (byteIndex >= 16)
+                    byteIndex = 0;
+
                 // Get a reference to the current encrypted byte
                 byte encryptedByte = unknownBytes[i];
 
-                // cdg debug
-                if (i == 16)
-                    break;
-
                 // Encrypt the short block
-                byte[] target = EncryptShortBlock(Convert.ToChar(encryptedByte), blockSize - removeAmount, character, key);
+                byte[] target = EncryptShortBlock(Convert.ToChar(encryptedByte), blockSize - byteIndex, character, key);
 
                 // Build dictionary used to hold all possible byte combinations for the missing byte ("AAAAAAAA", "AAAAAAAB", "AAAAAAAC" etc.)
-                Dictionary<byte[], string> mappings = BuildMappingTable(blockSize - removeAmount, character, key);
+                Dictionary<byte[], string> mappings = BuildMappingTable(blockSize - byteIndex, character, key);
 
                 // Get the match from the dictionary
                 KeyValuePair<byte[], string> match = mappings.FirstOrDefault(x => x.Key.SequenceEqual(target));
 
                 // Get the match key as a character (the final character of the plaintext in the match)
-                char decryptedCharacter = match.Value[match.Value.Length - 1 - removeAmount];
+                char decryptedCharacter = match.Value[(match.Value.Length - 1) - byteIndex];
 
                 // Add it to the string builder
                 stringBuilder.Append(decryptedCharacter);
 
                 // Increment the removal amount
-                removeAmount++;
+                byteIndex++;
             }
 
             return stringBuilder.ToString();
