@@ -205,11 +205,10 @@ namespace CryptoPals.Sets
                 byte encryptedByte = unknownBytes[i];
 
                 // Build a block (1 byte short of the block size)
-                // It is -2 for my function as I re-use it to add a final character
-                byte[] shortBlock = BuildBlock(character, blockSize - 2, character);
+                byte[] shortBlock = BuildBlock(character, blockSize - 1, character);
 
                 // Pad it cdg
-                shortBlock = challenge9.PadBytes(shortBlock, 16, 0);
+                shortBlock = challenge9.PadBytes(shortBlock, blockSize, 0);
 
                 // Encrypt the short block
                 // cdg todo a short block returns null in this encryptor.... what to do
