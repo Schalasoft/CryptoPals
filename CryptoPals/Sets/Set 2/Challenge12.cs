@@ -60,7 +60,6 @@ namespace CryptoPals.Sets
         // Reuse previous challenge functionality
         IChallenge7 challenge7   = (IChallenge7)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge7);
         IChallenge8 challenge8   = (IChallenge8)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge8);
-        IChallenge9 challenge9   = (IChallenge9)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge9); // cdg debug
         IChallenge11 challenge11 = (IChallenge11)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge11);
 
         /// <inheritdoc />
@@ -76,8 +75,8 @@ namespace CryptoPals.Sets
             byte[] base64Bytes = Convert.FromBase64String(base64Text);
 
             // Generate a random key
-            //byte[] key = challenge11.GenerateRandomASCIIBytes(16);
-            byte[] key = challenge9.PadBytes(new byte[0], 16, 1); // CDG DEBUG
+            int keySize = 16;
+            byte[] key = challenge11.GenerateRandomASCIIBytes(keySize);
 
             // Append additional bytes after the input bytes
             byte[] appendedBytes = challenge11.InsertBytes(bytes, base64Bytes, false);
@@ -114,7 +113,7 @@ namespace CryptoPals.Sets
             return $"{"".PadRight(blockSize - 1, character)}{lastCharacter}";
         }
 
-
+        // cdg todo sometimes block size failed
         private int DetermineEncryptorBlockSize(char character, byte[] key)
         {
             // Feed identical bytes to encryptor
@@ -124,7 +123,7 @@ namespace CryptoPals.Sets
             // Keep trying until we get a block size, or we've tried shifting the bytes by 10
             while (blockSize == 0 || rightShiftCount < 10)
             {
-                // Try various block sizes
+                // Try various block sizes (we start at 4 but the AES encryptor I am using only allows 128/192/256 bit keys)
                 for (int i = 4; i <= 128; i++)
                 {
                     // Create a string of identical characters of the specified length
@@ -133,7 +132,7 @@ namespace CryptoPals.Sets
                     // Convert text to bytes
                     byte[] checkBytes = Encoding.ASCII.GetBytes(text);
 
-                    // Pad the bytes with random bytes up to at least 16 bytes or else the encryption will fail
+                    // Pad the bytes with random bytes up to at least 16 bytes or else the encryption will fail // cdg todo use unique bytes so this doesn't interfere (1,2,3,4,5... should do)
                     if(checkBytes.Length < 16)
                         checkBytes = challenge11.InsertBytes(checkBytes, challenge11.GenerateRandomASCIIBytes(16 - checkBytes.Length), true);
 
@@ -182,7 +181,7 @@ namespace CryptoPals.Sets
             if (isUsingECB)
             {
                 // Output the, now known, string
-                output = GetUnknownString(bytes, unknownBytes, blockSize, character, key);
+                output = GetUnknownString(unknownBytes, blockSize, character, key);
             }
 
             return output;
@@ -200,9 +199,7 @@ namespace CryptoPals.Sets
             return challenge7.AES_ECB(true, blockBytes, key);
         }
 
-        // cdg todo block size failed
-
-        private string GetUnknownString(byte[] bytes, byte[] unknownBytes, int blockSize, char character, byte[] key)
+        private string GetUnknownString(byte[] unknownBytes, int blockSize, char character, byte[] key)
         {
             // Build dictionary used to hold all possible last byte combinations for the identical strings ("AAAAAAAA", "AAAAAAAB", "AAAAAAAC" etc.)
             byte[] mappings = BuildMappingTable(blockSize, character, key);
@@ -211,20 +208,22 @@ namespace CryptoPals.Sets
             StringBuilder stringBuilder = new StringBuilder();
             for (int i = 0; i < unknownBytes.Length; i++)
             {
-                // Encrypt a short block
-                byte[] shortEncrypt = EncryptShortBlock(Convert.ToChar(unknownBytes[i]), blockSize, character, key);
+                // Get a reference to the current encrypted byte
+                byte currentByte = unknownBytes[i];
+
+                // Encrypt a block with 1 missing character at the end
+                byte[] shortEncrypt = EncryptShortBlock(Convert.ToChar(currentByte), blockSize, character, key);
 
                 // Get the last byte of the encryption
                 byte lastUnknownByte = shortEncrypt[shortEncrypt.Length - 1];
 
                 // Get the match from the dictionary (taking the index to get the ASCII value)
-                byte actualByte = (byte)Array.FindIndex(mappings, x => x.Equals(lastUnknownByte));
+                byte actualByte = (byte)Array.FindIndex(mappings, x => x.Equals(currentByte));
 
                 // Get the match key (the character index/ascii byte value)
                 char lastCharacter = Convert.ToChar(actualByte);
 
                 // Append the final character of the match to the string builder for outputting
-                // cdg todo we can't just check the first encrypted byte because it has to be at the 8th position
                 stringBuilder.Append(lastCharacter);
             }
 
