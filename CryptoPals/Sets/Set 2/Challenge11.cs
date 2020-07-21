@@ -55,7 +55,7 @@ namespace CryptoPals.Sets
                 int keySize = 16;
                 Tuple<byte[], EncryptionTypeEnum> encryptionResult = EncryptWithUnknownKey(bytes, keySize);
 
-                // Detect the Oracle to determine which encryption type was used
+                // Detect which encryption type was used
                 EncryptionTypeEnum oracleEncryption = DetectEncryptionType(encryptionResult.Item1);
                 
                 // Get the actual encryption type that was used
