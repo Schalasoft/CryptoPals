@@ -202,7 +202,7 @@ namespace CryptoPals.Sets
         private string GetUnknownString(byte[] unknownBytes, int blockSize, char character, byte[] key)
         {
             string a = "YELLOW SUBMARINEYELLOW SUBMARINE";
-            //unknownBytes = challenge7.AES_ECB(true, Encoding.ASCII.GetBytes(a), key);
+            unknownBytes = challenge7.AES_ECB(true, Encoding.ASCII.GetBytes(a), key);
 
             // Match the output of the short block to the dictionary key to get each character of the unknown string
             StringBuilder stringBuilder = new StringBuilder();
@@ -215,6 +215,8 @@ namespace CryptoPals.Sets
                 // cdg debug
                 if (i == 16)
                     break;
+
+                // cdg todo compute when the secret text starts (encrypt out known text, pad it if it needs it, get the remaining bytes (the secret)
 
                 // Encrypt the short block
                 byte[] target = EncryptShortBlock(Convert.ToChar(encryptedByte), blockSize - removeAmount, character, key);
