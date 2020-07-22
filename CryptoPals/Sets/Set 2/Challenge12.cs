@@ -82,7 +82,7 @@ namespace CryptoPals.Sets
             byte[] base64Bytes = Convert.FromBase64String(base64Text);
 
             // Pad the Base64 bytes as a multiple of the key size as the encryptor cuts off text if not a multiple of the block size (just use key size (16), as the block size is 128 bits by default)
-            base64Bytes = challenge9.PadBytes(base64Bytes, key.Length);
+            //base64Bytes = challenge9.PadBytes(base64Bytes, key.Length);
 
             // Append additional bytes after the input bytes
             byte[] appendedBytes = challenge11.InsertBytes(bytes, base64Bytes, false);
@@ -109,7 +109,7 @@ namespace CryptoPals.Sets
                 byte[] unknownBytes = GetUnknownBytes(bytes, encryptedBytes, key);
 
                 // Decrypt the unknown bytes
-                output = DecryptUnknownBytes(unknownBytes, blockSize, character, key);
+                output = DecryptUnknownBytes(encryptedBytes, blockSize, character, key);
             }
 
             return output;
@@ -177,14 +177,14 @@ namespace CryptoPals.Sets
             byte[] unknownBytes = new byte[unknownBytesLength];
             Array.Copy(encryptedBytes, knownBytesLength, unknownBytes, 0, unknownBytesLength);
 
-            return unknownBytes;
+            return encryptedBytes;
         }
 
         private string DecryptUnknownBytes(byte[] unknownBytes, int blockSize, char character, byte[] key)
         {
             // CDG DEBUG
             string debugText = "YELLOW SUBMARINEYELLOW SUBMARINE";
-            unknownBytes = challenge7.AES_ECB(true, Encoding.ASCII.GetBytes(debugText), key);
+            //unknownBytes = challenge7.AES_ECB(true, Encoding.ASCII.GetBytes(debugText), key);
 
             // Match the output of the short block to the dictionary key to get each character of the unknown string
             StringBuilder stringBuilder = new StringBuilder();
