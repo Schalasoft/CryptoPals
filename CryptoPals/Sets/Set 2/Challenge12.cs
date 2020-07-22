@@ -72,6 +72,7 @@ namespace CryptoPals.Sets
             int keySize = 16;
             //byte[] key = challenge11.GenerateRandomASCIIBytes(keySize);
             byte[] key = Encoding.ASCII.GetBytes("YELLOW SUBMARINE"); // cdg debug use same key
+            input = "ABCDEFGHIJKLMNOP"; // cdg debug use the alphabet as 'my string' text
 
             // Convert input to bytes
             byte[] bytes = Encoding.ASCII.GetBytes(input);
@@ -82,12 +83,6 @@ namespace CryptoPals.Sets
             // Base64 decode the text
             byte[] base64Bytes = Convert.FromBase64String(base64Text);
 
-            // Append additional bytes after the input bytes
-            byte[] appendedBytes = challenge11.InsertBytes(bytes, base64Bytes, false);
-
-            // Encrypt the bytes with the key
-            byte[] encryptedBytes = Oracle(true, Encoding.ASCII.GetString(appendedBytes), key);
-
             // Detect the block size of the cipher
             int blockSize = DetermineEncryptorBlockSize();
 
@@ -97,11 +92,31 @@ namespace CryptoPals.Sets
             string output = "";
             if(isUsingECB)
             {
+                // Append additional bytes after the input bytes
+                byte[] appendedBytes = challenge11.InsertBytes(bytes, base64Bytes, false);
+
+                // Pad the bytes so it is a multiple of the block size
+                appendedBytes = PadBytesToBlockSizeMultiple(appendedBytes, blockSize);
+
+                // Encrypt the bytes with the key
+                byte[] encryptedBytes = Oracle(true, Encoding.ASCII.GetString(appendedBytes), key);
+
                 // Decrypt the unknown bytes
                 output = DecryptUnknownBytes(encryptedBytes, blockSize, key);
             }
 
             return output;
+        }
+
+        private byte[] PadBytesToBlockSizeMultiple(byte[] bytes, int blockSize, byte paddingByte = 4)
+        {
+            // Determine the new size (the size of the bytes plus how many bytes we are missing, which is the block size minus the modulus remainder of the length of the bytes and the block size)
+            int newSize = bytes.Length + ((blockSize) - bytes.Length % blockSize);
+
+            // Create resized byte array
+            byte[] resizedBytes = challenge9.PadBytes(bytes, newSize, paddingByte);
+
+            return resizedBytes;
         }
 
         private bool IsEncryptorUsingECB(int blockSize)
@@ -114,27 +129,6 @@ namespace CryptoPals.Sets
 
             // Check if the encrption contains 2 indentical blocks
             return challenge8.IsECBEncrypted(encrypted);
-        }
-
-        private Dictionary<byte[], string> BuildMappingTable(byte[] block, byte[] key)
-        {
-            int tableStart = 64;
-            int tableEnd   = 121;
-            Dictionary<byte[], string> mappings = new Dictionary<byte[], string>();
-            for (int i = tableStart; i < tableEnd; i++)
-            {
-                // Build a block with a unique byte in the final byte position (using the values in our passed in block to decrypt the whole block
-                block[block.Length - 1] = (byte)i;
-                string plainText = Encoding.ASCII.GetString(block);
-
-                // Encrypt the block
-                byte[] encrypt = Oracle(true, plainText, key);
-
-                // Add it to the dictionary (the encrypted bytes as the key, and the plaintext as the value)
-                mappings.Add(encrypt, plainText);
-            }
-
-            return mappings;
         }
 
         // Proof of concept
@@ -190,7 +184,7 @@ namespace CryptoPals.Sets
             return blockSize;
         }
 
-        // As Bouncy Castle does not allow us to use 1 byte short inputs, we'll use .Net Frameworks Managed AES in ECB mode
+        // Thought I would try .Net AES Managed, turns out they both return null for text below the block size
         private byte[] Oracle(bool encrypt, string text, byte[] key, byte[] iv = null, CipherMode mode = CipherMode.ECB)
         {
             bool useBouncyCastle = true;
@@ -202,12 +196,10 @@ namespace CryptoPals.Sets
             }
             else
             {
-
                 using (AesManaged aes = new AesManaged())
                 {
-                    // Set the mode and block size
+                    // Set the mode
                     aes.Mode = mode;
-                    aes.BlockSize = 128;
 
                     if (encrypt)
                     {
@@ -247,6 +239,27 @@ namespace CryptoPals.Sets
             return output;
         }
 
+        private Dictionary<byte[], string> BuildMappingTable(byte[] block, byte[] key)
+        {
+            int tableStart = 0;
+            int tableEnd = 256;
+            Dictionary<byte[], string> mappings = new Dictionary<byte[], string>();
+            for (int i = tableStart; i < tableEnd; i++)
+            {
+                // Build a block with a unique byte in the final byte position (using the values in our passed in block to decrypt the whole block
+                block[block.Length - 1] = (byte)i;
+                string plainText = Encoding.ASCII.GetString(block);
+
+                // Encrypt the block
+                byte[] encrypt = Oracle(true, plainText, key);
+
+                // Add it to the dictionary (the encrypted bytes as the key, and the plaintext as the value)
+                mappings.Add(encrypt, plainText);
+            }
+
+            return mappings;
+        }
+
         private string DecryptUnknownBytes(byte[] encryptedBytes, int blockSize, byte[] key)
         {
             // Match the output of the short block to the dictionary key to get each character of the unknown string
@@ -263,7 +276,7 @@ namespace CryptoPals.Sets
 
                 // Build the block
                 byte[] block = challenge9.PadBytes(new byte[0], blockSize, (byte)'A');
-                block[block.Length - 1] = (byte)'A';
+                block[block.Length - 1] = (byte)4; // Add padding byte
 
                 // Need to grab the previous decrypted so its like "AAAAAAAA21" where 1 is the first encrypted, 2 is 2nd until the end of our decrypted characters
                 int startIndex = block.Length - 2;
@@ -273,13 +286,17 @@ namespace CryptoPals.Sets
                 }
 
                 // Encrypt the short block
-                byte[] target = Oracle(true, Encoding.ASCII.GetString(block), key);
+                string targetPlainText = Encoding.ASCII.GetString(block);
+                byte[] target = Oracle(true, targetPlainText, key);
+                string targetCipherText = Encoding.ASCII.GetString(target);
 
                 // Build dictionary used to hold all possible byte combinations for the missing byte ("AAAAAAAA", "AAAAAAAB", "AAAAAAAC" etc.)
                 Dictionary<byte[], string> mappings = BuildMappingTable(block, key);
 
                 // Get the match from the dictionary
-                KeyValuePair<byte[], string> match = mappings.FirstOrDefault(x => x.Key.SequenceEqual(target));
+                //KeyValuePair<byte[], string> match = mappings.FirstOrDefault(x => x.Key.SequenceEqual(target));
+
+                KeyValuePair<byte[], string> match = mappings.FirstOrDefault(x => x.Key.Equals(target));
 
                 // Get the match key as a character (the final character of the plaintext in the match)
                 char decryptedCharacter = match.Value[blockSize - 1 - decryptedBlock.Count];
@@ -290,5 +307,6 @@ namespace CryptoPals.Sets
 
             return new string(decryptedCharacters.ToArray());
         }
+
     }
 }
