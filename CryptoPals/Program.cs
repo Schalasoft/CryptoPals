@@ -23,7 +23,7 @@ namespace CryptoPals
     class Program
     {
         // Used to identify challenges that do not require input files
-        private static List<int> challengesWithoutInputs = new List<int>() { };
+        private static List<int> challengesWithoutInputs = new List<int>() { 13 };
         private static List<int> challengesToUsePreviousInputs = new List<int>() { 12 };
 
         /// <summary>
@@ -51,7 +51,7 @@ namespace CryptoPals
         {
             // Initialize the Challenge Manager used to hold the instance of each challenge
             // DEBUG Should start at 1 and end at the last challenge but for speed we only run the current challenge
-            int currentChallenge = 12;
+            int currentChallenge = 13;
             int startChallenge = currentChallenge;
             int challengeCount = 57;
             InitializeChallengeManager(challengeCount);

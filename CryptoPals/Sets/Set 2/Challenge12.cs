@@ -291,7 +291,7 @@ namespace CryptoPals.Sets
 
                 // Build the block
                 byte[] block = challenge9.PadBytes(new byte[0], blockSize, (byte)'A');
-                block[block.Length - 1] = (byte)i; // Add padding byte
+                block[block.Length - 1] = (byte)0; // Add padding byte
 
                 // Need to grab the previous decrypted so its like "AAAAAAAA21" where 1 is the first encrypted, 2 is 2nd until the end of our decrypted characters
                 int startIndex = block.Length - 2;
