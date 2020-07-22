@@ -2,10 +2,11 @@
 using CryptoPals.Interfaces;
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Linq;
 using System.Security.Cryptography;
 using System.IO;
+using CryptoPals.Extension_Methods;
+using static CryptoPals.Utilities.Cryptography;
 
 namespace CryptoPals.Sets
 {
@@ -71,11 +72,11 @@ namespace CryptoPals.Sets
             // Generate a random key
             int keySize = 16;
             //byte[] key = challenge11.GenerateRandomASCIIBytes(keySize);
-            byte[] key = Encoding.ASCII.GetBytes("YELLOW SUBMARINE"); // cdg debug use same key
+            byte[] key = "YELLOW SUBMARINE".ToBytes(); // cdg debug use same key
             input = "ABCDEFGHIJKLMNOP"; // cdg debug use the alphabet as 'my string' text
 
             // Convert input to bytes
-            byte[] bytes = Encoding.ASCII.GetBytes(input);
+            byte[] bytes = input.ToBytes();
 
             // The text to append after the input bytes
             string base64Text = "Um9sbGluJyBpbiBteSA1LjAKV2l0aCBteSByYWctdG9wIGRvd24gc28gbXkgaGFpciBjYW4gYmxvdwpUaGUgZ2lybGllcyBvbiBzdGFuZGJ5IHdhdmluZyBqdXN0IHRvIHNheSBoaQpEaWQgeW91IHN0b3A/IE5vLCBJIGp1c3QgZHJvdmUgYnkK";
@@ -99,7 +100,7 @@ namespace CryptoPals.Sets
                 appendedBytes = PadBytesToBlockSizeMultiple(appendedBytes, blockSize);
 
                 // Encrypt the bytes with the key
-                byte[] encryptedBytes = Oracle(true, Encoding.ASCII.GetString(appendedBytes), key);
+                byte[] encryptedBytes = Oracle(true, appendedBytes.ToASCIIString(), key);
 
                 // Decrypt the unknown bytes
                 output = DecryptUnknownBytes(encryptedBytes, blockSize, key);
@@ -171,7 +172,7 @@ namespace CryptoPals.Sets
                 text += c;
 
                 // Encrypt the text
-                byte[] encrypted = Oracle(true, text, key);
+                byte[] encrypted = Oracle(true, text, key, 0);
 
                 // If the size has changed, the block size is the difference between the two
                 if (encrypted.Length > initialEcrypt.Length)
@@ -185,55 +186,68 @@ namespace CryptoPals.Sets
         }
 
         // Thought I would try .Net AES Managed, turns out they both return null for text below the block size
-        private byte[] Oracle(bool encrypt, string text, byte[] key, byte[] iv = null, CipherMode mode = CipherMode.ECB)
+        private byte[] Oracle(bool encrypt, string text, byte[] key, int crypto = 2, byte[] iv = null, CipherMode mode = CipherMode.ECB)
         {
-            bool useBouncyCastle = true;
+            // crypto input variable meaning
+            // 0 : Bouncy Castle
+            // 1 : .Net AES Managed
+            // 2 : AesCryptoServiceProvider
 
             byte[] output;
-            if (useBouncyCastle)
+            switch (crypto)
             {
-                output = challenge7.AES_ECB(encrypt, Encoding.ASCII.GetBytes(text), key);
-            }
-            else
-            {
-                using (AesManaged aes = new AesManaged())
-                {
-                    // Set the mode
-                    aes.Mode = mode;
+                case 0:
+                    output = challenge7.AES_ECB(encrypt, text.ToBytes(), key);
+                    break;
 
-                    if (encrypt)
+                case 1:
+                    using (AesManaged aes = new AesManaged())
                     {
-                        ICryptoTransform encryptor = aes.CreateEncryptor(key, iv);
+                        // Set the mode
+                        aes.Mode = mode;
 
-                        using (MemoryStream ms = new MemoryStream())
+                        if (encrypt)
                         {
-                            using (CryptoStream cs = new CryptoStream(ms, encryptor, CryptoStreamMode.Write))
+                            ICryptoTransform encryptor = aes.CreateEncryptor(key, iv);
+
+                            using (MemoryStream ms = new MemoryStream())
                             {
-                                using (StreamWriter sw = new StreamWriter(cs))
+                                using (CryptoStream cs = new CryptoStream(ms, encryptor, CryptoStreamMode.Write))
                                 {
-                                    sw.Write(text);
-                                    output = ms.ToArray();
+                                    using (StreamWriter sw = new StreamWriter(cs))
+                                    {
+                                        sw.Write(text);
+                                        output = ms.ToArray();
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            ICryptoTransform decryptor = aes.CreateDecryptor(key, iv);
+                            using (MemoryStream ms = new MemoryStream(text.ToBytes()))
+                            {
+                                // Create crypto stream    
+                                using (CryptoStream cs = new CryptoStream(ms, decryptor, CryptoStreamMode.Read))
+                                {
+                                    // Read crypto stream    
+                                    using (StreamReader reader = new StreamReader(cs))
+                                    {
+                                        output = reader.ReadToEnd().ToBytes();
+                                    }
                                 }
                             }
                         }
                     }
-                    else
-                    {
-                        ICryptoTransform decryptor = aes.CreateDecryptor(key, iv);
-                        using (MemoryStream ms = new MemoryStream(Encoding.ASCII.GetBytes(text)))
-                        {
-                            // Create crypto stream    
-                            using (CryptoStream cs = new CryptoStream(ms, decryptor, CryptoStreamMode.Read))
-                            {
-                                // Read crypto stream    
-                                using (StreamReader reader = new StreamReader(cs))
-                                {
-                                    output = Encoding.ASCII.GetBytes(reader.ReadToEnd());
-                                }
-                            }
-                        }
-                    }
-                }
+                    break;
+
+                case 2:
+                    output = AES_128_ECB_Encrypt(text.ToBytes(), key);
+                    break;
+
+                default:
+                    output = new byte[0];
+                    break;
             }
 
             return output;
@@ -248,7 +262,7 @@ namespace CryptoPals.Sets
             {
                 // Build a block with a unique byte in the final byte position (using the values in our passed in block to decrypt the whole block
                 block[block.Length - 1] = (byte)i;
-                string plainText = Encoding.ASCII.GetString(block);
+                string plainText = block.ToASCIIString();
 
                 // Encrypt the block
                 byte[] encrypt = Oracle(true, plainText, key);
@@ -260,6 +274,7 @@ namespace CryptoPals.Sets
             return mappings;
         }
 
+        // cdg todo refactor previous challenges to use extension methods
         private string DecryptUnknownBytes(byte[] encryptedBytes, int blockSize, byte[] key)
         {
             // Match the output of the short block to the dictionary key to get each character of the unknown string
@@ -276,7 +291,7 @@ namespace CryptoPals.Sets
 
                 // Build the block
                 byte[] block = challenge9.PadBytes(new byte[0], blockSize, (byte)'A');
-                block[block.Length - 1] = (byte)4; // Add padding byte
+                block[block.Length - 1] = (byte)i; // Add padding byte
 
                 // Need to grab the previous decrypted so its like "AAAAAAAA21" where 1 is the first encrypted, 2 is 2nd until the end of our decrypted characters
                 int startIndex = block.Length - 2;
@@ -286,9 +301,9 @@ namespace CryptoPals.Sets
                 }
 
                 // Encrypt the short block
-                string targetPlainText = Encoding.ASCII.GetString(block);
+                string targetPlainText = block.ToASCIIString();
                 byte[] target = Oracle(true, targetPlainText, key);
-                string targetCipherText = Encoding.ASCII.GetString(target);
+                string targetCipherText = target.ToASCIIString();
 
                 // Build dictionary used to hold all possible byte combinations for the missing byte ("AAAAAAAA", "AAAAAAAB", "AAAAAAAC" etc.)
                 Dictionary<byte[], string> mappings = BuildMappingTable(block, key);
