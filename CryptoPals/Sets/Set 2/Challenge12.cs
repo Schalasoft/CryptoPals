@@ -186,7 +186,7 @@ namespace CryptoPals.Sets
         }
 
         // Thought I would try .Net AES Managed, turns out they both return null for text below the block size
-        public byte[] Oracle(bool encrypt, string text, byte[] key, int crypto = 2, byte[] iv = null, CipherMode mode = CipherMode.ECB)
+        public byte[] Oracle(bool encrypt, string text, byte[] key, int crypto = 0, byte[] iv = null, CipherMode mode = CipherMode.ECB)
         {
             // crypto input variable meaning
             // 0 : Bouncy Castle
@@ -291,7 +291,7 @@ namespace CryptoPals.Sets
 
                 // Build the block
                 byte[] block = challenge9.PadBytes(new byte[0], blockSize, (byte)'A');
-                block[block.Length - 1] = (byte)0; // Add padding byte
+                block[block.Length - 1] = (byte)encryptedBytes[i];
 
                 // Need to grab the previous decrypted so its like "AAAAAAAA21" where 1 is the first encrypted, 2 is 2nd until the end of our decrypted characters
                 int startIndex = block.Length - 2;

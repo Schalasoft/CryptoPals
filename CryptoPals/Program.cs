@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace CryptoPals
 {
@@ -51,7 +52,7 @@ namespace CryptoPals
         {
             // Initialize the Challenge Manager used to hold the instance of each challenge
             // DEBUG Should start at 1 and end at the last challenge but for speed we only run the current challenge
-            int currentChallenge = 13;
+            int currentChallenge = 12;
             int startChallenge = currentChallenge;
             int challengeCount = 57;
             InitializeChallengeManager(challengeCount);
@@ -93,6 +94,10 @@ namespace CryptoPals
                     case 12:
                         inputAlias = fileName;
                     break;
+
+                    case 13:
+                        inputAlias = "No input required";
+                        break;
 
                     default:
                         
