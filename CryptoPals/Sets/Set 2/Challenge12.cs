@@ -60,7 +60,7 @@ namespace CryptoPals.Sets
         // Reuse previous challenge functionality
         IChallenge7 challenge7   = (IChallenge7)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge7);
         IChallenge8 challenge8   = (IChallenge8)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge8);
-        IChallenge9 challenge9 = (IChallenge9)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge9);
+        IChallenge9 challenge9   = (IChallenge9)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge9);
         IChallenge11 challenge11 = (IChallenge11)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge11);
 
         /// <inheritdoc />
@@ -70,10 +70,11 @@ namespace CryptoPals.Sets
             int keySize = 16;
             //byte[] key = challenge11.GenerateRandomASCIIBytes(keySize);
             byte[] key = Encoding.ASCII.GetBytes("YELLOW SUBMARINE"); // cdg debug use same key
+            input = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"; // cdg debug
 
             // Convert input to bytes
             byte[] bytes = Encoding.ASCII.GetBytes(input);
-            bytes = challenge9.PadBytes(bytes, key.Length);
+            //bytes = challenge9.PadBytes(bytes, key.Length);
 
             // The text to append after the input bytes
             string base64Text = "Um9sbGluJyBpbiBteSA1LjAKV2l0aCBteSByYWctdG9wIGRvd24gc28gbXkgaGFpciBjYW4gYmxvdwpUaGUgZ2lybGllcyBvbiBzdGFuZGJ5IHdhdmluZyBqdXN0IHRvIHNheSBoaQpEaWQgeW91IHN0b3A/IE5vLCBJIGp1c3QgZHJvdmUgYnkK";
@@ -86,6 +87,7 @@ namespace CryptoPals.Sets
 
             // Append additional bytes after the input bytes
             byte[] appendedBytes = challenge11.InsertBytes(bytes, base64Bytes, false);
+            //appendedBytes = challenge9.PadBytes(base64Bytes, key.Length); // cdg debug pad appendeded bytes to multiple of block size so we don't lose data
 
             // Encrypt the bytes with the key
             byte[] encryptedBytes = challenge7.AES_ECB(true, appendedBytes, key);
@@ -94,20 +96,15 @@ namespace CryptoPals.Sets
             char character = 'A';
 
             // Detect the block size of the cipher
-            int blockSize = DetermineEncryptorBlockSize(character);
+            //int blockSize = DetermineEncryptorBlockSize(); // Generic
+            int blockSize = DetermineBouncyCastleEncryptorBlockSize(); // Bouncy Castle proof of concept
 
-            // Detect if the function is using ECB
-            // We could just feed 2 blocks worth of identical data
-            // to see if we get 2 blocks of identical encrypted
-            // but might as well reuse the ECB encrypted bytes function
-            bool isUsingECB = challenge8.IsECBEncrypted(encryptedBytes);
+            // Detect if the encryptor is using ECB
+            bool isUsingECB = IsEncryptorUsingECB(blockSize);
 
             string output = "";
             if(isUsingECB)
             {
-                // Get the unknown bytes from the combined bytes
-                byte[] unknownBytes = GetUnknownBytes(bytes, encryptedBytes, key);
-
                 // Decrypt the unknown bytes
                 output = DecryptUnknownBytes(encryptedBytes, blockSize, character, key);
             }
@@ -115,14 +112,29 @@ namespace CryptoPals.Sets
             return output;
         }
 
-        private Dictionary<byte[], string> BuildMappingTable(int blockSize, char character, byte[] key)
+        private bool IsEncryptorUsingECB(int blockSize)
+        {
+            // Construct 2 blocks worth of identical data
+            string text = "".PadRight(blockSize * 2, 'A');
+
+            // Convert to bytes
+            byte[] bytes = Encoding.ASCII.GetBytes(text);
+
+            // Encrypt the data (just use a blank key)
+            byte[] encrypted = challenge7.AES_ECB(true, bytes, new byte[blockSize]);
+
+            // Check if the encrption contains 2 indentical blocks
+            return challenge8.IsECBEncrypted(encrypted);
+        }
+
+        private Dictionary<byte[], string> BuildMappingTable(byte[] block, char character, byte[] key)
         {
             int size = 256;
             Dictionary<byte[], string> mappings = new Dictionary<byte[], string>();
             for (int i = 0; i < size; i++)
             {
                 // Build a block with a unique byte in the final byte position
-                byte[] block = challenge9.PadBytes(new byte[0], blockSize, (byte)character);
+                //byte[] block = challenge9.PadBytes(new byte[0], blockSize, (byte)character);
                 block[block.Length - 1] = (byte)i;
                 string plainText = Encoding.ASCII.GetString(block);
 
@@ -136,16 +148,37 @@ namespace CryptoPals.Sets
             return mappings;
         }
 
-        private int DetermineEncryptorBlockSize(char character)
+        
+        private int DetermineBouncyCastleEncryptorBlockSize()
+        {
+            // Just use a 128 bit blank key
+            byte[] key = new byte[16];
+
+            // Due to how BouncyCastle works, simply attempting to encrypt text 
+            // until we get back a non null, we can find the block size...
+            byte[] encryption = null;
+            int byteCount = 1;
+            int blockSize = byteCount;
+            while(encryption == null)
+            {
+                encryption = challenge7.AES_ECB(true, challenge9.PadBytes(new byte[0], byteCount), key);
+                blockSize = byteCount++;
+            }
+
+            return blockSize;
+        }
+
+        private int DetermineEncryptorBlockSize()
         {
             // AES current maximum block size 128 bits(16 bytes)
             int maxBlockSize = 248;
 
             // Just use a 128 bit blank key
-            byte[] key = new byte[16]; 
+            byte[] key = new byte[16];
 
             // Do an initial encrypt on blank text
-            string text = "".PadRight(16, character);
+            char c = 'A'; // A char to use to fill the blocks
+            string text = "".PadRight(16, c);
             byte[] initialEcrypt = challenge7.AES_ECB(true, Encoding.ASCII.GetBytes(text), key);
 
             // Feed larger and larger sets of bytes to the encryptor until the size changes, and we have the block size
@@ -153,7 +186,7 @@ namespace CryptoPals.Sets
             for (int i = 0; i <= maxBlockSize; i++)
             {
                 // Add a character to the text to encrypt
-                text += character;
+                text += c;
 
                 // Encrypt the text
                 byte[] encrypted = challenge7.AES_ECB(true, Encoding.ASCII.GetBytes(text), key);
@@ -169,40 +202,33 @@ namespace CryptoPals.Sets
             return blockSize;
         }
 
-        private byte[] GetUnknownBytes(byte[] bytes, byte[] encryptedBytes, byte[] key)
-        {
-            // Find the unknown text bytes by finding out how long our string encrypts to
-            int knownBytesLength = challenge7.AES_ECB(true, bytes, key).Length;
-            int unknownBytesLength = encryptedBytes.Length - knownBytesLength;
-            byte[] unknownBytes = new byte[unknownBytesLength];
-            Array.Copy(encryptedBytes, knownBytesLength, unknownBytes, 0, unknownBytesLength);
-
-            return encryptedBytes;
-        }
-
-        private string DecryptUnknownBytes(byte[] unknownBytes, int blockSize, char character, byte[] key)
+        private string DecryptUnknownBytes(byte[] encryptedBytes, int blockSize, char character, byte[] key)
         {
             // CDG DEBUG
             string debugText = "YELLOW SUBMARINEYELLOW SUBMARINE";
             //unknownBytes = challenge7.AES_ECB(true, Encoding.ASCII.GetBytes(debugText), key);
 
             // Match the output of the short block to the dictionary key to get each character of the unknown string
-            StringBuilder stringBuilder = new StringBuilder();
+            List<char> decryptedCharacters = new List<char>();
             int knownBytes = 0;
-            for (int i = 0; i < unknownBytes.Length - 1; i++)
+            for (int i = 0; i < encryptedBytes.Length - 1; i++)
             {
-                // Get a reference to the current encrypted byte
-                byte encryptedByte = unknownBytes[i];
-
                 // Build the block
                 byte[] block = challenge9.PadBytes(new byte[0], blockSize, (byte)character);
-                block[block.Length - 1] = encryptedByte;
+                block[block.Length - 1] = encryptedBytes[i];
+
+                // Need to grab the previous decrypted so its like "AAAAAAAA21" where 1 is the first encrypted, 2 is current until the end
+                int startIndex = block.Length - 2;
+                foreach(char c in decryptedCharacters)
+                {
+                    block[startIndex--] = (byte)c;
+                }
 
                 // Encrypt the short block
                 byte[] target = challenge7.AES_ECB(true, block, key);
 
                 // Build dictionary used to hold all possible byte combinations for the missing byte ("AAAAAAAA", "AAAAAAAB", "AAAAAAAC" etc.)
-                Dictionary<byte[], string> mappings = BuildMappingTable(blockSize, character, key);
+                Dictionary<byte[], string> mappings = BuildMappingTable(block, character, key);
 
                 // Get the match from the dictionary
                 KeyValuePair<byte[], string> match = mappings.FirstOrDefault(x => x.Key.SequenceEqual(target));
@@ -211,7 +237,7 @@ namespace CryptoPals.Sets
                 char decryptedCharacter = match.Value[blockSize - 1 - knownBytes];
 
                 // Add it to the string builder
-                stringBuilder.Append(decryptedCharacter);
+                decryptedCharacters.Add(decryptedCharacter);
 
                 if (knownBytes <= blockSize)
                     // Increment the byte index
@@ -221,7 +247,7 @@ namespace CryptoPals.Sets
                     knownBytes = 0;
             }
 
-            return stringBuilder.ToString();
+            return decryptedCharacters.ToString();
         }
     }
 }
