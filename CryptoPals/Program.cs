@@ -71,12 +71,15 @@ namespace CryptoPals
                 string fileName = $"Challenge{fileIndex}.txt";
 
                 // Read the challenge input file, unless it is a challenge without an input
-                if(!challengesWithoutInputs.Contains(i))
+                if (!challengesWithoutInputs.Contains(i))
+                {
+                    // Read the input file
                     input = FileHandling.ReadFile(fileName);
 
-                // If the input file does not exist, or is empty, bomb out
-                if (input.Length == 0)
-                    return;
+                    // If the input file does not exist, or is empty, bomb out
+                    if (input.Length == 0)
+                        return;
+                }
 
                 // Perform any additional preparation operations for specific challenges
                 switch (i)

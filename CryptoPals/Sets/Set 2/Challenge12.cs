@@ -186,7 +186,7 @@ namespace CryptoPals.Sets
         }
 
         // Thought I would try .Net AES Managed, turns out they both return null for text below the block size
-        private byte[] Oracle(bool encrypt, string text, byte[] key, int crypto = 2, byte[] iv = null, CipherMode mode = CipherMode.ECB)
+        public byte[] Oracle(bool encrypt, string text, byte[] key, int crypto = 2, byte[] iv = null, CipherMode mode = CipherMode.ECB)
         {
             // crypto input variable meaning
             // 0 : Bouncy Castle
