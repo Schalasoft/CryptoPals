@@ -294,9 +294,7 @@ namespace CryptoPals.Sets
                 Dictionary<byte[], string> mappings = BuildMappingTable(block, key);
 
                 // Get the match from the dictionary
-                //KeyValuePair<byte[], string> match = mappings.FirstOrDefault(x => x.Key.SequenceEqual(target));
-
-                KeyValuePair<byte[], string> match = mappings.FirstOrDefault(x => x.Key.Equals(target));
+                KeyValuePair<byte[], string> match = mappings.FirstOrDefault(x => x.Key.SequenceEqual(target));
 
                 // Get the match key as a character (the final character of the plaintext in the match)
                 char decryptedCharacter = match.Value[blockSize - 1 - decryptedBlock.Count];
