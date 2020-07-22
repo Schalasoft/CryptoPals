@@ -109,11 +109,8 @@ namespace CryptoPals.Sets
             // Construct 2 blocks worth of identical data
             string text = "".PadRight(blockSize * 2, 'A');
 
-            // Convert to bytes
-            byte[] bytes = Encoding.ASCII.GetBytes(text);
-
             // Encrypt the data (just use a blank key)
-            byte[] encrypted = challenge7.AES_ECB(true, bytes, new byte[blockSize]);
+            byte[] encrypted = Oracle(true, text, new byte[16]);
 
             // Check if the encrption contains 2 indentical blocks
             return challenge8.IsECBEncrypted(encrypted);
@@ -121,13 +118,8 @@ namespace CryptoPals.Sets
 
         private Dictionary<byte[], string> BuildMappingTable(byte[] block, byte[] key)
         {
-            // Pad the input block to the correct size
-            //byte[] padBlock = new byte[block.Length + 1];
-            //block.CopyTo(padBlock, 0);
-
-
-            int tableStart = 63;
-            int tableEnd   = 123;
+            int tableStart = 64;
+            int tableEnd   = 121;
             Dictionary<byte[], string> mappings = new Dictionary<byte[], string>();
             for (int i = tableStart; i < tableEnd; i++)
             {
@@ -167,8 +159,7 @@ namespace CryptoPals.Sets
 
         private int DetermineEncryptorBlockSize()
         {
-            // AES current maximum block size 128 bits(16 bytes)
-            int maxBlockSize = 248;
+            int maxBlockSize = 2000;
 
             // Just use a 128 bit blank key
             byte[] key = new byte[16];
@@ -176,7 +167,7 @@ namespace CryptoPals.Sets
             // Do an initial encrypt on blank text
             char c = 'A'; // A char to use to fill the blocks
             string text = "".PadRight(16, c);
-            byte[] initialEcrypt = challenge7.AES_ECB(true, Encoding.ASCII.GetBytes(text), key);
+            byte[] initialEcrypt = Oracle(true, text, key);
 
             // Feed larger and larger sets of bytes to the encryptor until the size changes, and we have the block size
             int blockSize = 0;
@@ -186,7 +177,7 @@ namespace CryptoPals.Sets
                 text += c;
 
                 // Encrypt the text
-                byte[] encrypted = challenge7.AES_ECB(true, Encoding.ASCII.GetBytes(text), key);
+                byte[] encrypted = Oracle(true, text, key);
 
                 // If the size has changed, the block size is the difference between the two
                 if (encrypted.Length > initialEcrypt.Length)
@@ -202,40 +193,51 @@ namespace CryptoPals.Sets
         // As Bouncy Castle does not allow us to use 1 byte short inputs, we'll use .Net Frameworks Managed AES in ECB mode
         private byte[] Oracle(bool encrypt, string text, byte[] key, byte[] iv = null, CipherMode mode = CipherMode.ECB)
         {
+            bool useBouncyCastle = true;
+
             byte[] output;
-            using (AesManaged aes = new AesManaged())
+            if (useBouncyCastle)
             {
-                // Set the mdoe
-                aes.Mode = mode;
+                output = challenge7.AES_ECB(encrypt, Encoding.ASCII.GetBytes(text), key);
+            }
+            else
+            {
 
-                if (encrypt)
+                using (AesManaged aes = new AesManaged())
                 {
-                    ICryptoTransform encryptor = aes.CreateEncryptor(key, iv);
+                    // Set the mode and block size
+                    aes.Mode = mode;
+                    aes.BlockSize = 128;
 
-                    using (MemoryStream ms = new MemoryStream())
+                    if (encrypt)
                     {
-                        using (CryptoStream cs = new CryptoStream(ms, encryptor, CryptoStreamMode.Write))
-                        { 
-                            using (StreamWriter sw = new StreamWriter(cs))
+                        ICryptoTransform encryptor = aes.CreateEncryptor(key, iv);
+
+                        using (MemoryStream ms = new MemoryStream())
+                        {
+                            using (CryptoStream cs = new CryptoStream(ms, encryptor, CryptoStreamMode.Write))
                             {
-                                sw.Write(text);
-                                output = ms.ToArray();
+                                using (StreamWriter sw = new StreamWriter(cs))
+                                {
+                                    sw.Write(text);
+                                    output = ms.ToArray();
+                                }
                             }
                         }
                     }
-                }
-                else
-                {
-                    ICryptoTransform decryptor = aes.CreateDecryptor(key, iv);
-                    using (MemoryStream ms = new MemoryStream(Encoding.ASCII.GetBytes(text)))
+                    else
                     {
-                        // Create crypto stream    
-                        using (CryptoStream cs = new CryptoStream(ms, decryptor, CryptoStreamMode.Read))
+                        ICryptoTransform decryptor = aes.CreateDecryptor(key, iv);
+                        using (MemoryStream ms = new MemoryStream(Encoding.ASCII.GetBytes(text)))
                         {
-                            // Read crypto stream    
-                            using (StreamReader reader = new StreamReader(cs))
+                            // Create crypto stream    
+                            using (CryptoStream cs = new CryptoStream(ms, decryptor, CryptoStreamMode.Read))
                             {
-                                output = Encoding.ASCII.GetBytes(reader.ReadToEnd());
+                                // Read crypto stream    
+                                using (StreamReader reader = new StreamReader(cs))
+                                {
+                                    output = Encoding.ASCII.GetBytes(reader.ReadToEnd());
+                                }
                             }
                         }
                     }
@@ -269,7 +271,6 @@ namespace CryptoPals.Sets
                 {
                     block[startIndex--] = (byte)c;
                 }
-                block = challenge11.GenerateRandomASCIIBytes(500);
 
                 // Encrypt the short block
                 byte[] target = Oracle(true, Encoding.ASCII.GetString(block), key);
@@ -281,13 +282,13 @@ namespace CryptoPals.Sets
                 KeyValuePair<byte[], string> match = mappings.FirstOrDefault(x => x.Key.SequenceEqual(target));
 
                 // Get the match key as a character (the final character of the plaintext in the match)
-                char decryptedCharacter = match.Value[blockSize - 1 - decryptedCharacters.Count];
+                char decryptedCharacter = match.Value[blockSize - 1 - decryptedBlock.Count];
 
                 // Add it to the string builder
                 decryptedBlock.Add(decryptedCharacter);
             }
 
-            return decryptedCharacters.ToString();
+            return new string(decryptedCharacters.ToArray());
         }
     }
 }
