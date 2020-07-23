@@ -213,17 +213,16 @@ namespace CryptoPals.Sets
         private string DecryptUnknownBytes(byte[] knownBytes, int blockSize, byte[] key)
         {
             // Match the output of the short block to the dictionary key to get each character of the unknown string
-            List<char> decryptedBlock = new List<char>();
+            List<char> decryptedCharacters = new List<char>();
             for (int i = 0; i < blockSize * 2 - 1; i++) // cdg look at this look later, need to figure how many times we need to go around (as we don't know the unknown text, I guess block size + unknown text size so record that somewhere from above)
             {
                 // Build the block
                 byte[] block = challenge9.PadBytes(new byte[0], blockSize - 1, (byte)'A');
 
                 // Need to grab the previous decrypted so its like "AAAAAAAA21" where 1 is the first encrypted, 2 is 2nd until the end of our decrypted characters
-                int startIndex = block.Length - 2;
-                foreach (char c in decryptedBlock)
+                for(int j = 0; j < decryptedCharacters.Count; j++)
                 {
-                    block[startIndex--] = (byte)c;
+                    block[blockSize - 1 - j - decryptedCharacters.Count] = (byte)decryptedCharacters[decryptedCharacters.Count - 1];
                 }
 
                 string s = block.ToASCIIString();
@@ -244,10 +243,10 @@ namespace CryptoPals.Sets
                 char decryptedCharacter = match.Value[blockSize - 1];
 
                 // Add it to the string builder
-                decryptedBlock.Add(decryptedCharacter);
+                decryptedCharacters.Add(decryptedCharacter);
             }
 
-            return new string(decryptedBlock.ToArray());
+            return new string(decryptedCharacters.ToArray());
         }
 
     }
