@@ -183,7 +183,7 @@ namespace CryptoPals.Sets
             return output;
         }
 
-        private Dictionary<byte[], string> BuildMappingTable(byte[] block, int blockSize, byte[] key)
+        private Dictionary<byte[], string> BuildMappingTable(byte[] block, int blockSize, byte[] key, int decryptedCharactersCount)
         {
             int tableStart = 0;
             int tableEnd = 256;
@@ -191,8 +191,9 @@ namespace CryptoPals.Sets
             for (int i = tableStart; i < tableEnd; i++)
             {
                 // Build a block with a unique byte in the final byte position (using the values in our passed in block to decrypt the whole block)
-                block = challenge9.PadBytes(block, blockSize);
-                block[blockSize - 1] = (byte)i;
+                int shortBlockSize = blockSize - decryptedCharactersCount;
+                block = challenge9.PadBytes(block, shortBlockSize);
+                block[shortBlockSize - 1] = (byte)i;
                 string plainText = block.ToASCIIString();
 
                 // Encrypt the block
@@ -219,7 +220,7 @@ namespace CryptoPals.Sets
                 // Build the block
                 byte[] block = challenge9.PadBytes(new byte[0], blockSize - 1, (byte)'A');
 
-                // Need to grab the previous decrypted so its like "AAAAAAAA21" where 1 is the first encrypted, 2 is 2nd until the end of our decrypted characters
+                // Need to grab the previous decrypted so its like "AAAAAAAA12" where 1 is the first encrypted, 2 is 2nd until the end of our decrypted characters
                 for(int j = 0; j < decryptedCharacters.Count; j++)
                 {
                     block[blockSize - 1 - j - decryptedCharacters.Count] = (byte)decryptedCharacters[decryptedCharacters.Count - 1];
@@ -233,11 +234,10 @@ namespace CryptoPals.Sets
                 string targetCipherText = target.ToASCIIString();
 
                 // Build dictionary used to hold all possible byte combinations for the missing byte ("AAAAAAAA", "AAAAAAAB", "AAAAAAAC" etc.)
-                Dictionary<byte[], string> mappings = BuildMappingTable(block, blockSize, key);
+                Dictionary<byte[], string> mappings = BuildMappingTable(block, blockSize, key, decryptedCharacters.Count);
 
                 // Get the match from the dictionary
                 KeyValuePair<byte[], string> match = mappings.FirstOrDefault(x => x.Key.SequenceEqual(target));
-                KeyValuePair<byte[], string> firstChar = mappings.ElementAt(89);
 
                 // Get the match key as a character (the final character of the plaintext in the match)
                 char decryptedCharacter = match.Value[blockSize - 1];
