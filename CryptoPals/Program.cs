@@ -24,8 +24,8 @@ namespace CryptoPals
     class Program
     {
         // Used to identify challenges that do not require input files
-        private static List<int> challengesWithoutInputs = new List<int>() { 13 };
-        private static List<int> challengesToUsePreviousInputs = new List<int>() { 12 };
+        private static List<int> challengesWithoutInputs = new List<int>() { 12, 13 };
+        private static List<int> challengesToUsePreviousInputs = new List<int>() { };
 
         /// <summary>
         /// Main entry point
@@ -91,10 +91,10 @@ namespace CryptoPals
                     case 8:
                     case 10:
                     case 11:
-                    case 12:
                         inputAlias = fileName;
                     break;
 
+                    case 12:
                     case 13:
                         inputAlias = "No input required";
                         break;

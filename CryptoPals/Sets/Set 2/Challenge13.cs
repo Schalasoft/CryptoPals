@@ -1,6 +1,7 @@
 ﻿using CryptoPals.Interfaces;
 using System.Text.Json;
 using CryptoPals.Enumerations;
+using CryptoPals.Extension_Methods;
 
 namespace CryptoPals.Sets
 {
@@ -43,7 +44,7 @@ namespace CryptoPals.Sets
 
         // Use previous challenge functionality
         IChallenge11 challenge11 = (IChallenge11)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge11);
-        IChallenge12 challenge12 = (IChallenge12)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge12);
+        IChallenge7 challenge7 = (IChallenge7)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge7);
 
         public string Solve(string input)
         {
@@ -57,7 +58,7 @@ namespace CryptoPals.Sets
             byte[] key = challenge11.GenerateRandomASCIIBytes(16);
 
             // Encrypt the profile
-            byte[] encryptedProfile = challenge12.Oracle(true, encodedProfile, key);
+            byte[] encryptedProfile = challenge7.AES_ECB(true, encodedProfile.ToBytes(), key);
 
             // Decrypt the profile and parse it using only the user input to GetProfileByEmail
             Attacker(encryptedProfile);
