@@ -103,7 +103,7 @@ namespace CryptoPals.Sets
                 byte[] encryptedBytes = Oracle(true, appendedBytes.ToASCIIString(), key);
 
                 // Decrypt the unknown bytes
-                output = DecryptUnknownBytes(encryptedBytes, blockSize, key);
+                output = DecryptUnknownBytes(bytes, encryptedBytes, blockSize, key);
             }
 
             return output;
@@ -275,7 +275,7 @@ namespace CryptoPals.Sets
         }
 
         // cdg todo refactor previous challenges to use extension methods
-        private string DecryptUnknownBytes(byte[] encryptedBytes, int blockSize, byte[] key)
+        private string DecryptUnknownBytes(byte[] knownBytes, byte[] encryptedBytes, int blockSize, byte[] key)
         {
             // Match the output of the short block to the dictionary key to get each character of the unknown string
             List<char> decryptedCharacters = new List<char>();
@@ -283,7 +283,7 @@ namespace CryptoPals.Sets
             for (int i = 0; i < encryptedBytes.Length - 1; i++)
             {
                 // Reset the decrypted block and store the result everytime we decrypt an entire block
-                if (i % (blockSize - 1) == 0)
+                if (i % (blockSize) == 0)
                 {
                     decryptedCharacters.AddRange(decryptedBlock);
                     decryptedBlock = new List<char>();
@@ -291,7 +291,7 @@ namespace CryptoPals.Sets
 
                 // Build the block
                 byte[] block = challenge9.PadBytes(new byte[0], blockSize, (byte)'A');
-                block[block.Length - 1] = (byte)encryptedBytes[i];
+                block[block.Length - 1] = (byte)knownBytes[knownBytes.Length - 1 - decryptedBlock.Count];
 
                 // Need to grab the previous decrypted so its like "AAAAAAAA21" where 1 is the first encrypted, 2 is 2nd until the end of our decrypted characters
                 int startIndex = block.Length - 2;
@@ -299,6 +299,8 @@ namespace CryptoPals.Sets
                 {
                     block[startIndex--] = (byte)c;
                 }
+
+                string s = block.ToASCIIString();
 
                 // Encrypt the short block
                 string targetPlainText = block.ToASCIIString();
@@ -312,11 +314,13 @@ namespace CryptoPals.Sets
                 KeyValuePair<byte[], string> match = mappings.FirstOrDefault(x => x.Key.SequenceEqual(target));
 
                 // Get the match key as a character (the final character of the plaintext in the match)
-                char decryptedCharacter = match.Value[blockSize - 1 - decryptedBlock.Count];
+                char decryptedCharacter = match.Value[blockSize - 1];
 
                 // Add it to the string builder
                 decryptedBlock.Add(decryptedCharacter);
             }
+
+            decryptedCharacters.Reverse();
 
             return new string(decryptedCharacters.ToArray());
         }
