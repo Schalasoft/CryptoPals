@@ -108,7 +108,8 @@ namespace CryptoPals.Sets
                 byte[] encryptedBytes = Oracle(true, appendedBytes.ToASCIIString(), key);
 
                 // Decrypt the unknown bytes
-                output = DecryptUnknownBytes(bytes, encryptedBytes, unknownBytes, blockSize, key);
+                unknownBytes = Oracle(true, unknownBytes.ToASCIIString(), key); // cdg I'm an idiot, i forgot to encrypt, I only deciphered the first byte!!!
+                output = DecryptUnknownBytes(bytes, unknownBytes, blockSize, key);
             }
 
             return output;
@@ -281,7 +282,7 @@ namespace CryptoPals.Sets
         }
 
         // cdg todo refactor previous challenges to use extension methods
-        private string DecryptUnknownBytes(byte[] knownBytes, byte[] encryptedBytes, byte[] unknownBytes, int blockSize, byte[] key)
+        private string DecryptUnknownBytes(byte[] knownBytes, byte[] unknownBytes, int blockSize, byte[] key)
         {
             // Match the output of the short block to the dictionary key to get each character of the unknown string
             List<char> decryptedCharacters = new List<char>();
