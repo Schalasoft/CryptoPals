@@ -83,7 +83,7 @@ namespace CryptoPals.Sets
 
             // Base64 decode the text
             byte[] base64Bytes = Convert.FromBase64String(base64Text);
-            base64Bytes = "YELLOW SUBMARINE".ToBytes(); // cdg debug "hidden" text
+            //base64Bytes = "YELLOW SUBMARINE".ToBytes(); // cdg debug "hidden" text
 
             // Detect the block size of the cipher
             int blockSize = DetermineEncryptorBlockSize();
@@ -285,73 +285,55 @@ namespace CryptoPals.Sets
         {
             // Match the output of the short block to the dictionary key to get each character of the unknown string
             List<char> decryptedCharacters = new List<char>();
-            List<char> decryptedBlock = new List<char>();
-            for (int i = 0; i < encryptedBytes.Length - 1; i++)
+            for (int j = 0; j < unknownBytes.Length; j++)
             {
-                // Reset the decrypted block and store the result everytime we decrypt an entire block
-                if (i % (blockSize) == 0)
+                List<char> decryptedBlock = new List<char>();
+                for (int i = 0; i < blockSize * 2 - 1; i++)
                 {
-                    decryptedCharacters.AddRange(decryptedBlock);
-                    decryptedBlock = new List<char>();
+                    // Reset the decrypted block and store the result everytime we decrypt an entire block
+                    if (i % blockSize == 0 && i != 0)
+                    {
+                        decryptedCharacters.Add(decryptedBlock[decryptedBlock.Count - 1]);
+                        //decryptedCharacters.AddRange(decryptedBlock);
+                        decryptedBlock = new List<char>();
+                    }
+
+                    // Build the block
+                    byte[] block = challenge9.PadBytes(new byte[0], blockSize, (byte)'A');
+
+                    // cdg Not even sure this all needs rewritten!
+                    if (i < 15)
+                        block[block.Length - 1] = (byte)knownBytes[knownBytes.Length - 1 - decryptedBlock.Count];
+                    else
+                        block[block.Length - 1] = (byte)unknownBytes[j];
+
+                    // Need to grab the previous decrypted so its like "AAAAAAAA21" where 1 is the first encrypted, 2 is 2nd until the end of our decrypted characters
+                    int startIndex = block.Length - 2;
+                    foreach (char c in decryptedBlock)
+                    {
+                        block[startIndex--] = (byte)c;
+                    }
+
+                    string s = block.ToASCIIString();
+
+                    // Encrypt the short block
+                    string targetPlainText = block.ToASCIIString();
+                    byte[] target = Oracle(true, targetPlainText, key);
+                    string targetCipherText = target.ToASCIIString();
+
+                    // Build dictionary used to hold all possible byte combinations for the missing byte ("AAAAAAAA", "AAAAAAAB", "AAAAAAAC" etc.)
+                    Dictionary<byte[], string> mappings = BuildMappingTable(block, key);
+
+                    // Get the match from the dictionary
+                    KeyValuePair<byte[], string> match = mappings.FirstOrDefault(x => x.Key.SequenceEqual(target));
+
+                    // Get the match key as a character (the final character of the plaintext in the match)
+                    char decryptedCharacter = match.Value[blockSize - 1];
+
+                    // Add it to the string builder
+                    decryptedBlock.Add(decryptedCharacter);
                 }
-
-                // Build the block
-                byte[] block = challenge9.PadBytes(new byte[0], blockSize, (byte)'A');
-
-                if (i < 15)
-                    block[block.Length - 1] = (byte)knownBytes[knownBytes.Length - 1 - decryptedBlock.Count];
-                else
-                    block[block.Length - 1] = (byte)unknownBytes[0];
-
-                // Need to grab the previous decrypted so its like "AAAAAAAA21" where 1 is the first encrypted, 2 is 2nd until the end of our decrypted characters
-                int startIndex = block.Length - 2;
-                foreach(char c in decryptedBlock)
-                {
-                    block[startIndex--] = (byte)c;
-                }
-
-                string s = block.ToASCIIString();
-
-                // Encrypt the short block
-                string targetPlainText = block.ToASCIIString();
-                byte[] target = Oracle(true, targetPlainText, key);
-                string targetCipherText = target.ToASCIIString();
-
-                // Build dictionary used to hold all possible byte combinations for the missing byte ("AAAAAAAA", "AAAAAAAB", "AAAAAAAC" etc.)
-                Dictionary<byte[], string> mappings = BuildMappingTable(block, key);
-
-                // Get the match from the dictionary
-                KeyValuePair<byte[], string> match = mappings.FirstOrDefault(x => x.Key.SequenceEqual(target));
-
-                // Get the match key as a character (the final character of the plaintext in the match)
-                char decryptedCharacter = match.Value[blockSize - 1];
-
-                // Add it to the string builder
-                decryptedBlock.Add(decryptedCharacter);
             }
-
-            decryptedCharacters.Reverse();
-
-            // Get out offset for deciphering the unknown block
-            string halfBlock = String.Join("", decryptedCharacters.GetRange(0, 8));
-
-            // Build dictionary
-            byte[] block1 = new byte[blockSize / 2];
-            halfBlock.ToBytes().CopyTo(block1, 0); // copy offset to first half of the block
-            block1 = challenge9.PadBytes(block1, blockSize, (byte)'A'); // fill the other half with A
-            block1[block1.Length - 1] = unknownBytes[0]; // Set the last byte to the byte to decrypt
-
-            Dictionary<byte[], string> mappings1 = BuildMappingTable(block1, key);
-
-            string plainText1 = block1.ToASCIIString();
-
-            byte[] target1 = Oracle(true, plainText1, key);
-
-            // Get the match from the dictionary
-            KeyValuePair<byte[], string> match1 = mappings1.FirstOrDefault(x => x.Key.SequenceEqual(target1));
-
-            // Get the match key as a character (the final character of the plaintext in the match)
-            char decryptedCharacter1 = match1.Value[blockSize - 1];
 
             return new string(decryptedCharacters.ToArray());
         }
