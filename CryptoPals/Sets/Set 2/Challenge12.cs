@@ -95,7 +95,7 @@ namespace CryptoPals.Sets
             if(isUsingECB)
             {
                 // Decrypt the unknown bytes
-                output = DecryptUnknownBytes(knownBytes, blockSize, key);
+                output = DecryptUnknownBytes(blockSize, key);
             }
 
             return output;
@@ -183,7 +183,21 @@ namespace CryptoPals.Sets
             return output;
         }
 
-        private Dictionary<byte[], string> BuildMappingTable(byte[] block, int blockSize, byte[] key, int decryptedCharactersCount)
+        // cdg todo refactor previous challenges to use extension methods
+        private string DecryptUnknownBytes(int blockSize, byte[] key)
+        {
+            // Match the output of the short block to the dictionary key to get each character of the unknown string
+            List<char> decryptedCharacters = new List<char>();
+            for (int i = 0; i < blockSize * 2 - 1; i++) // cdg look at this look later, need to figure how many times we need to go around (as we don't know the unknown text, I guess block size + unknown text size so record that somewhere from above)
+            {
+                // Decrypt each byte and add it to the list
+                decryptedCharacters.Add(DecryptUnknownByte(blockSize, key, decryptedCharacters));
+            }
+
+            return new string(decryptedCharacters.ToArray());
+        }
+
+        private Dictionary<byte[], string> BuildMappingTable(byte[] block, int blockSize, byte[] key, List<char> decryptedCharacters)
         {
             int tableStart = 0;
             int tableEnd = 256;
@@ -191,9 +205,9 @@ namespace CryptoPals.Sets
             for (int i = tableStart; i < tableEnd; i++)
             {
                 // Build a block with a unique byte in the final byte position (using the values in our passed in block to decrypt the whole block)
-                int shortBlockSize = blockSize - decryptedCharactersCount;
+                int shortBlockSize = blockSize - decryptedCharacters.Count;
                 block = challenge9.PadBytes(block, shortBlockSize);
-                block[shortBlockSize - 1] = (byte)i;
+                block[block.Length - 1] = (byte)i;
                 string plainText = block.ToASCIIString();
 
                 // Encrypt the block
@@ -210,43 +224,35 @@ namespace CryptoPals.Sets
             return mappings;
         }
 
-        // cdg todo refactor previous challenges to use extension methods
-        private string DecryptUnknownBytes(byte[] knownBytes, int blockSize, byte[] key)
+        private char DecryptUnknownByte(int blockSize, byte[] key, List<char> decryptedCharacters)
         {
-            // Match the output of the short block to the dictionary key to get each character of the unknown string
-            List<char> decryptedCharacters = new List<char>();
-            for (int i = 0; i < blockSize * 2 - 1; i++) // cdg look at this look later, need to figure how many times we need to go around (as we don't know the unknown text, I guess block size + unknown text size so record that somewhere from above)
+            // Build the block of the correct size
+            byte[] block = challenge9.PadBytes(new byte[0], blockSize - 1 - decryptedCharacters.Count, (byte)'A');
+
+            // Need to grab the previous decrypted so its like "AAAAAAAA12" where 1 is the first encrypted, 2 is 2nd until the end of our decrypted characters
+            int k = 0;
+            for (int j = decryptedCharacters.Count; j > 0; j--)
             {
-                // Build the block
-                byte[] block = challenge9.PadBytes(new byte[0], blockSize - 1, (byte)'A');
-
-                // Need to grab the previous decrypted so its like "AAAAAAAA12" where 1 is the first encrypted, 2 is 2nd until the end of our decrypted characters
-                for(int j = 0; j < decryptedCharacters.Count; j++)
-                {
-                    block[blockSize - 1 - j - decryptedCharacters.Count] = (byte)decryptedCharacters[decryptedCharacters.Count - 1];
-                }
-
-                string s = block.ToASCIIString();
-
-                // Encrypt the short block
-                string targetPlainText = block.ToASCIIString();
-                byte[] target = Oracle(true, targetPlainText, key);
-                string targetCipherText = target.ToASCIIString();
-
-                // Build dictionary used to hold all possible byte combinations for the missing byte ("AAAAAAAA", "AAAAAAAB", "AAAAAAAC" etc.)
-                Dictionary<byte[], string> mappings = BuildMappingTable(block, blockSize, key, decryptedCharacters.Count);
-
-                // Get the match from the dictionary
-                KeyValuePair<byte[], string> match = mappings.FirstOrDefault(x => x.Key.SequenceEqual(target));
-
-                // Get the match key as a character (the final character of the plaintext in the match)
-                char decryptedCharacter = match.Value[blockSize - 1];
-
-                // Add it to the string builder
-                decryptedCharacters.Add(decryptedCharacter);
+                block[j] = (byte)decryptedCharacters[k++];
             }
 
-            return new string(decryptedCharacters.ToArray());
+            string s = block.ToASCIIString();
+
+            // Encrypt the short block
+            string targetPlainText = block.ToASCIIString();
+            byte[] target = Oracle(true, targetPlainText, key);
+            string targetCipherText = target.ToASCIIString();
+
+            // Build dictionary used to hold all possible byte combinations for the missing byte ("AAAAAAAA", "AAAAAAAB", "AAAAAAAC" etc.)
+            Dictionary<byte[], string> mappings = BuildMappingTable(block, blockSize, key, decryptedCharacters);
+
+            // Get the match from the dictionary
+            KeyValuePair<byte[], string> match = mappings.FirstOrDefault(x => x.Key.SequenceEqual(target));
+
+            // Get the match key as a character (the final character of the plaintext in the match)
+            char decryptedCharacter = match.Value[match.Value.Length - 1];
+
+            return decryptedCharacter;
         }
 
     }
