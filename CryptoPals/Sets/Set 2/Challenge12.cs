@@ -80,7 +80,7 @@ namespace CryptoPals.Sets
             int keySize = 16;
             //byte[] key = challenge11.GenerateRandomASCIIBytes(keySize);
             byte[] key = "YELLOW SUBMARINE".ToBytes(); // cdg debug use same key
-            string knownText = "ABCDEFGHIJKLMNO"; // cdg debug use the alphabet as 'my string' text (cdg MY STRING SHOULD BE 1 BYTE SHORT SO I GET THE FIRST UNKNOWN BYTE!!!!)
+            string knownText = "Z"; // cdg debug use the alphabet as 'my string' text (cdg MY STRING SHOULD BE 1 BYTE SHORT SO I GET THE FIRST UNKNOWN BYTE!!!!)
 
             // Convert input to bytes
             byte[] knownBytes = knownText.ToBytes();
@@ -197,7 +197,7 @@ namespace CryptoPals.Sets
             return new string(decryptedCharacters.ToArray());
         }
 
-        private Dictionary<byte[], string> BuildMappingTable(byte[] block, int blockSize, byte[] key, List<char> decryptedCharacters)
+        private Dictionary<byte[], string> BuildMappingTable(int blockSize, byte[] key, List<char> decryptedCharacters)
         {
             int tableStart = 0;
             int tableEnd = 256;
@@ -206,9 +206,15 @@ namespace CryptoPals.Sets
             {
                 // Build a block with a unique byte in the final byte position (using the values in our passed in block to decrypt the whole block)
                 int shortBlockSize = blockSize - decryptedCharacters.Count;
-                block = challenge9.PadBytes(block, shortBlockSize);
-                block[block.Length - 1] = (byte)i;
-                string plainText = block.ToASCIIString();
+                byte[] shortBlock = challenge9.PadBytes(new byte[0], shortBlockSize - decryptedCharacters.Count, (byte)'A');
+                shortBlock[shortBlock.Length - 1] = (byte)i;
+                int j, k = 0;
+                foreach (char c in decryptedCharacters)
+                {
+                   //shortBlock[shortBlock.Length - 2 - k] = (byte)decryptedCharacters[k++];
+                }
+
+                string plainText = shortBlock.ToASCIIString();
 
                 // Encrypt the block
                 byte[] encrypt = Oracle(true, plainText, key);
@@ -226,25 +232,22 @@ namespace CryptoPals.Sets
 
         private char DecryptUnknownByte(int blockSize, byte[] key, List<char> decryptedCharacters)
         {
-            // Build the block of the correct size
-            byte[] block = challenge9.PadBytes(new byte[0], blockSize - 1 - decryptedCharacters.Count, (byte)'A');
+            // Encryt a short block to grab more and more of the unknown characters
+            int shortBlockSize = blockSize - decryptedCharacters.Count;
+            byte[] block = challenge9.PadBytes(new byte[0], shortBlockSize - 1, (byte)'A');
 
-            // Need to grab the previous decrypted so its like "AAAAAAAA12" where 1 is the first encrypted, 2 is 2nd until the end of our decrypted characters
-            int k = 0;
-            for (int j = decryptedCharacters.Count; j > 0; j--)
+            int j, k = 0;
+            foreach (char c in decryptedCharacters)
             {
-                block[j] = (byte)decryptedCharacters[k++];
+                //block[block.Length - 1 - k] = (byte)decryptedCharacters[k++];
             }
 
-            string s = block.ToASCIIString();
-
-            // Encrypt the short block
             string targetPlainText = block.ToASCIIString();
             byte[] target = Oracle(true, targetPlainText, key);
             string targetCipherText = target.ToASCIIString();
 
-            // Build dictionary used to hold all possible byte combinations for the missing byte ("AAAAAAAA", "AAAAAAAB", "AAAAAAAC" etc.)
-            Dictionary<byte[], string> mappings = BuildMappingTable(block, blockSize, key, decryptedCharacters);
+            // Build dictionary used to hold all possible byte combinations for the missing byte (e.g. 4 size blocks "AAAA", "AAAB", "AAAC")
+            Dictionary<byte[], string> mappings = BuildMappingTable(blockSize, key, decryptedCharacters);
 
             // Get the match from the dictionary
             KeyValuePair<byte[], string> match = mappings.FirstOrDefault(x => x.Key.SequenceEqual(target));
