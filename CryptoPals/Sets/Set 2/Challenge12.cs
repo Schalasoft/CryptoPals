@@ -61,6 +61,7 @@ namespace CryptoPals.Sets
         */
 
         // Reuse previous challenge functionality
+        IChallenge6 challenge6 = (IChallenge6)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge6);
         IChallenge7 challenge7   = (IChallenge7)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge7);
         IChallenge8 challenge8   = (IChallenge8)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge8);
         IChallenge9 challenge9   = (IChallenge9)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge9);
@@ -71,7 +72,6 @@ namespace CryptoPals.Sets
 
         // Base64 decode the text
         byte[] unknownBytes = Convert.FromBase64String(base64Text);
-        //byte[] unknownBytes = "YELLOW SUBMARINE".ToBytes();
 
         /// <inheritdoc />
         public string Solve(string input)
@@ -79,11 +79,6 @@ namespace CryptoPals.Sets
             // Generate a random key
             int keySize = 16;
             byte[] key = challenge11.GenerateRandomASCIIBytes(keySize);
-            //byte[] key = "0123456789123456".ToBytes(); // cdg debug use same key
-            string knownText = ""; // This text can be anything it doesn't matter
-
-            // Convert input to bytes
-            byte[] knownBytes = knownText.ToBytes();
 
             // Detect the block size of the cipher
             int blockSize = DetermineEncryptorBlockSize();
@@ -94,8 +89,11 @@ namespace CryptoPals.Sets
             string output = "";
             if(isUsingECB)
             {
-                // Decrypt the unknown bytes
-                output = DecryptUnknownBytes(blockSize, key);
+                // Get the unknown string bytes
+                byte[] unknownBytes = Oracle(true, "", key);
+
+                // Decrypt the unknown string
+                output = DecryptUnknownString(unknownBytes, blockSize, key);
             }
 
             return output;
@@ -184,23 +182,37 @@ namespace CryptoPals.Sets
         }
 
         // cdg todo refactor previous challenges to use extension methods
-        private string DecryptUnknownBytes(int blockSize, byte[] key)
+        private string DecryptUnknownString(byte[] unknownBytes, int blockSize, byte[] key)
         {
-            // Determine how long the unknown string is by sending in a blank string and getting the length of the cipher
-            int unknownTextSize = Oracle(true, "", key).Length;
+            // Split the unknown text in blocks using the encryptions block size
+            byte[][] blocks = challenge6.CreateBlocks(unknownBytes, blockSize);
 
-            // Match the output of the short block to the dictionary key to get each character of the unknown string
-            List<char> decryptedCharacters = new List<char>();
-            for (int i = 0; i < unknownTextSize; i++)
+            // Decrypt all the bytes (use an array of lists)
+            List<char>[] decryptedBlocks = new List<char>[unknownBytes.Length / blockSize];
+            for (int i = 0; i < blocks.Length; i++)
             {
-                // Decrypt each byte and add it to the list
-                decryptedCharacters.Add(DecryptUnknownByte(blockSize, key, decryptedCharacters));
-            }
+                // Variable to hold decrypted bytes from a block
+                List<char> currentBlock = new List<char>();
 
-            return new string(decryptedCharacters.ToArray());
+                // The previous block, null if at the first block
+                List<char> previousBlock = i > 1 ? decryptedBlocks[i - 1] : null;
+
+                // Decrypt each block 1 byte at a time
+                for (int j = 0; j < blockSize; j++)
+                {
+                    // Decrypt each byte and add it to the list
+                    currentBlock.Add(DecryptUnknownByte(blockSize, key, currentBlock, previousBlock));
+                }
+
+                // Copy the decrypted block to the 2d array that holds all the decrypted blocks
+                decryptedBlocks[i] = currentBlock;
+            }
+            
+            // Return the 2d decrypted blocks flattened into a string
+            return new string(String.Join("", decryptedBlocks.Select(x => string.Join("", x)).ToArray()));
         }
 
-        private Dictionary<byte[], string> BuildMappingTable(int blockSize, byte[] key, List<char> decryptedCharacters)
+        private Dictionary<byte[], string> BuildMappingTable(int blockSize, byte[] key, List<char> currentBlock, List<char> previousBlock)
         {
             int tableStart = 0;
             int tableEnd = 256;
@@ -215,9 +227,9 @@ namespace CryptoPals.Sets
                 // cdg todo handle case where we shift to the next block
                 // Add in the previously decrypted bytes in this block
                 int k = 1;
-                for(int j = decryptedCharacters.Count; j > 0; j--)
+                for(int j = currentBlock.Count; j > 0; j--)
                 {
-                    shortBlock[shortBlock.Length - 1 - k++] = (byte)decryptedCharacters[j - 1];
+                    shortBlock[shortBlock.Length - 1 - k++] = (byte)currentBlock[j - 1];
                 }
 
                 string plainText = shortBlock.ToASCIIString();
@@ -236,21 +248,21 @@ namespace CryptoPals.Sets
             return mappings;
         }
 
-        private char DecryptUnknownByte(int blockSize, byte[] key, List<char> decryptedCharacters)
+        private char DecryptUnknownByte(int blockSize, byte[] key, List<char> currentBlock, List<char> previousBlock)
         {
             // Construct a short block to grab more and more of the unknown characters
-            byte[] block = challenge9.PadBytes(new byte[0], blockSize - 1 - decryptedCharacters.Count, (byte)'A');
+            byte[] block = challenge9.PadBytes(new byte[0], blockSize - 1 - currentBlock.Count, (byte)'A');
 
             // Encrypt block
             string targetPlainText = block.ToASCIIString();
             byte[] target = Oracle(true, targetPlainText, key);
 
-            // Get the first block
+            // Get the block
             byte[] firstBlock = new byte[blockSize];
             Array.Copy(target, firstBlock, blockSize);
 
             // Build dictionary used to hold all possible byte combinations for the missing byte (e.g. 4 size blocks "AAAA", "AAAB", "AAAC")
-            Dictionary<byte[], string> mappings = BuildMappingTable(blockSize, key, decryptedCharacters);
+            Dictionary<byte[], string> mappings = BuildMappingTable(blockSize, key, currentBlock, previousBlock);
 
             // Get the match from the dictionary
             KeyValuePair<byte[], string> match = mappings.FirstOrDefault(x => x.Key.SequenceEqual(firstBlock));
