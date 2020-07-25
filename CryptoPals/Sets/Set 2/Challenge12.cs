@@ -212,6 +212,8 @@ namespace CryptoPals.Sets
                 byte[] shortBlock = challenge9.PadBytes(new byte[0], shortBlockSize, (byte)'A');
                 shortBlock[shortBlock.Length - 1] = (byte)i;
 
+                // cdg todo handle case where we shift to the next block
+                // Add in the previously decrypted bytes in this block
                 int k = 1;
                 for(int j = decryptedCharacters.Count; j > 0; j--)
                 {
