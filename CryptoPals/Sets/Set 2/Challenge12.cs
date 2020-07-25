@@ -254,9 +254,12 @@ namespace CryptoPals.Sets
             return mappings;
         }
 
-        // cdg todo refactor previous challenges to use extension methods
-        // cdg todo comment the methods in this class
-        // cdg todo move cryptographic methods (AES and CBC encrypt etc. to Cryptography class in Utilities)
+        // cdg todo 
+        // comment the methods in this class
+        // Decrypt N blocks and not just first block of unknown string
+
+        // refactor previous challenges to use extension methods
+        //  move cryptographic methods (AES and CBC encrypt etc. to Cryptography class in Utilities)
         private char DecryptUnknownByte(int blockSize, byte[] key, List<char> currentBlock, List<char> previousBlock)
         {
             // Construct a short block to grab more and more of the unknown characters
