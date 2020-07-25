@@ -213,24 +213,25 @@ namespace CryptoPals.Sets
             Dictionary<byte[], string> mappings = new Dictionary<byte[], string>();
             for (int i = tableStart; i < tableEnd; i++)
             {
-                // Build a block 1 byte short of a block, filled with As
-                int shortBlockSize = blockSize;
-                byte[] shortBlock = challenge9.PadBytes(new byte[0], shortBlockSize, (byte)'A');
-
-                // Add in previously decrypted bytes if we are at the first block, or past the first character of any subsequent block
-                if (previousBlock == null || currentBlock.Count != 0)
+                byte[] shortBlock;
+                if (previousBlock == null)
                 {
-                    // First block: add in the previously decrypted bytes in this block, if any
-                    int k = 1;
-                    for (int j = currentBlock.Count; j > 0; j--)
-                    {
-                        shortBlock[shortBlock.Length - 1 - k++] = (byte)currentBlock[j - 1];
-                    }
+                    // First block: Build a block 1 byte short of a block, filled with As
+                    shortBlock = challenge9.PadBytes(new byte[0], blockSize, (byte)'A');
                 }
                 else
                 {
-                    // Subsequent blocks: Copy the starting bytes from the previous block to get the first character
+                    // Subsequent blocks: Copy the starting bytes from the previous block
                     shortBlock = previousBlock;
+
+                    // Left shift bytes for all but first byte in subsequent blocks
+                }
+
+                // Add decrypted bytes to the short clock for decrypting the final byte correctly (as AES decryption requires all preceding bytes be the same for the attack to work)
+                int k = 1;
+                for (int j = currentBlock.Count; j > 0; j--)
+                {
+                    shortBlock[shortBlock.Length - 1 - k++] = (byte)currentBlock[j - 1];
                 }
 
                 // Add a unique byte in the final byte position, this is what we will use to find what the decrypted character is
@@ -267,7 +268,7 @@ namespace CryptoPals.Sets
             }
             else
             {
-                // Subsequent blocks: fill the block with all the characters from the previous block excluding the first (for 1 missing byte at the end)
+                // Subsequent blocks: fill the block with all the characters from the previous block excluding the first character (for 1 missing byte at the end)
                 new string(previousBlock.GetRange(1, previousBlock.Count - 1).ToArray()).ToBytes().CopyTo(block, 0);
             }
 
