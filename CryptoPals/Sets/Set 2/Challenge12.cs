@@ -3,10 +3,7 @@ using CryptoPals.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography;
-using System.IO;
 using CryptoPals.Extension_Methods;
-using static CryptoPals.Utilities.Cryptography;
 
 namespace CryptoPals.Sets
 {
@@ -61,7 +58,7 @@ namespace CryptoPals.Sets
         */
 
         // Reuse previous challenge functionality
-        IChallenge6 challenge6 = (IChallenge6)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge6);
+        IChallenge6 challenge6   = (IChallenge6)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge6);
         IChallenge7 challenge7   = (IChallenge7)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge7);
         IChallenge8 challenge8   = (IChallenge8)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge8);
         IChallenge9 challenge9   = (IChallenge9)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge9);
@@ -156,7 +153,7 @@ namespace CryptoPals.Sets
                 // Encrypt the text
                 byte[] encrypted = Oracle(true, text, key);
 
-                // If the size has changed, the block size is the difference between the two
+                // If the size has changed, the block size is the difference between the two, then leave the loop
                 if (encrypted.Length > initialEcrypt.Length)
                 {
                     blockSize = encrypted.Length - initialEcrypt.Length;
@@ -176,12 +173,9 @@ namespace CryptoPals.Sets
             byte[] output = challenge7.AES_ECB(encrypt, text.ToBytes(), key);
 
             // Pad the bytes so it is a multiple of the block size
-            output = PadBytesToBlockSizeMultiple(output, 16); // In the Oracle so it 'knows' the block size, this is just here for cleaner code elsewhere
-
-            return output;
+            return PadBytesToBlockSizeMultiple(output, 16); // The Oracle knows the block size, as the Oracle knows all!
         }
 
-        // cdg todo refactor previous challenges to use extension methods
         private string DecryptUnknownString(byte[] unknownBytes, int blockSize, byte[] key)
         {
             // Split the unknown text in blocks using the encryptions block size
@@ -212,65 +206,87 @@ namespace CryptoPals.Sets
             return new string(String.Join("", decryptedBlocks.Select(x => string.Join("", x)).ToArray()));
         }
 
-        private Dictionary<byte[], string> BuildMappingTable(int blockSize, byte[] key, List<char> currentBlock, List<char> previousBlock)
+        private Dictionary<byte[], string> BuildMappingTable(int blockSize, byte[] key, List<char> currentBlock, byte[] previousBlock)
         {
             int tableStart = 0;
             int tableEnd = 256;
             Dictionary<byte[], string> mappings = new Dictionary<byte[], string>();
             for (int i = tableStart; i < tableEnd; i++)
             {
-                // Build a block with a unique byte in the final byte position (using the values in our passed in block to decrypt the whole block)
+                // Build a block 1 byte short of a block, filled with As
                 int shortBlockSize = blockSize;
                 byte[] shortBlock = challenge9.PadBytes(new byte[0], shortBlockSize, (byte)'A');
-                shortBlock[shortBlock.Length - 1] = (byte)i;
 
-                // cdg todo handle case where we shift to the next block
-                // Add in the previously decrypted bytes in this block
-                int k = 1;
-                for(int j = currentBlock.Count; j > 0; j--)
+                // Add in previously decrypted bytes if we are at the first block, or past the first character of any subsequent block
+                if (previousBlock == null || currentBlock.Count != 0)
                 {
-                    shortBlock[shortBlock.Length - 1 - k++] = (byte)currentBlock[j - 1];
+                    // First block: add in the previously decrypted bytes in this block, if any
+                    int k = 1;
+                    for (int j = currentBlock.Count; j > 0; j--)
+                    {
+                        shortBlock[shortBlock.Length - 1 - k++] = (byte)currentBlock[j - 1];
+                    }
+                }
+                else
+                {
+                    // Subsequent blocks: Copy the starting bytes from the previous block to get the first character
+                    shortBlock = previousBlock;
                 }
 
+                // Add a unique byte in the final byte position, this is what we will use to find what the decrypted character is
+                shortBlock[shortBlock.Length - 1] = (byte)i;
+
+                // Get the short block as plain text
                 string plainText = shortBlock.ToASCIIString();
 
                 // Encrypt the block
                 byte[] encrypt = Oracle(true, plainText, key);
 
-                // We only want the first block
-                byte[] firstBlock = new byte[blockSize];
-                Array.Copy(encrypt, firstBlock, blockSize);
+                // Get the block
+                byte[] block = new byte[blockSize];
+                Array.Copy(encrypt, block, blockSize);
 
                 // Add it to the dictionary (the encrypted bytes as the key, and the plaintext as the value)
-                mappings.Add(firstBlock, plainText);
+                mappings.Add(block, plainText);
             }
 
             return mappings;
         }
 
+        // cdg todo refactor previous challenges to use extension methods
+        // cdg todo comment the methods in this class
+        // cdg todo move cryptographic methods (AES and CBC encrypt etc. to Cryptography class in Utilities)
         private char DecryptUnknownByte(int blockSize, byte[] key, List<char> currentBlock, List<char> previousBlock)
         {
             // Construct a short block to grab more and more of the unknown characters
-            byte[] block = challenge9.PadBytes(new byte[0], blockSize - 1 - currentBlock.Count, (byte)'A');
+            byte[] block = new byte[blockSize - 1];
+            if (previousBlock == null)
+            {
+                // First block: fill block with As with 1 missing byte at the end
+                block = challenge9.PadBytes(new byte[0], blockSize - 1 - currentBlock.Count, (byte)'A');
+            }
+            else
+            {
+                // Subsequent blocks: fill the block with all the characters from the previous block excluding the first (for 1 missing byte at the end)
+                new string(previousBlock.GetRange(1, previousBlock.Count - 1).ToArray()).ToBytes().CopyTo(block, 0);
+            }
 
             // Encrypt block
             string targetPlainText = block.ToASCIIString();
             byte[] target = Oracle(true, targetPlainText, key);
 
-            // Get the block
-            byte[] firstBlock = new byte[blockSize];
-            Array.Copy(target, firstBlock, blockSize);
+            // Get the block to check (as the Oracle will return many blocks depending on the length of 'my string' and 'unknown string'
+            byte[] blockToCheck = new byte[blockSize];
+            Array.Copy(target, blockToCheck, blockSize);
 
             // Build dictionary used to hold all possible byte combinations for the missing byte (e.g. 4 size blocks "AAAA", "AAAB", "AAAC")
-            Dictionary<byte[], string> mappings = BuildMappingTable(blockSize, key, currentBlock, previousBlock);
+            Dictionary<byte[], string> mappings = BuildMappingTable(blockSize, key, currentBlock, previousBlock == null ? null : block);
 
             // Get the match from the dictionary
-            KeyValuePair<byte[], string> match = mappings.FirstOrDefault(x => x.Key.SequenceEqual(firstBlock));
+            KeyValuePair<byte[], string> match = mappings.FirstOrDefault(x => x.Key.SequenceEqual(blockToCheck));
 
             // Get the match key as a character (the final character of the plaintext in the match)
-            char decryptedCharacter = match.Value[match.Value.Length - 1];
-
-            return decryptedCharacter;
+            return match.Value[match.Value.Length - 1];
         }
     }
 }
