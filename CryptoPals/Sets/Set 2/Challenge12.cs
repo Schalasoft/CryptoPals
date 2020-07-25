@@ -79,8 +79,8 @@ namespace CryptoPals.Sets
             // Generate a random key
             int keySize = 16;
             //byte[] key = challenge11.GenerateRandomASCIIBytes(keySize);
-            byte[] key = "YELLOW SUBMARINE".ToBytes(); // cdg debug use same key
-            string knownText = "Z"; // cdg debug use the alphabet as 'my string' text (cdg MY STRING SHOULD BE 1 BYTE SHORT SO I GET THE FIRST UNKNOWN BYTE!!!!)
+            byte[] key = "0123456789123456".ToBytes(); // cdg debug use same key
+            string knownText = ""; // cdg debug use the alphabet as 'my string' text (cdg MY STRING SHOULD BE 1 BYTE SHORT SO I GET THE FIRST UNKNOWN BYTE!!!!)
 
             // Convert input to bytes
             byte[] knownBytes = knownText.ToBytes();
@@ -145,7 +145,7 @@ namespace CryptoPals.Sets
 
             // Do an initial encrypt on blank text
             char c = 'A'; // A char to use to fill the blocks
-            string text = "".PadRight(16, c);
+            string text = "012345678912345".PadRight(16, c);
             byte[] initialEcrypt = Oracle(true, text, key); 
 
             // Feed larger and larger sets of bytes to the encryptor until the size changes, then we have the block size
@@ -205,13 +205,14 @@ namespace CryptoPals.Sets
             for (int i = tableStart; i < tableEnd; i++)
             {
                 // Build a block with a unique byte in the final byte position (using the values in our passed in block to decrypt the whole block)
-                int shortBlockSize = blockSize - decryptedCharacters.Count;
-                byte[] shortBlock = challenge9.PadBytes(new byte[0], shortBlockSize - decryptedCharacters.Count, (byte)'A');
+                int shortBlockSize = blockSize;
+                byte[] shortBlock = challenge9.PadBytes(new byte[0], shortBlockSize, (byte)'A');
                 shortBlock[shortBlock.Length - 1] = (byte)i;
-                int j, k = 0;
-                foreach (char c in decryptedCharacters)
+
+                int k = 1;
+                for(int j = decryptedCharacters.Count; j > 0; j--)
                 {
-                   //shortBlock[shortBlock.Length - 2 - k] = (byte)decryptedCharacters[k++];
+                    shortBlock[shortBlock.Length - 1 - k++] = (byte)decryptedCharacters[j - 1];
                 }
 
                 string plainText = shortBlock.ToASCIIString();
@@ -219,9 +220,20 @@ namespace CryptoPals.Sets
                 // Encrypt the block
                 byte[] encrypt = Oracle(true, plainText, key);
 
+                byte[] encrypt1 = Oracle(true, "AAAAAAAAAAAAAAYE", key);
+
+
                 // We only want the first block
                 byte[] firstBlock = new byte[blockSize];
                 Array.Copy(encrypt, firstBlock, blockSize);
+
+                // Convert to stirng for checking
+                string encryptText = firstBlock.ToASCIIString();
+
+                byte[] firstBlock1 = new byte[blockSize];
+                Array.Copy(encrypt1, firstBlock1, blockSize);
+
+                string encryptText1 = firstBlock1.ToASCIIString();
 
                 // Add it to the dictionary (the encrypted bytes as the key, and the plaintext as the value)
                 mappings.Add(firstBlock, plainText);
@@ -232,16 +244,10 @@ namespace CryptoPals.Sets
 
         private char DecryptUnknownByte(int blockSize, byte[] key, List<char> decryptedCharacters)
         {
-            // Encryt a short block to grab more and more of the unknown characters
-            int shortBlockSize = blockSize - decryptedCharacters.Count;
-            byte[] block = challenge9.PadBytes(new byte[0], shortBlockSize - 1, (byte)'A');
+            // Construct a short block to grab more and more of the unknown characters
+            byte[] block = challenge9.PadBytes(new byte[0], blockSize - 1 - decryptedCharacters.Count, (byte)'A');
 
-            int j, k = 0;
-            foreach (char c in decryptedCharacters)
-            {
-                //block[block.Length - 1 - k] = (byte)decryptedCharacters[k++];
-            }
-
+            // Encrypt block
             string targetPlainText = block.ToASCIIString();
             byte[] target = Oracle(true, targetPlainText, key);
             string targetCipherText = target.ToASCIIString();
