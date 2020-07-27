@@ -72,14 +72,16 @@ namespace CryptoPals.Sets
         // Base64 decode the text
         byte[] unknownBytesEncrypted;
 
-        // Generate a random key
-        int keySize = 16;
-        //byte[] key = challenge11.GenerateRandomASCIIBytes(keySize);
-        byte[] key = "YELLOW SUBMARINE".ToBytes(); // cdg debug
+        // The random key (generated once)
+        byte[] key;
 
         /// <inheritdoc />
         public string Solve(string input)
         {
+            // Assign the key
+            int keySize = 16;
+            key = challenge11.GenerateRandomASCIIBytes(keySize);
+
             // Detect the block size of the cipher
             int blockSize = DetermineEncryptorBlockSize();
 
@@ -186,13 +188,20 @@ namespace CryptoPals.Sets
 
             // Decrypt all the bytes (use an array of lists)
             List<byte> decryptedBytes = new List<byte>();
-            for (int i = 0; i < blocks.Length; i++)
+            for (int i = 0; i <= blocks.Length; i++)
             {
                 // Decrypt each block 1 byte at a time
                 for (int j = 0; j < blockSize; j++)
                 {
+                    // The start index of the block we want to decrypt
+                    int blockIndex = i * blockSize;
+
                     // Decrypt each byte and add it to the list
-                    byte decryptedByte = DecryptUnknownByte(i * blockSize, blockSize, decryptedBytes);
+                    byte decryptedByte = DecryptUnknownByte(blockIndex, blockSize, decryptedBytes);
+
+                    // If we hit padding, exit
+                    if (decryptedByte == (byte)4)
+                        break;
 
                     // Copy the decrypted char to the list that holds all the decrypted blocks
                     decryptedBytes.Add(decryptedByte);
@@ -221,7 +230,14 @@ namespace CryptoPals.Sets
             byte[] shortBlock = challenge9.PadBytes(null, padding);
 
             // Encrypt
-            byte[] target = Oracle(shortBlock.ToASCIIString()).ToList().GetRange(blockIndex, blockSize).ToArray();
+            List<byte> encrypted = Oracle(shortBlock.ToASCIIString()).ToList();
+
+            // If we cannot grab anymore in this block, we're done, return a padding byte
+            if (encrypted.Count < blockIndex + blockSize)
+                return (byte)4;
+
+            // Get the encrypted block we are on
+            byte[] target = encrypted.GetRange(blockIndex, blockSize).ToArray();
 
             // Try each byte it could be and get the one it actually is
             byte decryptedByte = new byte();
