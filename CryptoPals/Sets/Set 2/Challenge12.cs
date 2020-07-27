@@ -158,10 +158,10 @@ namespace CryptoPals.Sets
         public byte[] Oracle(string text)
         {
             // Add unknown bytes
-            text += Convert.FromBase64String(base64Text).ToASCIIString();
+            text += Convert.FromBase64String(base64Text).GetASCIIString();
 
             // Encrypt
-            byte[] output = challenge7.AES_ECB(true, text.ToBytes(), key);
+            byte[] output = Cryptography.AES_ECB(text.GetBytes(), key);
 
             // Pad the bytes so it is a multiple of the block size
             return challenge9.PadBytesToBlockSizeMultiple(output, 16); // The Oracle knows the block size, as the Oracle knows all!
@@ -201,7 +201,7 @@ namespace CryptoPals.Sets
             }
             
             // Return the decrypted bytes flattened as an ASCII string
-            return decryptedBytes.ToArray().ToASCIIString();
+            return decryptedBytes.ToArray().GetASCIIString();
         }
 
         // cdg todo 
@@ -222,13 +222,13 @@ namespace CryptoPals.Sets
             int padding = (blockSize - (decryptedBytes.Count % blockSize) - 1);
 
             // Get our previously decrypted bytes as a string
-            string decryptedString = String.Join("", decryptedBytes.ToArray().ToASCIIString());
+            string decryptedString = String.Join("", decryptedBytes.ToArray().GetASCIIString());
 
             // Create the block to encrypt that will be our target
             byte[] shortBlock = challenge9.PadBytes(padding);
 
             // Encrypt
-            List<byte> encrypted = Oracle(shortBlock.ToASCIIString()).ToList();
+            List<byte> encrypted = Oracle(shortBlock.GetASCIIString()).ToList();
 
             // If we cannot grab anymore in this block, we're done, return a padding byte
             if (encrypted.Count < blockIndex + blockSize)
@@ -242,7 +242,7 @@ namespace CryptoPals.Sets
             for (int i = 0; i < 256; i++)
             {
                 // Encrypt the guess
-                byte[] guessBlocks = Oracle($"{shortBlock.ToASCIIString()}{decryptedString}{(char)i}");
+                byte[] guessBlocks = Oracle($"{shortBlock.GetASCIIString()}{decryptedString}{(char)i}");
 
                 // Get the block we are on
                 byte[] guessBlock = guessBlocks.ToList().GetRange(blockIndex, blockSize).ToArray();

@@ -1,5 +1,5 @@
-﻿using CryptoPals.Interfaces;
-using System.Text;
+﻿using CryptoPals.Extension_Methods;
+using CryptoPals.Interfaces;
 
 namespace CryptoPals.Sets
 {
@@ -26,14 +26,14 @@ namespace CryptoPals.Sets
         public string Solve(string input)
         {
             // Get the text to pad
-            byte[] bytes = Encoding.ASCII.GetBytes(input);
+            byte[] bytes = input.GetBytes();
 
             // Pad the text bytes to the specified length
             int size = 20;
             byte[] paddedBytes = PadBytes(size, bytes);
 
             // Convert to string for output
-            return Encoding.ASCII.GetString(paddedBytes);
+            return paddedBytes.GetASCIIString();
         }
 
         ///<inheritdoc cref="IChallenge9.PadBytes(byte[], int, byte)"/>

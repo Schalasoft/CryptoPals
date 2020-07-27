@@ -58,7 +58,7 @@ namespace CryptoPals.Sets
             byte[] key = challenge11.GenerateRandomASCIIBytes(16);
 
             // Encrypt the profile
-            byte[] encryptedProfile = challenge7.AES_ECB(true, encodedProfile.ToBytes(), key);
+            byte[] encryptedProfile = Cryptography.AES_ECB(encodedProfile.GetBytes(), key);
 
             // Decrypt the profile and parse it using only the user input to GetProfileByEmail
             Attacker(encryptedProfile);

@@ -1,6 +1,6 @@
 ﻿using CryptoPals.Enumerations;
 using CryptoPals.Interfaces;
-using System.Text;
+using CryptoPals.Extension_Methods;
 
 namespace CryptoPals.Sets
 {
@@ -35,8 +35,8 @@ namespace CryptoPals.Sets
             // Split the input to get the plaintext to encrypt and the cycling key
             string[] split = challenge4.SplitTextIntoLines(input, Constants.Separator);
 
-            byte[] inputBytes = Encoding.ASCII.GetBytes(split[0]);
-            byte[] keyBytes   = Encoding.ASCII.GetBytes(split[1]);
+            byte[] inputBytes = split[0].GetBytes();
+            byte[] keyBytes   = split[1].GetBytes();
 
             // Encrypt/Decrypt
             byte[] result = RepeatingKeyXOR(inputBytes, keyBytes);

@@ -1,28 +1,27 @@
-﻿using System.Security.Cryptography;
+﻿using Org.BouncyCastle.Crypto;
+using Org.BouncyCastle.Crypto.Parameters;
+using Org.BouncyCastle.Security;
 
-namespace CryptoPals.Utilities
+namespace CryptoPals
 {
     static class Cryptography
     {
-		public static byte[] AES_128_ECB_Encrypt(byte[] plainBytes, byte[] key)
+        /// <summary>
+        /// Encrypt/decrypt input bytes using AES ECB with no padding
+        /// </summary>
+        /// <param name="bytes">The bytes to encrypt/decrypt</param>
+        /// <param name="key">The key to use for encryption/decryption</param>
+        /// <param name="encrypt">Whether to encrypt or decrypt, defaults to true</param>
+        /// <returns>The encrypted/decrypted bytes</returns>
+		public static byte[] AES_ECB(byte[] bytes, byte[] key, bool encrypt = true)
 		{
-			var aes = new AesCryptoServiceProvider
-			{
-				KeySize = 128,
-				Key = key,
-				Mode = CipherMode.ECB,
-				Padding = PaddingMode.Zeros
-			};
+            // Setup the encryption/decryption cipher
+            IBufferedCipher cipher = CipherUtilities.GetCipher("AES/ECB/NoPadding");
+            cipher.Init(encrypt, new KeyParameter(key));
 
-			var encryptor = aes.CreateEncryptor();
-			byte[] cipherBytes = new byte[plainBytes.Length];
-			for (int offset = 0; offset < plainBytes.Length; offset += aes.BlockSize / 8)
-			{
-				encryptor.TransformBlock(plainBytes, offset, aes.BlockSize / 8, cipherBytes, offset);
-			}
-
-			return cipherBytes;
-		}
+            // Encrypt/Decrypt
+            return cipher.ProcessBytes(bytes);
+        }
 	}
 }
 

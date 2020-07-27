@@ -1,7 +1,7 @@
 ﻿using CryptoPals.Enumerations;
+using CryptoPals.Extension_Methods;
 using CryptoPals.Interfaces;
 using System;
-using System.Text;
 
 namespace CryptoPals.Sets
 {
@@ -33,7 +33,6 @@ namespace CryptoPals.Sets
         // Reuse previous challenge functionality
         IChallenge2 challenge2 = (IChallenge2)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge2);
         IChallenge6 challenge6 = (IChallenge6)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge6);
-        IChallenge7 challenge7 = (IChallenge7)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge7);
         IChallenge9 challenge9 = (IChallenge9)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge9);
 
         ///<inheritdoc />
@@ -41,17 +40,17 @@ namespace CryptoPals.Sets
         {
             // Get input and key as bytes
             byte[] bytes = Convert.FromBase64String(input);
-            byte[] key = Encoding.ASCII.GetBytes("YELLOW SUBMARINE");
+            byte[] key = "YELLOW SUBMARINE".GetBytes();
 
             // Create Initialization Vector (a block the same size as the key/block but filled with ASCII 0 bytes)
             byte paddingByte = (byte)0x00;
-            byte[] iv = challenge9.PadBytes(null, key.Length, paddingByte); // Could just let use a default byte array but this reads clearer
+            byte[] iv = challenge9.PadBytes(key.Length, null, paddingByte); // Could just let use a default byte array but this reads clearer
 
             // Decrypt
             byte[] decryptedBytes = AES_CBC(false, bytes, key, iv);
 
             // Convert decrypted bytes to string
-            return Encoding.ASCII.GetString(decryptedBytes);
+            return decryptedBytes.GetASCIIString();
         }
 
         ///<inheritdoc cref="IChallenge10.AES_CBC(bool, byte[], byte[], byte[])"/>
@@ -60,7 +59,7 @@ namespace CryptoPals.Sets
             // Encrypt & decrypt in the one function is a bit hard to read but reduces code duplication
             // If we are encrypting and the bytes are not divisible by the key, pad the bytes
             if (encrypt && bytes.Length % key.Length != 0)
-               bytes = challenge9.PadBytes(bytes, key.Length);
+               bytes = challenge9.PadBytes(key.Length, bytes);
 
             // Break input into blocks
             byte[][] blocks = challenge6.CreateBlocks(bytes, key.Length);
@@ -115,7 +114,7 @@ namespace CryptoPals.Sets
             byte[] xorBlock = challenge2.XORByteArray(block, previousBlock);
 
             // ECB Encrypt
-            return challenge7.AES_ECB(true, xorBlock, key);
+            return Cryptography.AES_ECB(xorBlock, key);
         }
 
         /// <summary>
@@ -128,7 +127,7 @@ namespace CryptoPals.Sets
         private byte[] AES_CBC_Decrypt(byte[] block, byte[] previousBlock, byte[] key)
         {
             // ECB Decrypt
-            byte[] decryptedBlock = challenge7.AES_ECB(false, block, key);
+            byte[] decryptedBlock = Cryptography.AES_ECB(block, key, false);
 
             // XOR block against the previous block
             return challenge2.XORByteArray(decryptedBlock, previousBlock);

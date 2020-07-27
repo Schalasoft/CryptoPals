@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using CryptoPals.Extension_Methods;
 
 namespace CryptoPals.Sets
 {
@@ -68,8 +69,8 @@ namespace CryptoPals.Sets
             byte[] outputBytes = challenge5.RepeatingKeyXOR(decodedBytes, keyBytes);
 
             // Get the key and decrypted bytes as strings to output
-            string output = Encoding.ASCII.GetString(outputBytes);
-            string key = Encoding.ASCII.GetString(keyBytes);
+            string output = outputBytes.GetASCIIString();
+            string key = keyBytes.GetASCIIString();
 
             // Format the output
             return FormatOutput(output, key);
@@ -127,8 +128,8 @@ namespace CryptoPals.Sets
             while ((stream.Position + (keySize * 2)) < stream.Length) //  Don't take two full size chunks of keysize if there isn't enough bytes remaining
             {
                 // Get the hamming distance between neighbouring keysize worth of bytes
-                byte[] a = ByteConverter.GetBytes(stream, keySize); // This call effectively removes the bytes from the stream
-                byte[] b = ByteConverter.GetBytes(stream, keySize);
+                byte[] a = stream.GetBytes(keySize); // This call effectively removes the bytes from the stream
+                byte[] b = stream.GetBytes(keySize);
                 double distance = CalculateHammingDistance(a, b);
 
                 // Normalize the distance by dividing by the keysize

@@ -1,7 +1,7 @@
 ﻿using CryptoPals.Enumerations;
+using CryptoPals.Extension_Methods;
 using CryptoPals.Interfaces;
 using System;
-using System.Text;
 
 namespace CryptoPals.Sets
 {
@@ -44,7 +44,7 @@ namespace CryptoPals.Sets
         public string Solve(string input)
         {
             // Convert input string to bytes
-            byte[] bytes = Encoding.ASCII.GetBytes(input);
+            byte[] bytes = input.GetBytes();
 
             // Run Oracle against the input data multiple times (with different random byte keys)
             int totalTests = 50;
@@ -98,7 +98,7 @@ namespace CryptoPals.Sets
             if (encryptionType.Equals(EncryptionTypeEnum.ECB))
             {
                 // Encrypt using ECB
-                encryptedBytes = challenge7.AES_ECB(true, bytes, key);
+                encryptedBytes = Cryptography.AES_ECB(bytes, key);
             }
             else if (encryptionType.Equals(EncryptionTypeEnum.CBC))
             {
@@ -125,7 +125,7 @@ namespace CryptoPals.Sets
 
             // Pad the constructed byte array if it is not divisible by the key length
             if (bytesWithInserts.Length % keyLength != 0)
-                bytesWithInserts = challenge9.PadBytes(bytesWithInserts, keyLength);
+                bytesWithInserts = challenge9.PadBytesToBlockSizeMultiple(bytesWithInserts, keyLength);
 
             // Create a random key
             byte[] key = GenerateRandomASCIIBytes(keyLength);

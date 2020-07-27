@@ -1,9 +1,6 @@
 ﻿using CryptoPals.Interfaces;
-using Org.BouncyCastle.Crypto;
-using Org.BouncyCastle.Crypto.Parameters;
-using Org.BouncyCastle.Security;
 using System;
-using System.Text;
+using CryptoPals.Extension_Methods;
 
 namespace CryptoPals.Sets
 {
@@ -32,24 +29,25 @@ namespace CryptoPals.Sets
             byte[] bytes = Convert.FromBase64String(input);
 
             // Get key as bytes
-            byte[] key = Encoding.ASCII.GetBytes("YELLOW SUBMARINE");
+            byte[] key = "YELLOW SUBMARINE".GetBytes();
 
             // Decrypt the input using the key
-            byte[] data = AES_ECB(false, bytes, key);
+            byte[] data = AES_ECB(bytes, key, false);
 
             // Get decrypted bytes as text
-            return Encoding.ASCII.GetString(data);
+            return data.GetASCIIString();
         }
 
-        ///<inheritdoc cref="IChallenge7.AES_ECB(bool, byte[], byte[])"/>
-        public byte[] AES_ECB(bool encrypt, byte[] bytes, byte[] key)
+        /// <summary>
+        /// Encrypt/Decrypt bytes using AES in ECB mode
+        /// </summary>
+        /// <param name="bytes">The bytes to encrypt/decrypt</param>
+        /// <param name="key">The key to use for encrypting/decrypting</param>
+        /// <param name="encrypt">Whether we are encrypting or decrypting</param>
+        /// <returns>The encrypted/decrypted data</returns>
+        public byte[] AES_ECB(byte[] bytes, byte[] key, bool encrypt)
         {
-            // Setup the encryption/decryption cipher
-            IBufferedCipher cipher = CipherUtilities.GetCipher("AES/ECB/NoPadding");
-            cipher.Init(encrypt, new KeyParameter(key));
-
-            // Encrypt/Decrypt
-            return cipher.ProcessBytes(bytes);
+            return Cryptography.AES_ECB(bytes, key, encrypt);
         }
     }
 }
