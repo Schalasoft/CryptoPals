@@ -4,8 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using CryptoPals.Extension_Methods;
-using Org.BouncyCastle.Asn1.X509;
-using Org.BouncyCastle.Crypto.Paddings;
 
 namespace CryptoPals.Sets
 {
@@ -101,29 +99,11 @@ namespace CryptoPals.Sets
             return output;
         }
 
-        // Move to challenge 9
-        private byte[] PadBytesToBlockSizeMultiple(byte[] bytes, int blockSize, byte paddingByte = 4)
-        {
-            byte[] output;
-            
-            // The byte array needs resized
-            if (bytes.Length % blockSize != 0)
-            {
-                // Determine the new size (the size of the bytes plus how many bytes we are missing, which is the block size minus the modulus remainder of the length of the bytes and the block size)
-                int newSize = bytes.Length + ((blockSize) - bytes.Length % blockSize);
-
-                // Create resized byte array
-                output = challenge9.PadBytes(bytes, newSize, paddingByte);
-            }
-            else
-            {
-                // Doesn't need a resize, just output the bytes
-                output = bytes;
-            }
-
-            return output;
-        }
-
+        /// <summary>
+        /// Determines if the encryptor is using ECB, this is done by sending it 2 blocks worth of identical data, and seeing if we get back 2 identical cipher text blocks
+        /// </summary>
+        /// <param name="blockSize">The block size used by the encryptor</param>
+        /// <returns>True if the encryptor is using AES ECB</returns>
         private bool IsEncryptorUsingECB(int blockSize)
         {
             // Construct 2 blocks worth of identical data
@@ -136,12 +116,13 @@ namespace CryptoPals.Sets
             return challenge8.IsECBEncrypted(encrypted);
         }
 
+        /// <summary>
+        /// Determines the block size used by the encryptor
+        /// </summary>
+        /// <returns>The block size the ECB encryptor is using</returns>
         private int DetermineEncryptorBlockSize()
         {
             int maxBlockSize = 2000;
-
-            // Just use a 128 bit blank key
-            byte[] key = new byte[16];
 
             // Do an initial encrypt on blank text
             char c = 'A'; // A char to use to fill the blocks
@@ -169,18 +150,29 @@ namespace CryptoPals.Sets
             return blockSize;
         }
 
-        public byte[] Oracle(string text, bool encrypt = true)
+        /// <summary>
+        /// Encrypts a string, while also appending an unknown string to the end of it
+        /// </summary>
+        /// <param name="text">The string to encrypt (the unknown string is appended to this)</param>
+        /// <returns>The encryption of the text provided, after an unknown string was appended to it</returns>
+        public byte[] Oracle(string text)
         {
             // Add unknown bytes
             text += Convert.FromBase64String(base64Text).ToASCIIString();
 
             // Encrypt
-            byte[] output = challenge7.AES_ECB(encrypt, text.ToBytes(), key);
+            byte[] output = challenge7.AES_ECB(true, text.ToBytes(), key);
 
             // Pad the bytes so it is a multiple of the block size
-            return PadBytesToBlockSizeMultiple(output, 16); // The Oracle knows the block size, as the Oracle knows all!
+            return challenge9.PadBytesToBlockSizeMultiple(output, 16); // The Oracle knows the block size, as the Oracle knows all!
         }
 
+        /// <summary>
+        /// Decrypts the encrypted bytes
+        /// </summary>
+        /// <param name="bytes">The encrypted bytes</param>
+        /// <param name="blockSize">The size of the blocks used in decryption</param>
+        /// <returns>The decrypted bytes as a string</returns>
         private string DecryptUnknownString(byte[] bytes, int blockSize)
         {
             // Split the unknown text in blocks using the encryptions block size
@@ -213,11 +205,17 @@ namespace CryptoPals.Sets
         }
 
         // cdg todo 
-        // comment the methods in this class
-        // Decrypt N blocks and not just first block of unknown string
 
         // refactor previous challenges to use extension methods
         // move cryptographic methods (AES and CBC encrypt etc. to Cryptography class in Utilities)
+
+        /// <summary>
+        /// Decrypts the next byte using previously decrypted bytes (or in the case of the first byte, a block of all the same byte)
+        /// </summary>
+        /// <param name="blockIndex">The starting index of the current block</param>
+        /// <param name="blockSize">The size of the blocks used in decryption</param>
+        /// <param name="decryptedBytes">The bytes already decrypted</param>
+        /// <returns>The next decrypted byte</returns>
         private byte DecryptUnknownByte(int blockIndex, int blockSize, List<byte> decryptedBytes)
         {
             // Padding
@@ -227,7 +225,7 @@ namespace CryptoPals.Sets
             string decryptedString = String.Join("", decryptedBytes.ToArray().ToASCIIString());
 
             // Create the block to encrypt that will be our target
-            byte[] shortBlock = challenge9.PadBytes(null, padding);
+            byte[] shortBlock = challenge9.PadBytes(padding);
 
             // Encrypt
             List<byte> encrypted = Oracle(shortBlock.ToASCIIString()).ToList();
