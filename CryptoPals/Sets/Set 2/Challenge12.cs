@@ -188,9 +188,6 @@ namespace CryptoPals.Sets
             List<byte> decryptedBytes = new List<byte>();
             for (int i = 0; i < blocks.Length; i++)
             {
-                // Variable to hold decrypted bytes from a block
-                List<byte> currentBlock = new List<byte>();
-
                 // Decrypt each block 1 byte at a time
                 for (int j = 0; j < blockSize; j++)
                 {
@@ -215,8 +212,7 @@ namespace CryptoPals.Sets
         private byte DecryptUnknownByte(int blockIndex, int blockSize, List<byte> decryptedBytes)
         {
             // Padding
-            int padding = (blockSize - decryptedBytes.Count - 1);
-            if (blockIndex >= 16) padding %= blockSize;
+            int padding = (blockSize - (decryptedBytes.Count % blockSize) - 1);
 
             // Get our previously decrypted bytes as a string
             string decryptedString = String.Join("", decryptedBytes.ToArray().ToASCIIString());
