@@ -2,6 +2,7 @@
 using System.Text.Json;
 using CryptoPals.Enumerations;
 using CryptoPals.Extension_Methods;
+using System;
 
 namespace CryptoPals.Sets
 {
@@ -69,8 +70,20 @@ namespace CryptoPals.Sets
             // Decrypt the encrypted profile
             string decryptedProfile = Cryptography.AES_ECB(encryptedProfileBytes, key, false).GetASCIIString();
 
-            // Make an admin profile
-            string adminCipherText = decryptedProfile;
+            // Make an admin profile (cdg testing)
+            // target
+            // email=foo@bar.com&uid=10&role=admin
+            string profileCipherText = decryptedProfile;
+            string profileCipher = String.Join(",", encryptedProfileBytes);
+            string testText = "email=foo@bar.com" + "&uid=10&role=user";
+            int testTextLength = testText.Length;
+            string testCipher = String.Join(",", Cryptography.AES_ECB(testText.GetBytes(), key));
+            string testCipherText = testCipher;
+
+            string adminText = "email=foo@bar.com&uid=10&role=admin";
+            int adminTextLength = adminText.Length;
+            string adminCipher = String.Join(",", Cryptography.AES_ECB(adminText.GetBytes(), key));
+            string adminCipherText = adminCipher;
 
             return adminCipherText;
         }
