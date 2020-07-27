@@ -204,11 +204,6 @@ namespace CryptoPals.Sets
             return decryptedBytes.ToArray().GetASCIIString();
         }
 
-        // cdg todo 
-
-        // refactor previous challenges to use extension methods
-        // move cryptographic methods (AES and CBC encrypt etc. to Cryptography class in Utilities)
-
         /// <summary>
         /// Decrypts the next byte using previously decrypted bytes (or in the case of the first byte, a block of all the same byte)
         /// </summary>
