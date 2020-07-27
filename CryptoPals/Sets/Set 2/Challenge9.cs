@@ -39,18 +39,21 @@ namespace CryptoPals.Sets
         ///<inheritdoc cref="IChallenge9.PadBytes(byte[], int, byte)"/>
         public byte[] PadBytes(byte[] bytes, int size, byte paddingByte = (byte)0x04)
         {
-            // If the blocksize we get is bigger than the the size specified, we are padding bytes to be evenly divisible by the size
-            if (bytes.Length > size)
-                size = bytes.Length + (size - (bytes.Length % size));
-
             // Create a byte array the size of the desired length
             byte[] paddedBytes = new byte[size];
 
-            // Copy in the bytes to the padded bytes array
-            bytes.CopyTo(paddedBytes, 0);
-            
+            // Copy in bytes if any
+            if (bytes != null && bytes.Length > size)
+            {
+                // If the blocksize we get is bigger than the the size specified, we are padding bytes to be evenly divisible by the size
+                size = bytes.Length + (size - (bytes.Length % size));
+
+                // Copy in the bytes to the padded bytes array
+                bytes.CopyTo(paddedBytes, 0);
+            }
+
             // Pad the remaining unset bytes with EOT bytes (decimal 4)
-            for(int i = bytes.Length; i < size; i++)
+            for(int i = paddedBytes.Length; i < size; i++)
             {
                 paddedBytes[i] = paddingByte;
             }

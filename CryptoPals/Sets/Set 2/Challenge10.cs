@@ -45,7 +45,7 @@ namespace CryptoPals.Sets
 
             // Create Initialization Vector (a block the same size as the key/block but filled with ASCII 0 bytes)
             byte paddingByte = (byte)0x00;
-            byte[] iv = challenge9.PadBytes(new byte[0], key.Length, paddingByte); // Could just let use a default byte array but this reads clearer
+            byte[] iv = challenge9.PadBytes(null, key.Length, paddingByte); // Could just let use a default byte array but this reads clearer
 
             // Decrypt
             byte[] decryptedBytes = AES_CBC(false, bytes, key, iv);
