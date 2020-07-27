@@ -41,12 +41,16 @@ namespace CryptoPals.Sets
         {
             // Create a byte array the size of the desired length
             byte[] paddedBytes = new byte[size];
+            int padFrom = 0; // Default to padding bytes from the start
 
             // Copy in bytes if any
             if (bytes != null)
             {
                 // Copy in the bytes to the padded bytes array
                 bytes.CopyTo(paddedBytes, 0);
+
+                // Pad bytes after the inserted bytes
+                padFrom = paddedBytes.Length;
             }
             else
             {
@@ -60,7 +64,7 @@ namespace CryptoPals.Sets
             }
 
             // Pad the remaining unset bytes with EOT bytes (decimal 4)
-            for (int i = paddedBytes.Length; i < size; i++)
+            for (int i = padFrom; i < size; i++)
             {
                 paddedBytes[i] = paddingByte;
             }
