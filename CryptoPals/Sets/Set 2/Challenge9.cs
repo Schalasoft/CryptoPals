@@ -30,14 +30,14 @@ namespace CryptoPals.Sets
 
             // Pad the text bytes to the specified length
             int size = 20;
-            byte[] paddedBytes = PadBytes(bytes, size);
+            byte[] paddedBytes = PadBytes(size, bytes);
 
             // Convert to string for output
             return Encoding.ASCII.GetString(paddedBytes);
         }
 
         ///<inheritdoc cref="IChallenge9.PadBytes(byte[], int, byte)"/>
-        public byte[] PadBytes(byte[] bytes, int size, byte paddingByte = (byte)0x04)
+        public byte[] PadBytes(int size, byte[] bytes = null, byte paddingByte = (byte)0x04)
         {
             // Create a byte array the size of the desired length
             byte[] paddedBytes = new byte[size];
@@ -70,6 +70,28 @@ namespace CryptoPals.Sets
             }
 
             return paddedBytes;
+        }
+
+        ///<inheritdoc cref="IChallenge9.PadBytesToBlockSizeMultiple(byte[], int, byte)"/>
+        public byte[] PadBytesToBlockSizeMultiple(byte[] bytes, int blockSize, byte paddingByte = (byte)0x04)
+        {
+            // The byte array needs resized
+            byte[] output;
+            if (bytes.Length % blockSize != 0)
+            {
+                // Determine the new size (the size of the bytes plus how many bytes we are missing, which is the block size minus the modulus remainder of the length of the bytes and the block size)
+                int newSize = bytes.Length + ((blockSize) - bytes.Length % blockSize);
+
+                // Create resized byte array
+                output = PadBytes(newSize, bytes, paddingByte);
+            }
+            else
+            {
+                // Doesn't need a resize, just output the bytes
+                output = bytes;
+            }
+
+            return output;
         }
     }
 }
