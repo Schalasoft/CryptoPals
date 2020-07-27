@@ -43,17 +43,24 @@ namespace CryptoPals.Sets
             byte[] paddedBytes = new byte[size];
 
             // Copy in bytes if any
-            if (bytes != null && bytes.Length > size)
+            if (bytes != null)
             {
-                // If the blocksize we get is bigger than the the size specified, we are padding bytes to be evenly divisible by the size
-                size = bytes.Length + (size - (bytes.Length % size));
-
                 // Copy in the bytes to the padded bytes array
                 bytes.CopyTo(paddedBytes, 0);
             }
+            else
+            {
+                bytes = new byte[0];
+            }
+
+            // If the blocksize we get is bigger than the the size specified, we are padding bytes to be evenly divisible by the size
+            if (bytes.Length > size)
+            {
+                size = bytes.Length + (size - (bytes.Length % size));
+            }
 
             // Pad the remaining unset bytes with EOT bytes (decimal 4)
-            for(int i = paddedBytes.Length; i < size; i++)
+            for (int i = paddedBytes.Length; i < size; i++)
             {
                 paddedBytes[i] = paddingByte;
             }
