@@ -185,17 +185,20 @@ namespace CryptoPals.Sets
             List<char>[] decryptedBlocks = new List<char>[unknownBytes.Length / blockSize];
             for (int i = 0; i < blocks.Length; i++)
             {
+                // The block index, used for decrypting more than one block
+                int blockIndex = i * blockSize;
+
                 // Variable to hold decrypted bytes from a block
                 List<char> currentBlock = new List<char>();
 
                 // The previous block, null if at the first block
-                List<char> previousBlock = i > 1 ? decryptedBlocks[i - 1] : null;
+                List<char> previousBlock = i > 0 ? decryptedBlocks[i - 1] : null;
 
                 // Decrypt each block 1 byte at a time
                 for (int j = 0; j < blockSize; j++)
                 {
                     // Decrypt each byte and add it to the list
-                    currentBlock.Add(DecryptUnknownByte(blockSize, key, currentBlock, previousBlock));
+                    currentBlock.Add(DecryptUnknownByte(blockIndex, blockSize, key, currentBlock, previousBlock));
                 }
 
                 // Copy the decrypted block to the 2d array that holds all the decrypted blocks
@@ -206,7 +209,7 @@ namespace CryptoPals.Sets
             return new string(String.Join("", decryptedBlocks.Select(x => string.Join("", x)).ToArray()));
         }
 
-        private Dictionary<byte[], string> BuildMappingTable(int blockSize, byte[] key, List<char> currentBlock, byte[] previousBlock)
+        private Dictionary<byte[], string> BuildMappingTable(int blockIndex, int blockSize, byte[] key, List<char> currentBlock, byte[] previousBlock)
         {
             int tableStart = 0;
             int tableEnd = 256;
@@ -217,12 +220,17 @@ namespace CryptoPals.Sets
                 if (previousBlock == null)
                 {
                     // First block: Build a block 1 byte short of a block, filled with As
-                    shortBlock = challenge9.PadBytes(new byte[0], blockSize, (byte)'A');
+                    shortBlock = challenge9.PadBytes(null, blockSize, (byte)'A');
                 }
                 else
                 {
                     // Subsequent blocks: Copy the starting bytes from the previous block
-                    shortBlock = previousBlock;
+                    //shortBlock = previousBlock;
+
+                    // Pad the end as we removed the first character, this is instead of left shifting all the characters
+                    //shortBlock = challenge9.PadBytes(shortBlock, blockSize * 2, (byte)'A'); // Fill up the first block too
+
+                    shortBlock = challenge9.PadBytes(null, 1, unknownBytes[blockIndex + 1]);
 
                     // Left shift bytes for all but first byte in subsequent blocks
                 }
@@ -245,7 +253,7 @@ namespace CryptoPals.Sets
 
                 // Get the block
                 byte[] block = new byte[blockSize];
-                Array.Copy(encrypt, block, blockSize);
+                Array.Copy(encrypt, blockIndex, block, 0, blockSize);
 
                 // Add it to the dictionary (the encrypted bytes as the key, and the plaintext as the value)
                 mappings.Add(block, plainText);
@@ -259,20 +267,33 @@ namespace CryptoPals.Sets
         // Decrypt N blocks and not just first block of unknown string
 
         // refactor previous challenges to use extension methods
-        //  move cryptographic methods (AES and CBC encrypt etc. to Cryptography class in Utilities)
-        private char DecryptUnknownByte(int blockSize, byte[] key, List<char> currentBlock, List<char> previousBlock)
+        // move cryptographic methods (AES and CBC encrypt etc. to Cryptography class in Utilities)
+        private char DecryptUnknownByte(int blockIndex, int blockSize, byte[] key, List<char> currentBlock, List<char> previousBlock)
         {
             // Construct a short block to grab more and more of the unknown characters
             byte[] block = new byte[blockSize - 1];
             if (previousBlock == null)
             {
                 // First block: fill block with As with 1 missing byte at the end
-                block = challenge9.PadBytes(new byte[0], blockSize - 1 - currentBlock.Count, (byte)'A');
+                block = challenge9.PadBytes(null, blockSize - 1 - currentBlock.Count, (byte)'A');
             }
             else
             {
-                // Subsequent blocks: fill the block with all the characters from the previous block excluding the first character (for 1 missing byte at the end)
-                new string(previousBlock.GetRange(1, previousBlock.Count - 1).ToArray()).ToBytes().CopyTo(block, 0);
+                // Subsequent blocks: fill the block with all the characters from the previous block excluding the first character (for 1 unset byte at the end we set below)
+                //new string(previousBlock.GetRange(1, previousBlock.Count - 1).ToArray()).ToBytes().CopyTo(block, 0);
+
+                // Pad it to make room for the encrypted byte
+                //block = challenge9.PadBytes(block, blockSize - 1 - currentBlock.Count, (byte)'A');
+
+                // Here is where things are going to get a little different, we're going to grab the characters to encrypt and put them into the last slot
+                // This is markely different to the first block where we were reducing the string to encrypt to grab bytes from the first encrypted block
+                // As we are now outside the block size we need to actually point to the position in the decrypted text
+                // cdg the block 1 method could actually be removed and we could do all blocks the same way for a cleaner setup
+
+                // Get the next decrypted character from the unknown string to the last byte of our offset block
+                block = new byte[1];
+                byte[] unknownBytes = Oracle(true, "", key);
+                block[block.Length - 1] = unknownBytes[blockIndex + 1];
             }
 
             // Encrypt block
@@ -281,10 +302,10 @@ namespace CryptoPals.Sets
 
             // Get the block to check (as the Oracle will return many blocks depending on the length of 'my string' and 'unknown string'
             byte[] blockToCheck = new byte[blockSize];
-            Array.Copy(target, blockToCheck, blockSize);
+            Array.Copy(target, blockIndex, blockToCheck, 0, blockSize);
 
             // Build dictionary used to hold all possible byte combinations for the missing byte (e.g. 4 size blocks "AAAA", "AAAB", "AAAC")
-            Dictionary<byte[], string> mappings = BuildMappingTable(blockSize, key, currentBlock, previousBlock == null ? null : block);
+            Dictionary<byte[], string> mappings = BuildMappingTable(blockIndex, blockSize, key, currentBlock, previousBlock == null ? null : block);
 
             // Get the match from the dictionary
             KeyValuePair<byte[], string> match = mappings.FirstOrDefault(x => x.Key.SequenceEqual(blockToCheck));
