@@ -195,7 +195,7 @@ namespace CryptoPals.Sets
                 for (int j = 0; j < blockSize; j++)
                 {
                     // Decrypt each byte and add it to the list
-                    byte decryptedByte = DecryptUnknownByte(i, blockSize, decryptedBytes);
+                    byte decryptedByte = DecryptUnknownByte(i * blockSize, blockSize, decryptedBytes);
 
                     // Copy the decrypted char to the list that holds all the decrypted blocks
                     decryptedBytes.Add(decryptedByte);
@@ -216,25 +216,26 @@ namespace CryptoPals.Sets
         {
             // Padding
             int padding = (blockSize - decryptedBytes.Count - 1);
-            if (blockIndex > 0) padding %= blockSize;
+            if (blockIndex >= 16) padding %= blockSize;
 
-            // Create the target block
-            //byte[] target = CreateTargetBlock(blockIndex, blockSize, padding);
+            // Get our previously decrypted bytes as a string
+            string decryptedString = String.Join("", decryptedBytes.ToArray().ToASCIIString());
 
+            // Create the block to encrypt that will be our target
             byte[] shortBlock = challenge9.PadBytes(null, padding);
 
             // Encrypt
-            byte[] target = Oracle(shortBlock.ToASCIIString()).ToList().GetRange(blockIndex * blockSize, blockSize).ToArray();
+            byte[] target = Oracle(shortBlock.ToASCIIString()).ToList().GetRange(blockIndex, blockSize).ToArray();
 
             // Try each byte it could be and get the one it actually is
             byte decryptedByte = new byte();
             for (int i = 0; i < 256; i++)
             {
                 // Encrypt the guess
-                byte[] guessBlocks = Oracle($"{shortBlock.ToASCIIString()}{(char)i}");
+                byte[] guessBlocks = Oracle($"{shortBlock.ToASCIIString()}{decryptedString}{(char)i}");
 
                 // Get the block we are on
-                byte[] guessBlock = guessBlocks.ToList().GetRange(blockIndex * blockSize, blockSize).ToArray();
+                byte[] guessBlock = guessBlocks.ToList().GetRange(blockIndex, blockSize).ToArray();
 
                 if (guessBlock.SequenceEqual(target))
                 {
@@ -244,22 +245,6 @@ namespace CryptoPals.Sets
             }
 
             return decryptedByte;
-        }
-
-        private byte[] CreateTargetBlock(int blockIndex, int blockSize, int padding)
-        {
-            // Fill a block with As
-            byte[] block = challenge9.PadBytes(null, padding, (byte)'A');
-
-            // Encrypt block
-            string plainText = block.ToASCIIString();
-            byte[] encryptedBytes = Oracle(plainText);
-
-            // Get the block to check (as the Oracle will return many blocks depending on the length of 'my string' and 'unknown string')
-            byte[] target = new byte[blockSize];
-            Array.Copy(encryptedBytes, blockIndex * blockSize, target, 0, blockSize);
-
-            return target;
         }
     }
 }
