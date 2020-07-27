@@ -44,26 +44,20 @@ namespace CryptoPals.Sets
 
         // Use previous challenge functionality
         IChallenge11 challenge11 = (IChallenge11)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge11);
-        IChallenge7 challenge7 = (IChallenge7)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge7);
+
+        // Key used for encryption/decryption: set once
+        byte[] key;
 
         public string Solve(string input)
         {
-            // Convert input text to JSON
-            string json = ConvertCookieToJSON("foo=bar&baz=qux&zap=zazzle");
-
-            // Make an encoded profile by email
-            string encodedProfile = GetProfileByEmail("foo@bar.com");
-
             // Generate a random ASCII key
-            byte[] key = challenge11.GenerateRandomASCIIBytes(16);
+            key = challenge11.GenerateRandomASCIIBytes(16);
 
-            // Encrypt the profile
-            byte[] encryptedProfile = Cryptography.AES_ECB(encodedProfile.GetBytes(), key);
+            // Make an encrypted, encoded profile by email
+            byte[] encryptedProfile = profile_for("foo@bar.com");
 
-            // Decrypt the profile and parse it using only the user input to GetProfileByEmail
-            Attacker(encryptedProfile);
-
-            return "";
+            // Decrypt the profile and return the plaintext of a cipher that will make a valid admin account
+            return Attacker(encryptedProfile);
         }
 
         /*
@@ -73,18 +67,15 @@ namespace CryptoPals.Sets
         private string Attacker(byte[] encryptedProfileBytes)
         {
             // Decrypt the encrypted profile
-
-
-            // Parse the profile
-
+            string decryptedProfile = Cryptography.AES_ECB(encryptedProfileBytes, key, false).GetASCIIString();
 
             // Make an admin profile
+            string adminCipherText = decryptedProfile;
 
-
-            return "";
+            return adminCipherText;
         }
 
-        private string GetProfileByEmail(string email)
+        private byte[] profile_for(string email)
         {
             // Remove meta characters
             email = email.Replace("&", "").Replace("=", "");
@@ -95,8 +86,8 @@ namespace CryptoPals.Sets
             // Encode profile as JSON
             string profileJson = JsonSerializer.Serialize(profile);
 
-            // Return the encoded JSON profile
-            return EncodeJSON_Profile(profileJson);
+            // Return the encoded JSON profile, as an encrypted ASCII string
+            return Cryptography.AES_ECB(EncodeJSON_Profile(profileJson).GetBytes(), key);
         }
 
         private string EncodeJSON_Profile(string jsonProfile)
@@ -106,49 +97,6 @@ namespace CryptoPals.Sets
 
             // Return the formatted output
             return $"email={profile.email}&uid={profile.uid}&role={profile.role}";
-        }
-
-        private string ConvertCookieToJSON(string text)
-        {
-            // Get each key value pair
-            string[] kvps = text.Split('&');
-
-            // Reduce each key value pair to just the value and assign it (we're assuming they come in the correct order)
-            string[] vals = new string[kvps.Length];
-            for(int i = 0; i < kvps.Length; i++)
-            {
-                // Split around the equals sign and replace the kvp with just the value
-                vals[i] = kvps[i].Split('=')[1];
-            }
-
-            // Create the object
-            Cookie cookie = new Cookie(vals[0], vals[1], vals[2]);
-
-            // Convert the object to JSON
-            return JsonSerializer.Serialize(cookie);
-        }
-
-        // Cookie class
-        class Cookie
-        {
-            // Member variables
-            public string foo { get; set; }
-            public string baz { get; set; }
-            public string zap { get; set; }
-
-            // Constructor
-            public Cookie(string foo, string baz, string zap)
-            {
-                this.foo = foo;
-                this.baz = baz;
-                this.zap = zap;
-            }
-
-            // Parameterless constructor for deserialization
-            public Cookie()
-            {
-
-            }
         }
 
         // Profile class
