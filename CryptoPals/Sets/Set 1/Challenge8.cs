@@ -31,7 +31,7 @@ namespace CryptoPals.Sets
             string[] lines = challenge4.SplitTextIntoLines(input, Environment.NewLine);
 
             // Go through each line and get the repeated block count
-            int[] repeatedBlockCounts = new int[0];
+            int[] repeatedBlockCounts = new int[lines.Length];
             int blockSize = 16;
             for (int i = 0; i < lines.Length; i++)
             {
@@ -39,7 +39,7 @@ namespace CryptoPals.Sets
                 byte[] bytes = challenge1.HexStringToBytes(lines[i]);
 
                 // Go through each line and get the repeated block count
-                repeatedBlockCounts = GetRepeatedBlockCounts(bytes, blockSize);
+                repeatedBlockCounts[i] = GetRepeatedBlockCount(bytes, blockSize);
             }
 
             // Get the AES encrypted line by getting the index of the line with the most repeated block
@@ -70,24 +70,8 @@ namespace CryptoPals.Sets
             // Get the number of distinct blocks, due to being a 2d array we use LINQ select to effectively flatten the arrays for use with Distinct
             int distinctBlocks = blocks.Select(x => string.Join(",", x)).Distinct().ToArray().Length;
 
-            // Return the amount of repeated blocks we find by subtracting the amount of blocks from the number of distinct blocks
+            // Return the amount of repeated blocks we find by subtracting the amount of distinct blocks from the total number of blocks
             return blocks.Length - distinctBlocks;
-        }
-
-        ///<inheritdoc cref="IChallenge8.GetRepeatedBlockCounts(byte[], int)"/>
-        public int[] GetRepeatedBlockCounts(byte[] bytes, int blockSize)
-        {
-            int[] repeatedBlockCounts = new int[bytes.Length];
-            for (int i = 0; i < bytes.Length; i++)
-            {
-                // Get the repeated block count for the line
-                int repeatedBlockCount = GetRepeatedBlockCount(bytes, blockSize);
-
-                // Add the amount of repeated blocks for this line to an array (to identify the line index with the most repetitions)
-                repeatedBlockCounts[i] = repeatedBlockCount;
-            }
-
-            return repeatedBlockCounts;
         }
 
         ///<inheritdoc cref="IChallenge8.IsECBEncrypted(byte[])"/>
@@ -98,7 +82,7 @@ namespace CryptoPals.Sets
             int blockSizeAttempts = 20;
             for (int i = 0; i < blockSizeAttempts; i++)
             {
-                // Start with a block size of 4, then try increasing block sizes  (will start at 4 so this trys 4 to 24)
+                // Start with a block size of 4, then try increasing block sizes (will start at 4 so this trys 4 to 24)
                 int blockSize = 4 + i;
 
                 // If we find any repeated blocks, assume it is ECB
