@@ -217,7 +217,7 @@ namespace CryptoPals.Sets
             int padding = (blockSize - (decryptedBytes.Count % blockSize) - 1);
 
             // Get our previously decrypted bytes as a string
-            string decryptedString = String.Join("", decryptedBytes.ToArray().GetASCIIString());
+            string decryptedString = decryptedBytes.ToArray().GetASCIIString();
 
             // Create the block to encrypt that will be our target
             byte[] shortBlock = challenge9.PadBytes(padding);
