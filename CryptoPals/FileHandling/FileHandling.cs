@@ -6,7 +6,7 @@ namespace CryptoPals
     /// <summary>
     /// The class handles files
     /// </summary>
-    static class FileHandling
+    public static class FileHandling
     {
         /// <summary>
         /// Get the text from a file in a directory, if no directory provided then use the default data directory

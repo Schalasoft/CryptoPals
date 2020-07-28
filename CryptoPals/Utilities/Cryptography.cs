@@ -4,7 +4,7 @@ using Org.BouncyCastle.Security;
 
 namespace CryptoPals
 {
-    static class Cryptography
+    public static class Cryptography
     {
         /// <summary>
         /// Encrypt/decrypt input bytes using AES ECB with no padding

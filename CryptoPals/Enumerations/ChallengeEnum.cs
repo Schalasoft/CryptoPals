@@ -3,7 +3,7 @@
     /// <summary>
     /// An enumeration for challenges
     /// </summary>
-    enum ChallengeEnum : int
+    public enum ChallengeEnum : int
     {
         None = 0,
         Challenge1  = 1,

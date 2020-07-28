@@ -3,7 +3,7 @@
     /// <summary>
     /// An enumeration for encryption types
     /// </summary>
-    enum EncryptionTypeEnum : int
+    public enum EncryptionTypeEnum : int
     {
         None = 0,
         ECB = 1,

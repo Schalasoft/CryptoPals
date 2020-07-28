@@ -3,7 +3,7 @@
     /// <summary>
     /// Base Interface for a Challenge
     /// </summary>
-    interface IChallenge
+    public interface IChallenge
     {
         /// <summary>
         /// Solve the challenge

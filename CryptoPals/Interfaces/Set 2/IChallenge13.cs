@@ -3,7 +3,7 @@
     /// <summary>
     /// ECB cut-and-paste
     /// </summary>
-    interface IChallenge13 : IChallenge
+    public interface IChallenge13 : IChallenge
     {
 
     }

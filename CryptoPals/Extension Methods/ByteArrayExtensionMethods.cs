@@ -2,7 +2,7 @@
 
 namespace CryptoPals.Extension_Methods
 {
-    static class ByteArrayExtensionMethods
+    public static class ByteArrayExtensionMethods
     {
         /// <summary>
         /// Returns the ASCII string representation of the bytes

@@ -3,7 +3,7 @@
     /// <summary>
     /// Fixed XOR
     /// </summary>
-    interface IChallenge2 : IChallenge
+    public interface IChallenge2 : IChallenge
     {
         /// <summary>
         /// XOR two bytes

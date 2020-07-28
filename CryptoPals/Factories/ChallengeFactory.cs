@@ -7,7 +7,7 @@ namespace CryptoPals.Factories
     /// <summary>
     /// Factory pattern for creating challenges
     /// </summary>
-    static class ChallengeFactory
+    public static class ChallengeFactory
     {
         /// <summary>
         /// Inititalize a challenge based on its enumeration

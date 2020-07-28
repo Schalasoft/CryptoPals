@@ -1,5 +1,6 @@
 ﻿using CryptoPals.Enumerations;
 using CryptoPals.Interfaces;
+using CryptoPals.Managers;
 using System;
 using System.Collections.Generic;
 using System.Linq;

@@ -6,7 +6,7 @@ namespace CryptoPals.Interfaces
     /// <summary>
     /// Find single character key used to XOR text
     /// </summary>
-    interface IChallenge3 : IChallenge
+    public interface IChallenge3 : IChallenge
     {
         /// <summary>
         /// XOR decrypt bytes against each ASCII character and return a KVP containing the key, score, and resutling decoded text

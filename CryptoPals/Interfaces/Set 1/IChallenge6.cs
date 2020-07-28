@@ -3,7 +3,7 @@
     /// <summary>
     /// Break repeating-key XOR
     /// </summary>
-    interface IChallenge6 : IChallenge
+    public interface IChallenge6 : IChallenge
     {
         /// <summary>
         /// Break bytes into blocks of the specified size

@@ -3,7 +3,7 @@
     /// <summary>
     /// PKCS#7 padding
     /// </summary>
-    interface IChallenge9 : IChallenge
+    public interface IChallenge9 : IChallenge
     {
         /// <summary>
         /// Pad input bytes to the specified number of bytes, if no bytes provided simply return identical bytes of the specified length using the padding byte

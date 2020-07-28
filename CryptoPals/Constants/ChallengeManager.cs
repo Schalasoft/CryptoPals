@@ -2,16 +2,16 @@
 using CryptoPals.Factories;
 using CryptoPals.Interfaces;
 
-namespace CryptoPals
+namespace CryptoPals.Managers
 {
     /// <summary>
     /// Challenge Manager initializes each challenge class with the ChallengeFactory.
     /// This is done so the challenges are only initialized once, where they can be requested by subsequent challenges
     /// </summary>
-    static class ChallengeManager
+    public static class ChallengeManager
     {
         // Array of all the challenges (for reuse in later challenges)
-        static private IChallenge[] Challenges;
+        public static IChallenge[] Challenges { get; private set; }
 
         /// <summary>
         /// Initialize the number of specified challenges (starting from 1)

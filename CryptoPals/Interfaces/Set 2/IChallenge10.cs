@@ -3,7 +3,7 @@
     /// <summary>
     /// Encrypt/Decrypt using AES CBC (Advanced Encryption Standard Cipher Block Chaining Mode)
     /// </summary>
-    interface IChallenge10 : IChallenge
+    public interface IChallenge10 : IChallenge
     {
         /// <summary>
         /// Encrypt/Decrypt using AES CBC

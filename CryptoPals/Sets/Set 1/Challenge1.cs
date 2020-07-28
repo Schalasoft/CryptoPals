@@ -1,6 +1,6 @@
-﻿using System;
+﻿using CryptoPals.Interfaces;
+using System;
 using System.Text;
-using CryptoPals.Interfaces;
 
 namespace CryptoPals.Sets
 {
@@ -31,12 +31,8 @@ namespace CryptoPals.Sets
             return HexStringToBase64(input);
         }
 
-        /// <summary>
-        /// Convert a hex string to Base64
-        /// </summary>
-        /// <param name="hex">The hex string</param>
-        /// <returns>The Base64 representation of the input hex string</returns>
-        private string HexStringToBase64(string hex)
+        ///<inheritdoc cref="IChallenge1.HexStringToBase64(string)"/>
+        public string HexStringToBase64(string hex)
         {
             // Get binary string representation of hex string
             string binary = HexStringToBinaryString(hex);

@@ -3,7 +3,7 @@
     /// <summary>
     /// Convert a Hex string to Base64
     /// </summary>
-    interface IChallenge1 : IChallenge
+    public interface IChallenge1 : IChallenge
     {
         /// <summary>
         /// Convert Hex bytes to a string (no dashes)
@@ -18,5 +18,12 @@
         /// <param name="text">The hex string to convert to bytes</param>
         /// <returns>The byte representation of the hex string</returns>
         public byte[] HexStringToBytes(string text);
+
+        /// <summary>
+        /// Convert a hex string to Base64
+        /// </summary>
+        /// <param name="hex">The hex string</param>
+        /// <returns>The Base64 representation of the input hex string</returns>
+        public string HexStringToBase64(string hex);
     }
 }

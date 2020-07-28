@@ -2,7 +2,7 @@
 
 namespace CryptoPals.Extension_Methods
 {
-    static class StringExtensionMethods
+    public static class StringExtensionMethods
     {
         /// <summary>
         /// Returns the ASCII bytes of the provided string

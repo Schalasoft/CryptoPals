@@ -3,7 +3,7 @@
     /// <summary>
     /// Encrypt/Decrypt AES ECB (that has been Base64-encoded)
     /// </summary>
-    interface IChallenge7 : IChallenge
+    public interface IChallenge7 : IChallenge
     {
 
     }

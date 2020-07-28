@@ -1,5 +1,6 @@
 ﻿using CryptoPals.Enumerations;
 using CryptoPals.Interfaces;
+using CryptoPals.Managers;
 using System;
 
 namespace CryptoPals.Sets

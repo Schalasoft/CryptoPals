@@ -1,8 +1,9 @@
-﻿using CryptoPals.Interfaces;
-using System.Text.Json;
-using CryptoPals.Enumerations;
+﻿using CryptoPals.Enumerations;
 using CryptoPals.Extension_Methods;
+using CryptoPals.Interfaces;
+using CryptoPals.Managers;
 using System;
+using System.Text.Json;
 
 namespace CryptoPals.Sets
 {

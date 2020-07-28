@@ -3,7 +3,7 @@
     /// <summary>
     /// ECB/CBC Detection Oracle
     /// </summary>
-    interface IChallenge11 : IChallenge
+    public interface IChallenge11 : IChallenge
     {
         /// <summary>
         /// Generates a random key of the specified size

@@ -3,7 +3,7 @@
     /// <summary>
     /// Detect AES in ECB mode
     /// </summary>
-    interface IChallenge8 : IChallenge
+    public interface IChallenge8 : IChallenge
     {
         /// <summary>
         /// Detects if the bytes have been ECB encrypted

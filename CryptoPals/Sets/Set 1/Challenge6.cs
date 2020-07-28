@@ -1,11 +1,11 @@
 ﻿using CryptoPals.Enumerations;
+using CryptoPals.Extension_Methods;
 using CryptoPals.Interfaces;
+using CryptoPals.Managers;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using CryptoPals.Extension_Methods;
 
 namespace CryptoPals.Sets
 {

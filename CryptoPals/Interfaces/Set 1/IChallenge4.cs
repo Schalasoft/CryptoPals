@@ -3,7 +3,7 @@
     /// <summary>
     /// Detect single-character XOR
     /// </summary>
-    interface IChallenge4 : IChallenge
+    public interface IChallenge4 : IChallenge
     {
         /// <summary>
         /// Splits a given input string by a separator and returns a string array containing the lines created

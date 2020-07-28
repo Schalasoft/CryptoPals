@@ -3,7 +3,7 @@
     /// <summary>
     /// Repeating-key XOR
     /// </summary>
-    interface IChallenge5 : IChallenge
+    public interface IChallenge5 : IChallenge
     {
         /// <summary>
         /// Sequentially XOR each byte in the key against each byte in the bytes

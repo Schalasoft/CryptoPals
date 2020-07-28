@@ -2,7 +2,7 @@
 
 namespace CryptoPals.Extension_Methods
 {
-    static class MemoryStreamExtensionMethods
+    public static class MemoryStreamExtensionMethods
     {
         /// <summary>
         /// Consume and return bytes from a memory stream
