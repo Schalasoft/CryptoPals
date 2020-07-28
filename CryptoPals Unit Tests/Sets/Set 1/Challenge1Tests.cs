@@ -60,16 +60,19 @@ namespace CryptoPals_Unit_Tests_Sets
             [Test]
             public void ValidInput_ValidResult()
             {
-                string result = challenge1.HexStringToBase64("49276d206b696c6c696e6720796f757220627261696e206c696b65206120706f69736f6e6f7573206d757368726f6f6d");
+                string input = "49276d206b696c6c696e6720796f757220627261696e206c696b65206120706f69736f6e6f7573206d757368726f6f6d";
+                string expectedOutput = "SSdtIGtpbGxpbmcgeW91ciBicmFpbiBsaWtlIGEgcG9pc29ub3VzIG11c2hyb29t";
 
-                if (result.Equals("SSdtIGtpbGxpbmcgeW91ciBicmFpbiBsaWtlIGEgcG9pc29ub3VzIG11c2hyb29t"))
+                string output = challenge1.HexStringToBase64(input);
+
+                if (output.Equals(expectedOutput))
                     Assert.Pass();
                 else
                     Assert.Fail();
             }
 
             [Test]
-            public void InvalidInput_ExceptionThrown()
+            public void InvalidInput_ArgumentExceptionThrown()
             {
                     Assert.Pass();
             }
