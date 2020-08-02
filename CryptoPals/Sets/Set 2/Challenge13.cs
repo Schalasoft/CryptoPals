@@ -45,6 +45,7 @@ namespace CryptoPals.Sets
         */
 
         // Use previous challenge functionality
+        IChallenge9 challenge9 = (IChallenge9)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge9);
         IChallenge11 challenge11 = (IChallenge11)ChallengeManager.GetChallenge((int)ChallengeEnum.Challenge11);
 
         // Key used for encryption/decryption: set once
@@ -55,8 +56,8 @@ namespace CryptoPals.Sets
             // Generate a random ASCII key
             key = challenge11.GenerateRandomASCIIBytes(16);
 
-            // Make an encrypted, encoded profile by email
-            byte[] encryptedProfile = profile_for("foo@bar.com");
+            // Make an encrypted, encoded profile by email (make it a specific length so the value of admin is at the start of a cipher block)
+            byte[] encryptedProfile = profile_for("foooooooooooooooooooo@bar.com");
 
             // Decrypt the profile and return the plaintext of a cipher that will make a valid admin account
             return Attacker(encryptedProfile);
@@ -68,23 +69,19 @@ namespace CryptoPals.Sets
         */
         private string Attacker(byte[] encryptedProfileBytes)
         {
-            // Decrypt the encrypted profile
-            string decryptedProfile = Cryptography.AES_ECB(encryptedProfileBytes, key, false).GetASCIIString();
+            // Contrsuct a block containing admin value with padding
+            byte[] adminValueBytes = "admin".GetBytes();
+            byte[] adminPadded = challenge9.PadBytes(16, adminValueBytes);
+            byte[] adminValueCipher = Cryptography.AES_ECB(adminPadded, key);
 
-            // Make an admin profile (cdg testing)
-            // target
-            // email=foo@bar.com&uid=10&role=admin
-            string profileCipherText = decryptedProfile;
-            string profileCipher = String.Join(",", encryptedProfileBytes);
-            string testText = "email=foo@bar.com" + "&uid=10&role=user";
-            int testTextLength = testText.Length;
-            string testCipher = String.Join(",", Cryptography.AES_ECB(testText.GetBytes(), key));
-            string testCipherText = testCipher;
+            // Construct the ciphertext with the last block containing user ciphertext with admin + padding ciphertext
+            byte[] constructed = new byte[encryptedProfileBytes.Length + 16];
+            Array.Copy(encryptedProfileBytes, 0, constructed, 0, encryptedProfileBytes.Length);
+            Array.Copy(adminValueCipher, 0, constructed, encryptedProfileBytes.Length, 16);
 
-            string adminText = "email=foo@bar.com&uid=10&role=admin";
-            int adminTextLength = adminText.Length;
-            string adminCipher = String.Join(",", Cryptography.AES_ECB(adminText.GetBytes(), key));
-            string adminCipherText = adminCipher;
+            // Decrypt it to validate
+            byte[] adminDecrypted = Cryptography.AES_ECB(constructed, key, false);
+            string adminCipherText = adminDecrypted.GetASCIIString();
 
             return adminCipherText;
         }
