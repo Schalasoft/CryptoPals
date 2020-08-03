@@ -7,6 +7,7 @@ using System.Text.Json;
 
 namespace CryptoPals.Sets
 {
+    /// <inheritdoc cref="IChallenge13"/>
     class Challenge13 : IChallenge13, IChallenge
     {
         /*
@@ -51,6 +52,7 @@ namespace CryptoPals.Sets
         // Key used for encryption/decryption: set once
         byte[] key;
 
+        /// <inheritdoc />
         public string Solve(string input)
         {
             // Generate a random ASCII key
@@ -67,6 +69,11 @@ namespace CryptoPals.Sets
         Decrypt the encoded user profile and parse it.
         Using only the user input to profile_for() (as an oracle to generate "valid" ciphertexts) and the ciphertexts themselves, make a role=admin profile.
         */
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="encryptedProfileBytes"></param>
+        /// <returns></returns>
         private string Attacker(byte[] encryptedProfileBytes)
         {
             // Contrsuct a block containing admin value with padding
@@ -77,15 +84,37 @@ namespace CryptoPals.Sets
             // Construct the ciphertext with the last block containing user ciphertext with admin + padding ciphertext
             byte[] constructed = new byte[encryptedProfileBytes.Length + 16];
             Array.Copy(encryptedProfileBytes, 0, constructed, 0, encryptedProfileBytes.Length);
-            Array.Copy(adminValueCipher, 0, constructed, encryptedProfileBytes.Length, 16);
+            Array.Copy(adminValueCipher, 0, constructed, encryptedProfileBytes.Length - 16, 16);
 
             // Decrypt it to validate
             byte[] adminDecrypted = Cryptography.AES_ECB(constructed, key, false);
             string adminCipherText = adminDecrypted.GetASCIIString();
 
-            return adminCipherText;
+            // Decrypt encrypted profile bytes for output
+            string decryptedProfilePlainText = Cryptography.AES_ECB(encryptedProfileBytes, key, false).GetASCIIString();
+
+            // Return formatted output
+            return FormatOutput(encryptedProfileBytes.GetASCIIString(), decryptedProfilePlainText, constructed.GetASCIIString(), adminCipherText);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="originalCipher"></param>
+        /// <param name="originalPlainText"></param>
+        /// <param name="modifiedCipher"></param>
+        /// <param name="modifiedPlainText"></param>
+        /// <returns></returns>
+        private string FormatOutput(string originalCipher, string originalPlainText, string modifiedCipher, string modifiedPlainText)
+        {
+            return $"Original Cipher: {originalCipher}{Environment.NewLine}Original Plaintext: {originalPlainText}{Environment.NewLine}Modified Cipher: {modifiedCipher}{Environment.NewLine}Modified Plaintext: {modifiedPlainText}";
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="email"></param>
+        /// <returns></returns>
         private byte[] profile_for(string email)
         {
             // Remove meta characters
@@ -101,16 +130,30 @@ namespace CryptoPals.Sets
             return Cryptography.AES_ECB(EncodeJSON_Profile(profileJson).GetBytes(), key);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="jsonProfile"></param>
+        /// <returns></returns>
         private string EncodeJSON_Profile(string jsonProfile)
         {
             // Deserialize the JSON profile object
             Profile profile = JsonSerializer.Deserialize<Profile>(jsonProfile);
 
-            // Return the formatted output
-            return $"email={profile.email}&uid={profile.uid}&role={profile.role}";
+            // Encode the profile
+            string encoded = $"email={profile.email}&uid={profile.uid}&role={profile.role}";
+
+            // Pad the encoded profile so we don't lose parts in the encryption
+            string padded = challenge9.PadBytesToBlockSizeMultiple(encoded.GetBytes(), 16).GetASCIIString();
+
+            // Return the formatted, and padded output
+            return padded;
         }
 
         // Profile class
+        /// <summary>
+        /// 
+        /// </summary>
         class Profile
         {
             // Member variables
@@ -119,6 +162,12 @@ namespace CryptoPals.Sets
             public string role { get; set; }
 
             // Constructor
+            /// <summary>
+            /// 
+            /// </summary>
+            /// <param name="email"></param>
+            /// <param name="uid"></param>
+            /// <param name="role"></param>
             public Profile(string email, int uid, string role)
             {
                 this.email = email;
@@ -127,6 +176,9 @@ namespace CryptoPals.Sets
             }
 
             // Parameterless constructor for deserialization
+            /// <summary>
+            /// 
+            /// </summary>
             public Profile()
             {
 
