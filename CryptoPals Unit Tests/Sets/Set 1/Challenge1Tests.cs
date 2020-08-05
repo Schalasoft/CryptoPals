@@ -19,8 +19,14 @@ namespace CryptoPals_Unit_Tests_Sets
         [SetUp]
         public void Setup() { }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public class HexBytesToString
         {
+            /// <summary>
+            /// 
+            /// </summary>
             [Test]
             public void ValidInput_ValidResult()
             {
@@ -32,6 +38,9 @@ namespace CryptoPals_Unit_Tests_Sets
                     Assert.Fail();
             }
 
+            /// <summary>
+            /// 
+            /// </summary>
             [Test]
             public void InvalidInput_ExceptionThrown()
             {
@@ -39,7 +48,9 @@ namespace CryptoPals_Unit_Tests_Sets
             }
         }
 
-
+        /// <summary>
+        /// 
+        /// </summary>
         public class HexStringToBytes
         {
             [Test]
@@ -55,8 +66,14 @@ namespace CryptoPals_Unit_Tests_Sets
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public class HexStringToBase64
         {
+            /// <summary>
+            /// 
+            /// </summary>
             [Test]
             public void ValidInput_ValidResult()
             {
@@ -71,6 +88,9 @@ namespace CryptoPals_Unit_Tests_Sets
                     Assert.Fail();
             }
 
+            /// <summary>
+            /// 
+            /// </summary>
             [Test]
             public void InvalidInput_ArgumentExceptionThrown()
             {
