@@ -65,16 +65,8 @@ namespace CryptoPals.Sets
             return Attacker(encryptedProfile);
         }
 
-        /*
-        Decrypt the encoded user profile and parse it.
-        Using only the user input to profile_for() (as an oracle to generate "valid" ciphertexts) and the ciphertexts themselves, make a role=admin profile.
-        */
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="encryptedProfileBytes"></param>
-        /// <returns></returns>
-        private string Attacker(byte[] encryptedProfileBytes)
+        /// <inheritdoc cref="IChallenge13.Attacker(byte[])"/>
+        public string Attacker(byte[] encryptedProfileBytes)
         {
             // Contrsuct a block containing admin value with padding
             byte[] adminValueBytes = "admin".GetBytes();
@@ -98,23 +90,23 @@ namespace CryptoPals.Sets
         }
 
         /// <summary>
-        /// 
+        /// Format the output to show the original cipher and the manipulated output
         /// </summary>
         /// <param name="originalCipher"></param>
         /// <param name="originalPlainText"></param>
         /// <param name="modifiedCipher"></param>
         /// <param name="modifiedPlainText"></param>
-        /// <returns></returns>
+        /// <returns>The formatted output</returns>
         private string FormatOutput(string originalCipher, string originalPlainText, string modifiedCipher, string modifiedPlainText)
         {
             return $"Original Cipher: {originalCipher}{Environment.NewLine}Original Plaintext: {originalPlainText}{Environment.NewLine}Modified Cipher: {modifiedCipher}{Environment.NewLine}Modified Plaintext: {modifiedPlainText}";
         }
 
         /// <summary>
-        /// 
+        /// Return an encrypted, JSON profile for the email provided
         /// </summary>
-        /// <param name="email"></param>
-        /// <returns></returns>
+        /// <param name="email">The email of the user to get/create</param>
+        /// <returns>The encrypted, JSON profile</returns>
         private byte[] profile_for(string email)
         {
             // Remove meta characters
@@ -126,16 +118,16 @@ namespace CryptoPals.Sets
             // Encode profile as JSON
             string profileJson = JsonSerializer.Serialize(profile);
 
-            // Return the encoded JSON profile, as an encrypted ASCII string
-            return Cryptography.AES_ECB(EncodeJSON_Profile(profileJson).GetBytes(), key);
+            // Return the JSON profile, as an encrypted ASCII string
+            return Cryptography.AES_ECB(DecodeJSON_Profile(profileJson).GetBytes(), key);
         }
 
         /// <summary>
-        /// 
+        /// Decode a JSON profile as a string
         /// </summary>
-        /// <param name="jsonProfile"></param>
-        /// <returns></returns>
-        private string EncodeJSON_Profile(string jsonProfile)
+        /// <param name="jsonProfile">The JSON profile to decode as a string</param>
+        /// <returns>String containing the decoded JSON profile</returns>
+        private string DecodeJSON_Profile(string jsonProfile)
         {
             // Deserialize the JSON profile object
             Profile profile = JsonSerializer.Deserialize<Profile>(jsonProfile);
@@ -150,9 +142,8 @@ namespace CryptoPals.Sets
             return padded;
         }
 
-        // Profile class
         /// <summary>
-        /// 
+        /// Profile class: used to serialize the data into JSON format
         /// </summary>
         class Profile
         {
@@ -161,9 +152,8 @@ namespace CryptoPals.Sets
             public int uid { get; set; }
             public string role { get; set; }
 
-            // Constructor
             /// <summary>
-            /// 
+            /// Constructor
             /// </summary>
             /// <param name="email"></param>
             /// <param name="uid"></param>
@@ -175,9 +165,8 @@ namespace CryptoPals.Sets
                 this.role = role;
             }
 
-            // Parameterless constructor for deserialization
             /// <summary>
-            /// 
+            /// Parameterless constructor for deserialization
             /// </summary>
             public Profile()
             {
