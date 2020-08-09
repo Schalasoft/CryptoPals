@@ -116,7 +116,7 @@ namespace CryptoPals_Unit_Tests_Challenge1
             }
 
             /// <summary>
-            /// Test inputting null string
+            /// Test inputting null byte array
             /// </summary>
             [Test]
             public void NullInput_ArgumentNullExceptionThrown()
@@ -160,7 +160,7 @@ namespace CryptoPals_Unit_Tests_Challenge1
             /// Test that invalid input throws a format exception
             /// </summary>
             [Test]
-            public void InvalidInput_ExceptionThrown()
+            public void InvalidInput_FormatExceptionThrown()
             {
                 // Invalid input
                 string input = "G";
@@ -173,6 +173,25 @@ namespace CryptoPals_Unit_Tests_Challenge1
                     Assert.Fail();
                 }
                 catch (FormatException)
+                {
+                    Assert.Pass();
+                }
+            }
+
+            /// <summary>
+            /// Test inputting null string
+            /// </summary>
+            [Test]
+            public void NullInput_ArgumentNullExceptionThrown()
+            {
+                try
+                {
+                    // Convert bytes to hex string
+                    challenge1.HexStringToBytes(null);
+
+                    Assert.Fail();
+                }
+                catch (ArgumentNullException)
                 {
                     Assert.Pass();
                 }
@@ -217,6 +236,25 @@ namespace CryptoPals_Unit_Tests_Challenge1
                     Assert.Fail();
                 }
                 catch (FormatException)
+                {
+                    Assert.Pass();
+                }
+            }
+
+            /// <summary>
+            /// Test inputting null string
+            /// </summary>
+            [Test]
+            public void NullInput_ArgumentNullExceptionThrown()
+            {
+                try
+                {
+                    // Convert bytes to hex string
+                    challenge1.HexStringToBase64(null);
+
+                    Assert.Fail();
+                }
+                catch (ArgumentNullException)
                 {
                     Assert.Pass();
                 }

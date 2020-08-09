@@ -90,6 +90,10 @@ namespace CryptoPals.Sets
         ///<inheritdoc cref="IChallenge1.HexStringToBytes(string)"/>
         public byte[] HexStringToBytes(string hex)
         {
+            // Throw exception if the input is null
+            if (hex == null)
+                throw new ArgumentNullException();
+
             // Throw exception if the input text is not valid hex
             if (!IsValidHexString(hex))
                 throw new FormatException();
@@ -135,6 +139,10 @@ namespace CryptoPals.Sets
         /// <returns>Base64 representation of the binary string</returns>
         private string BinaryStringToBase64(string text)
         {
+            // Throw exception if the input is null
+            if (text == null)
+                throw new ArgumentNullException();
+
             // Grab sextets from binary sequence
             StringBuilder stringBuilder = new StringBuilder();
             int index = 0;
