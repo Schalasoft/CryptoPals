@@ -107,6 +107,10 @@ namespace CryptoPals.Sets
         ///<inheritdoc cref="IChallenge1.HexBytesToString(byte[])"/>
         public string HexBytesToString(byte[] bytes)
         {
+            // Throw exception if the input is null
+            if (bytes == null)
+                throw new ArgumentNullException();
+
             // Throw exception if the input bytes are invalid
             if (!IsValidHexBytes(bytes))
                 throw new FormatException();

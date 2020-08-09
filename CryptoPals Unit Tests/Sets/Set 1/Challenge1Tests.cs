@@ -114,6 +114,25 @@ namespace CryptoPals_Unit_Tests_Challenge1
                     Assert.Pass();
                 }
             }
+
+            /// <summary>
+            /// Test inputting null string
+            /// </summary>
+            [Test]
+            public void NullInput_ArgumentNullExceptionThrown()
+            {
+                try
+                {
+                    // Convert bytes to hex string
+                    challenge1.HexBytesToString(null);
+
+                    Assert.Fail();
+                }
+                catch (ArgumentNullException)
+                {
+                    Assert.Pass();
+                }
+            }
         }
 
         /// <summary>
