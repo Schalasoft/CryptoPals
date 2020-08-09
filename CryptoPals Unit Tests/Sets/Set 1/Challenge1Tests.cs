@@ -37,7 +37,7 @@ namespace CryptoPals_Unit_Tests_Challenge1
             {
                 string input = "49276d206b696c6c696e6720796f757220627261696e206c696b65206120706f69736f6e6f7573206d757368726f6f6d";
                 string expectedOutput = "SSdtIGtpbGxpbmcgeW91ciBicmFpbiBsaWtlIGEgcG9pc29ub3VzIG11c2hyb29t";
-                string actualOutput = challenge1.HexStringToBase64(input);
+                string actualOutput = challenge1.Solve(input);
 
                 // Use contains as the output contains formatting text surrounding the actual output
                 if (actualOutput.Contains(expectedOutput))
