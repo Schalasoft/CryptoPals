@@ -25,12 +25,12 @@ namespace CryptoPals_Unit_Tests_Challenge1
         public void Setup() { }
 
         /// <summary>
-        /// Test that challenge 1 is solved correctly
+        /// Test that challenge is solved correctly
         /// </summary>
         public class Solve
         {
             /// <summary>
-            /// The test
+            /// The challenge test
             /// </summary>
             [Test]
             public void Challenge()
