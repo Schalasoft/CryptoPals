@@ -161,7 +161,7 @@ namespace CryptoPals_Unit_Tests_Challenge1
         }
 
         /// <summary>
-        /// 
+        /// Test hex string to base 64 conversion
         /// </summary>
         public class HexStringToBase64
         {
