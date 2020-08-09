@@ -1,5 +1,7 @@
-﻿using CryptoPals.Interfaces;
+﻿using CryptoPals.Extension_Methods;
+using CryptoPals.Interfaces;
 using System;
+using System.Linq;
 using System.Text;
 
 namespace CryptoPals.Sets
@@ -65,9 +67,33 @@ namespace CryptoPals.Sets
             return binarySb.ToString();
         }
 
+        /// <summary>
+        /// Check if provided bytes are valid hex (bytes have to be a multiple of 2 and contain only hex digits)
+        /// </summary>
+        /// <param name="bytes">The bytes to test</param>
+        /// <returns>True if the bytes are valid hex, false otherwise</returns>
+        private bool IsValidHexBytes(byte[] bytes)
+        {
+            return bytes.Length % 2 == 0 && !bytes.Any(x => x < 30 || x > 66);
+        }
+
+        /// <summary>
+        /// Check if provided text is a valid hex string (bytes have to be a multiple of 2 and contain only hex digits)
+        /// </summary>
+        /// <param name="text">The text to test</param>
+        /// <returns>True if the string is valid hex, false otherwise</returns>
+        private bool IsValidHexString(string text)
+        {
+            return text.GetBytes().Length % 2 == 0 && System.Text.RegularExpressions.Regex.IsMatch(text, @"\A\b[0-9a-fA-F]+\b\Z");
+        }
+
         ///<inheritdoc cref="IChallenge1.HexStringToBytes(string)"/>
         public byte[] HexStringToBytes(string hex)
         {
+            // Throw exception if the input text is not valid hex
+            if (!IsValidHexString(hex))
+                throw new FormatException();
+
             byte[] bytes = new byte[hex.Length / 2];
 
             for (int i = 0; i < hex.Length; i += 2)
@@ -81,6 +107,10 @@ namespace CryptoPals.Sets
         ///<inheritdoc cref="IChallenge1.HexBytesToString(byte[])"/>
         public string HexBytesToString(byte[] bytes)
         {
+            // Throw exception if the input bytes are invalid
+            if (!IsValidHexBytes(bytes))
+                throw new FormatException();
+
             return BitConverter.ToString(bytes).Replace("-", string.Empty).ToLower();
         }
 
